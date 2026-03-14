@@ -16,6 +16,22 @@ cd "$REPO_DIR"
 case "${1:-status}" in
   pull)
     git pull --ff-only origin main 2>/dev/null && echo "SYNC: pulled latest" || echo "SYNC: already current"
+    # Auto-create symlinks for any new skills added remotely
+    for skill_dir in "$REPO_DIR"/skills/*/; do
+      skill_name=$(basename "$skill_dir")
+      if [ ! -e "$SKILLS_RUNTIME/$skill_name" ]; then
+        ln -s "$REPO_DIR/skills/$skill_name" "$SKILLS_RUNTIME/$skill_name"
+        echo "SYNC: linked new skill '$skill_name'"
+      fi
+    done
+    # Auto-create symlinks for any new agents added remotely
+    for agent_file in "$REPO_DIR"/agents/*.md; do
+      agent_name=$(basename "$agent_file")
+      if [ ! -e "$AGENTS_RUNTIME/$agent_name" ]; then
+        ln -s "$agent_file" "$AGENTS_RUNTIME/$agent_name"
+        echo "SYNC: linked new agent '$agent_name'"
+      fi
+    done
     ;;
   push)
     if [ -n "$(git status --porcelain)" ]; then
