@@ -97,7 +97,7 @@ The morning sweep does not typically update the COP (it's a read-heavy operation
 ## Data Pull Protocol
 
 1. Check today's date and day of week
-2. If health data available: pull `~/Library/Mobile Documents/com~apple~CloudDocs/Health/health_auto_export/` (latest CSV)
+2. If health data available: pull `~/Library/Mobile Documents/iCloud~com~ifunography~HealthExport/Documents/Health Metrics/` (latest JSON, format: `HealthAutoExport-YYYY-MM-DD.json`)
 3. If not available: note data gap, skip that section
 4. Check MEMORY.md for any time-sensitive items
 5. Check HISTORY.md for recent context (last 3 entries)
@@ -119,6 +119,18 @@ The "Today's Truth" section is the most important section. It cannot be skipped.
 
 **Rule 3: Action**
 Every brief ends with something specific Tory will do today and tonight. Not aspirations. Actions.
+
+---
+
+## Output Persistence (MANDATORY)
+
+**After generating the brief, you MUST save it to a file using the Write tool:**
+
+```
+File: ~/Library/Mobile Documents/com~apple~CloudDocs/morning-sweep-latest.md
+```
+
+Write the FULL brief output to this file. This ensures the brief persists across sessions and syncs to all devices via iCloud. This is non-negotiable — scheduled tasks that don't persist output are invisible to the system.
 
 ---
 

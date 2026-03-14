@@ -119,6 +119,18 @@ NEXT SYNC: [date based on schedule]
 
 ---
 
+## Output Persistence (MANDATORY)
+
+**After completing the COP sync, you MUST save a summary to a file using the Write tool:**
+
+```
+File: ~/Library/Mobile Documents/com~apple~CloudDocs/cop-sync-latest.md
+```
+
+Write the sync summary (what was updated, what flags were set, staleness status) to this file. This ensures sync results persist and sync to all devices via iCloud. This is non-negotiable — scheduled tasks that don't persist output are invisible to the system.
+
+---
+
 ## The Standard
 
 The COP sync is infrastructure maintenance. It's not glamorous. But a military staff that doesn't update the COP is flying blind. This agent ensures no domain goes dark for more than a few days.

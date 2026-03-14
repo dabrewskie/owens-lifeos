@@ -107,7 +107,20 @@ After updating the COP, push changes to all Claude instances:
 1. Run: `python3 ~/Documents/S6_COMMS_TECH/scripts/briefing_packet_generator.py`
 2. Update the Notion COP Mirror page (under LifeOS) with any changed data
 3. Log this EOD session to the Notion Session Log database
+4. Push skills/agents repo: `bash ~/owens-lifeos/sync.sh push`
 This ensures Desktop, Web, and iOS instances have tomorrow's context before the morning sweep.
+
+---
+
+## Output Persistence (MANDATORY)
+
+**After generating the EOD report, you MUST save it to a file using the Write tool:**
+
+```
+File: ~/Library/Mobile Documents/com~apple~CloudDocs/eod-close-latest.md
+```
+
+Write the FULL EOD report to this file. This ensures the report persists across sessions and syncs to all devices via iCloud. This is non-negotiable — scheduled tasks that don't persist output are invisible to the system.
 
 ---
 

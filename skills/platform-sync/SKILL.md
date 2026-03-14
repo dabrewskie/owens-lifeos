@@ -35,9 +35,21 @@ Using the Notion MCP tools:
 2. Sync current COP action items to the database
 3. Mark completed items, add new ones, update statuses
 
-### Step 5: Verify and Report
+### Step 5: Sync Skills/Agents Repo
+Push any local skill or agent changes to GitHub:
+```bash
+bash ~/owens-lifeos/sync.sh push
+```
+Then pull to ensure local is current:
+```bash
+bash ~/owens-lifeos/sync.sh pull
+```
+Report sync status (pending changes, last commit, symlink health).
+
+### Step 6: Verify and Report
 - Confirm briefing packet generated (check file exists and timestamp)
 - Confirm Notion pages updated
+- Confirm skills/agents repo synced to GitHub
 - Report any failures
 - Calculate days since last sync
 
@@ -51,6 +63,7 @@ Format:
 ## Notion COP: [SYNCED/FAILED]
 ## Notion Session Log: [X entries pushed]
 ## Notion Action Items: [X synced, Y new, Z completed]
+## Skills/Agents Repo: [SYNCED/FAILED] ([X skills, Y agents])
 ## Next Auto-Sync: [scheduled time]
 ## Staleness: [days since COP last updated]
 ```

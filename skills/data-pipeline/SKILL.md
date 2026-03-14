@@ -133,6 +133,18 @@ The biggest data bottleneck is the iPhone. Health Auto Export, Cronometer, and b
 
 ---
 
+## Output Persistence (MANDATORY)
+
+**After completing the data ingest, you MUST save a status report to a file using the Write tool:**
+
+```
+File: ~/Library/Mobile Documents/com~apple~CloudDocs/data-ingest-latest.md
+```
+
+Write the full ingest status (sources checked, freshness, gaps, errors) to this file. This ensures pipeline results persist and sync to all devices via iCloud. This is non-negotiable — scheduled tasks that don't persist output are invisible to the system.
+
+---
+
 ## The Standard
 
 Data is oxygen. When the pipeline stops, the system starts suffocating — slowly at first, then all at once. Every "UNKNOWN" in the COP is a decision being made blind. This agent's job is to keep the lights on.
