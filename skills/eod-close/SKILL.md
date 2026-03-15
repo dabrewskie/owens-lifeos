@@ -10,6 +10,21 @@ description: >
 
 # EOD Close — Daily Data Capture & COP Writer
 
+## MANDATORY OUTPUT — READ THIS FIRST
+This task MUST write its output to a file. The session may not be visible in any UI.
+If you do not write the file, the task output is LOST and the battle rhythm breaks.
+
+OUTPUT FILE: ~/Library/Mobile Documents/com~apple~CloudDocs/eod-close-latest.md
+
+RULES:
+1. Your LAST action in this session MUST be writing the full EOD report to the output file using Bash:
+   `cat << 'TASK_EOF' > ~/Library/Mobile\ Documents/com~apple~CloudDocs/eod-close-latest.md`
+2. After writing, verify the file exists: `ls -la ~/Library/Mobile\ Documents/com~apple~CloudDocs/eod-close-latest.md`
+3. If the Bash write fails for ANY reason, use the Write tool as fallback.
+4. Do NOT skip this step. Do NOT end the session without writing the file.
+
+---
+
 **Mission:** Capture the day before it fades. Log what happened, not what was planned. Update the COP so tomorrow's morning sweep starts with fresh intelligence.
 
 ---
@@ -109,18 +124,6 @@ After updating the COP, push changes to all Claude instances:
 3. Log this EOD session to the Notion Session Log database
 4. Push skills/agents repo: `bash ~/owens-lifeos/sync.sh push`
 This ensures Desktop, Web, and iOS instances have tomorrow's context before the morning sweep.
-
----
-
-## Output Persistence (MANDATORY)
-
-**After generating the EOD report, you MUST save it to a file using the Write tool:**
-
-```
-File: ~/Library/Mobile Documents/com~apple~CloudDocs/eod-close-latest.md
-```
-
-Write the FULL EOD report to this file. This ensures the report persists across sessions and syncs to all devices via iCloud. This is non-negotiable — scheduled tasks that don't persist output are invisible to the system.
 
 ---
 
