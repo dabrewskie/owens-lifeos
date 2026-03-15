@@ -81,6 +81,20 @@ Not everything is a threat. Also scan for:
 - Health optimization windows (lab result timing, medication adjustment opportunities, training periodization)
 - System improvement opportunities (new tools, platform capabilities, automation possibilities)
 
+#### F. Evolution Engine Signal Integration
+Read the `### Evolution Engine` section from COP.md and assess:
+
+| Signal | Response |
+|--------|----------|
+| Domain Health = RED for any domain | Flag as system degradation — scout sources may be failing, system-optimizer should audit |
+| Pending Tier 2 > 5 items | Flag as decision bottleneck — Commander falling behind on evolution reviews |
+| Top Signal relates to a domain with an active cascade | Elevate cascade severity — external intelligence confirms internal pattern |
+| Evolution Engine section stale (>7 days since Last Sweep) | Flag as battle rhythm failure — evolution sweeps not running |
+| Top Signal contradicts a current protocol | Flag for urgent Commander review — external evidence may invalidate current approach |
+| Individual Tier 2 item >7 days old without action | Flag as stale decision — include in CoS weekly assessment as decision bottleneck |
+
+The sentinel does NOT re-evaluate or second-guess evolution findings. It uses evolution data as an additional signal in its existing cascade analysis framework.
+
 #### E. The Mask Check
 This is the most important scan. Look for behavioral indicators that the 1SG mask is up:
 - "I'm fine" or similar minimizing language in recent sessions

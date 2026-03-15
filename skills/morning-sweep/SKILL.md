@@ -47,6 +47,11 @@ FAMILY OPS
 [Tonight's dinner: confirmed / not confirmed]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
+EVOLUTION INTEL
+━━━━━━━━━━━━━━━━━━━━━━━━
+[See Evolution Intelligence section below for data pull]
+
+━━━━━━━━━━━━━━━━━━━━━━━━
 TOP 3 PRIORITIES (Today only. Not 10. Three.)
 ━━━━━━━━━━━━━━━━━━━━━━━━
 1. [Most important thing — work, life, or both]
@@ -125,6 +130,21 @@ Reference: `~/Library/Mobile Documents/com~apple~CloudDocs/MEDICAL_HEALTH_PERFOR
 If protein <190g or calories <1,500: flag prominently — "UNDER-EATING ALERT"
 If deep sleep trending up from 0.7h baseline: note CJC-1295/Ipamorelin responding
 If hematocrit labs are >30 days old and next blood donation is <14 days away: remind
+
+---
+
+## Evolution Intelligence (check each run)
+
+Read: `/Users/toryowens/Library/Mobile Documents/com~apple~CloudDocs/evolution-intel-latest.md`
+
+If the file exists and was updated within the last 48 hours:
+- Surface any Tier 1 auto-implemented changes as: "Changes made overnight — review recommended: [list]"
+- Surface any Tier 2 items <72hrs old as: "FYI — Evolution Engine found: [list top 3 by score]"
+- Surface any Tier 2 items >72hrs old as: "ACTION REQUIRED — pending review: [list]"
+- If no changes or findings: "Evolution Engine: all quiet"
+
+If the file is >48hrs old or missing:
+- "Evolution Engine: no recent sweep (last: [date or 'never'])"
 
 ---
 
