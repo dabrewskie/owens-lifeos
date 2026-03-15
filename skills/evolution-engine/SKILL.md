@@ -39,13 +39,19 @@ Read the following to understand current system state:
 - `/Users/toryowens/Library/Mobile Documents/com~apple~CloudDocs/evolution-metrics.json` — cumulative metrics
 
 ### Step 3: Dispatch Scouts
-Dispatch ALL 7 scouts in a **single message with 7 parallel Agent tool calls**:
+Dispatch ALL 7 scouts in a **single message with 7 parallel Agent tool calls**.
 
-Each call uses:
+**Primary method** (when scout agent types are registered — i.e., they existed before session start):
 - `subagent_type` = the scout name (e.g., "evolution-scout-ai")
 - `model` = "opus"
 - `run_in_background` = true
 - `prompt` = "Run your domain scan protocol. Today is [DATE]. Return your findings in the standardized format."
+
+**Fallback method** (if scout agent types are not available — e.g., first session after creation):
+- Use `subagent_type` = "general-purpose" for each scout
+- `model` = "opus"
+- `run_in_background` = true
+- `prompt` = Read the scout's agent file at `~/.claude/agents/evolution-scout-[domain].md` and embed its FULL content as the prompt, followed by: "Run your domain scan protocol. Today is [DATE]. Return your findings in the standardized format."
 
 Scouts to dispatch:
 1. evolution-scout-ai
