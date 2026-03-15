@@ -103,6 +103,31 @@ The morning sweep does not typically update the COP (it's a read-heavy operation
 5. Check HISTORY.md for recent context (last 3 entries)
 6. Synthesize into brief — no padding
 
+## Health Protocol Compliance Check (MANDATORY — added 2026-03-14)
+
+Check yesterday's data against Health Protocol v1.0 targets and include in the brief:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━
+PROTOCOL COMPLIANCE (Yesterday)
+━━━━━━━━━━━━━━━━━━━━━━━━
+Protein: [X]g / 210g target [HIT/MISS]
+Calories: [X] / 2,000 target [HIT/MISS]
+Deep Sleep: [X]h / 1.5h target [HIT/MISS]
+Steps: [X] / 7,000 target [HIT/MISS]
+Post-meal walks: [report if data available]
+Training: [logged/not logged]
+Score: [X/4 targets met]
+```
+
+Reference: `~/Library/Mobile Documents/com~apple~CloudDocs/MEDICAL_HEALTH_PERFORMANCE/Owens_Health_Protocol_v1.md`
+
+If protein <190g or calories <1,500: flag prominently — "UNDER-EATING ALERT"
+If deep sleep trending up from 0.7h baseline: note CJC-1295/Ipamorelin responding
+If hematocrit labs are >30 days old and next blood donation is <14 days away: remind
+
+---
+
 ## Active Watchlist (check Gmail each run, report findings)
 
 - **Plaid Approval (added 2026-03-14):** Search Gmail for emails from Plaid (no-reply@plaid.com, team@plaid.com) containing "approved", "access granted", or "production". If found: (1) update `~/wealth-builder/backend/.env.local` changing `PLAID_ENV=sandbox` to `PLAID_ENV=development`, (2) prominently notify Commander: "PLAID APPROVED — WealthBuilder ready to link real accounts at http://localhost:3000/plaid-link". Remove this item once Commander confirms real accounts are linked.
