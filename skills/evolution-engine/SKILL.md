@@ -188,9 +188,12 @@ Structure:
   "domain_counts": {"ai": N, "health": N, "finance": N, "veteran": N, "parenting": N, "career": N, "systems": N},
   "domain_labels": {"ai": "AI/Agent", "health": "Health", ...},
   "findings": [
-    {"title": "...", "domain": "...", "score": N, "summary": "...", "tier": "auto|approval", "tags": [...], "priority": "critical|high|medium|low"}
+    {"title": "...", "domain": "...", "score": N, "summary": "...", "tier": "auto|approval", "tags": [...], "priority": "critical|high|medium|low", "why": "1-3 sentence explanation of why this matters to Tory specifically", "action_plan": ["Step 1 with specific details (phone numbers, URLs, dollar amounts)", "Step 2...", "Step 3..."]}
   ]
 }
+```
+
+**MANDATORY: Every finding MUST include `why` and `action_plan` fields.** Action plans must be concrete — include phone numbers, URLs, dollar amounts, and timelines. Generic steps like "look into it" are not acceptable. The dashboard renders these as expandable click-to-view panels.
 ```
 
 Priority bands: score>=100="critical", 75-99="high", 50-74="medium", <50="low".
