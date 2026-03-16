@@ -170,6 +170,33 @@ Write to: `/Users/toryowens/Library/Mobile Documents/com~apple~CloudDocs/evoluti
 - Cumulative system upgrades (all time): [N]
 ```
 
+### Step 10b: Write Dashboard Data
+Write dashboard JSON to: `/Users/toryowens/Documents/S6_COMMS_TECH/dashboard/evolution_intel_data.json`
+
+Structure:
+```json
+{
+  "sweep_date": "YYYY-MM-DD",
+  "sweep_type": "Sunday Full / Wednesday Mid-Week / Ad-Hoc",
+  "scouts_completed": N,
+  "scouts_total": 7,
+  "total_findings": N,
+  "tier1_implemented": N,
+  "tier2_queued": N,
+  "domains_green": N,
+  "cross_domain_signals": [{"icon": "...", "title": "...", "description": "..."}],
+  "domain_counts": {"ai": N, "health": N, "finance": N, "veteran": N, "parenting": N, "career": N, "systems": N},
+  "domain_labels": {"ai": "AI/Agent", "health": "Health", ...},
+  "findings": [
+    {"title": "...", "domain": "...", "score": N, "summary": "...", "tier": "auto|approval", "tags": [...], "priority": "critical|high|medium|low"}
+  ]
+}
+```
+
+Priority bands: score>=100="critical", 75-99="high", 50-74="medium", <50="low".
+Findings must be sorted by score descending.
+The dashboard at `evolution-intel.html` auto-refreshes from this file every 5 minutes.
+
 ### Step 11: Update COP
 Read `/Users/toryowens/Library/Mobile Documents/com~apple~CloudDocs/COP.md`.
 Find or create the `### Evolution Engine` section under STAFF RUNNING ESTIMATES and update:
