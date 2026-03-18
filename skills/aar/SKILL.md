@@ -82,16 +82,26 @@ target modifications, process changes]
 
 ---
 
-## Data Sources
+## Data Sources — PARALLEL DOMAIN AGENTS
 
-The AAR pulls from everything available:
+**The AAR dispatches domain agents in parallel to gather "what actually happened" data simultaneously:**
+
+### Step 0: Dispatch Domain Agents (ONE message, FOUR parallel calls)
+
+```
+Agent(subagent_type="domain-medical",    prompt="Run Medical SITREP for AAR covering [PERIOD]. Include daily compliance scores, trend direction, and protocol adherence.", run_in_background=true)
+Agent(subagent_type="domain-finance",    prompt="Run Finance SITREP for AAR covering [PERIOD]. Include milestone progress, spending vs plan, dashboard freshness.", run_in_background=true)
+Agent(subagent_type="domain-family",     prompt="Run Family SITREP for AAR covering [PERIOD]. Include presence metrics, events attended/missed, calendar adherence.", run_in_background=true)
+Agent(subagent_type="domain-operations", prompt="Run Operations SITREP for AAR covering [PERIOD]. Include action items completed/overdue, battle rhythm adherence, CCIR status changes.", run_in_background=true)
+```
+
+**CRITICAL:** All 4 calls MUST be in a single message for parallel execution.
+
+### Direct Reads (fast, no agent needed)
 1. **HISTORY.md** — session logs from the period
 2. **COP.md** — running estimates and their changes over time
-3. **Google Calendar** — planned vs. actual schedule
-4. **Health data** — planned targets vs. actual compliance
-5. **Financial Plan** — planned spending vs. actual
-6. **Morning sweep archives** — what priorities were set each day
-7. **EOD close archives** — what actually got done
+3. **Morning sweep archives** (`morning-sweep-latest.md`) — what priorities were set
+4. **EOD close archives** (`eod-close-latest.md`) — what actually got done
 
 ---
 

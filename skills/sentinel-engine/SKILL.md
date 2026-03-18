@@ -23,15 +23,23 @@ Every piece of data in the Life OS is a signal. Most signals are noise. The Sent
 
 ## Invocation Protocol
 
-### Step 1: Load Current State
-Pull ALL of the following before any analysis:
-- `get_cop` — full COP with all staff running estimates
-- `get_health_data` — latest health metrics (14 days)
-- `get_financial_snapshot` — current financial state
-- `get_action_items` — tracked items with status
-- `get_ccir_status` — Commander's Critical Information Requirements
-- `get_90day_horizon` — upcoming events and deadlines
-- `search_history` — last 5 sessions for pattern context
+### Step 1: Load Current State — PARALLEL DOMAIN AGENTS
+
+**Dispatch ALL 5 domain agents in a SINGLE message to gather state simultaneously:**
+
+```
+Agent(subagent_type="domain-medical",    prompt="Run Medical SITREP for Sentinel Engine. Include 14-day trends, protocol compliance, all alerts.", run_in_background=true)
+Agent(subagent_type="domain-finance",    prompt="Run Finance SITREP for Sentinel Engine. Include milestone tracking, dashboard health, spending anomalies.", run_in_background=true)
+Agent(subagent_type="domain-family",     prompt="Run Family SITREP for Sentinel Engine. Include presence trends, upcoming events needing prep, calendar collisions.", run_in_background=true)
+Agent(subagent_type="domain-security",   prompt="Run Security SITREP for Sentinel Engine. Full posture + LaunchAgent health + network anomalies.", run_in_background=true)
+Agent(subagent_type="domain-operations", prompt="Run Operations SITREP for Sentinel Engine. Full CCIR status, overdue items, battle rhythm adherence, cross-domain flags.", run_in_background=true)
+```
+
+**CRITICAL:** All 5 calls MUST be in a single message for parallel execution. Wait for all agents (60-second timeout).
+
+**Also read directly (fast, no agent needed):**
+- `~/Library/Mobile Documents/com~apple~CloudDocs/TORY_OWENS_HISTORY.md` — last 5 sessions for pattern context
+- `~/Library/Mobile Documents/com~apple~CloudDocs/COP.md` — full COP for cross-domain analysis
 
 ### Step 2: Run Detection Algorithms
 

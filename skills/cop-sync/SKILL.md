@@ -38,36 +38,33 @@ The COP is a shared state file. Every skill reads it. But skills only update the
 
 Check every section's `Last Updated` timestamp. Calculate staleness.
 
-### Step 2: Refresh Stale Sections
+### Step 2: Dispatch Domain Agents in Parallel
 
-**S1 — Personnel (Family):**
-- Check Google Calendar for family events in next 14 days
-- Update 90-day horizon with upcoming birthdays, anniversaries, school events
-- Note: Emory (7, bday 2/25), Harlan (3), Rylan (14, bday 9/24), Lindsey (bday 2/8), Anniversary 9/6
+**Dispatch ALL 5 domain agents in a SINGLE message to refresh stale sections simultaneously:**
 
-**S2 — Intelligence (Career/Development):**
-- Generally low-frequency updates. Note staleness but don't fabricate data.
-- Check if any Lilly milestones approaching (8-year anniversary 7/10)
+```
+Agent(subagent_type="domain-medical",    prompt="Run Medical SITREP for COP sync. Include 7-day trends.", run_in_background=true)
+Agent(subagent_type="domain-finance",    prompt="Run Finance SITREP for COP sync. Check dashboard JSON freshness.", run_in_background=true)
+Agent(subagent_type="domain-family",     prompt="Run Family SITREP for COP sync. Pull 14-day calendar horizon.", run_in_background=true)
+Agent(subagent_type="domain-security",   prompt="Run Security SITREP for COP sync. Full LaunchAgent health + posture.", run_in_background=true)
+Agent(subagent_type="domain-operations", prompt="Run Operations SITREP for COP sync. Full action item + CCIR status.", run_in_background=true)
+```
 
-**S3 — Operations (Life Admin):**
-- Check for approaching deadlines in action items
-- Verify estate planning status (CCIR #3: deadline 3/15)
-- Check NGB 23A due date (April annually)
+**CRITICAL:** All 5 calls MUST be in a single message for parallel execution.
 
-**S4 — Logistics/Finance:**
-- Check current date vs. financial milestones (CC payoff 3/6/26, bonus timing)
-- Note any changes to financial context from recent history entries
-- Cannot auto-pull account balances — note if data needs manual refresh
+### Step 2.5: Gather and Refresh COP Sections
 
-**Medical:**
-- Run: `python3 ~/Documents/S6_COMMS_TECH/scripts/health_auto_export_reader.py`
-- Update with latest macro/body comp data if available
-- Flag data gaps
+Wait for all agents (60-second timeout). Map each SITREP to the COP:
 
-**S6 — Communications/IT:**
-- Run: `python3 ~/Documents/S6_COMMS_TECH/scripts/security_audit.py --quick`
-- Update security posture
-- Check LaunchAgent status
+- **S1 (Family)** ← domain-family output (calendar, kids, presence, milestones)
+- **S2 (Intel/Career)** ← note staleness only (low-frequency, don't fabricate)
+  - Check if Lilly milestones approaching (8-year anniversary 7/10)
+- **S3 (Operations)** ← domain-operations output (action items, deadlines, battle rhythm)
+- **S4 (Finance)** ← domain-finance output (snapshot, dashboard health, milestones)
+- **Medical** ← domain-medical output (metrics, compliance, trends, alerts)
+- **S6 (IT/Comms)** ← domain-security output (posture, LaunchAgents, dashboards)
+
+Update each stale section in COP.md with fresh data from the domain agents.
 
 ### Step 3: Route Cross-Domain Flags
 - Read all pending flags
@@ -81,6 +78,13 @@ Check every section's `Last Updated` timestamp. Calculate staleness.
 ### Step 5: Update and Log
 - Update `Last Full Sync` timestamp
 - Append to HISTORY: `[Date] — COP sync. [Sections updated]. [Outstanding flags]`
+
+### Step 5.5: Financial Data Sync
+After updating the COP, sync all dashboard JSON data to prevent drift:
+1. Run: `python3 ~/Documents/S6_COMMS_TECH/scripts/financial_data_sync.py`
+2. This reads `owens_future_data.json` (canonical) and writes to `cop_data.json` financial_snapshot
+3. Validates all numbers are consistent — flags contradictions
+4. If validation fails, STOP and reconcile before proceeding
 
 ### Step 6: Cross-Platform Sync
 After updating the COP, trigger platform-sync to push changes to all Claude instances:

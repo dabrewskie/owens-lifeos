@@ -38,45 +38,39 @@ The Life OS has multiple data sources, most requiring manual action:
 
 ## Procedure
 
-### Step 1: Inventory Data Sources
-Check freshness of every data source:
+### Step 1: Dispatch Domain Agents in Parallel
 
-```bash
-# Health Auto Export
-ls -la ~/Library/Mobile\ Documents/com~apple~CloudDocs/Health/health_auto_export/
+**Dispatch 3 domain agents in a SINGLE message for parallel data ingestion:**
 
-# Cronometer
-ls -la ~/Library/Mobile\ Documents/com~apple~CloudDocs/Health/cronometer/
-
-# Hume
-ls -la ~/Library/Mobile\ Documents/com~apple~CloudDocs/Health/hume/
-
-# Apple Health XML
-ls -la ~/Library/Mobile\ Documents/com~apple~CloudDocs/apple_health_export/export.xml
-
-# Rocket Money
-ls -la ~/Downloads/*transactions* 2>/dev/null
-
-# Security audit
-python3 ~/Documents/S6_COMMS_TECH/scripts/security_audit.py --quick
+```
+Agent(subagent_type="domain-medical",  prompt="Run Medical SITREP for data pipeline. Pull ALL health sources, check freshness of each, report 7-day trends.", run_in_background=true)
+Agent(subagent_type="domain-finance",  prompt="Run Finance SITREP for data pipeline. Check Rocket Money CSV in ~/Downloads/, dashboard JSON freshness, transaction data availability.", run_in_background=true)
+Agent(subagent_type="domain-security", prompt="Run Security SITREP for data pipeline. Run security audit, check network scan freshness, LaunchAgent status.", run_in_background=true)
 ```
 
-### Step 2: Process Available Data
+**CRITICAL:** All 3 calls MUST be in a single message for parallel execution.
 
-**Health Data:**
-1. Run: `python3 ~/Documents/S6_COMMS_TECH/scripts/health_auto_export_reader.py`
-2. Parse output for macro averages, body comp, training
-3. Compare against targets (P:210g, C:130g, F:71g, 2000kcal)
+### Step 2: Gather and Process
 
-**Financial Data (if Rocket Money CSV available):**
-1. Read CSV from ~/Downloads/
-2. Categorize transactions
-3. Calculate spending vs. budget categories
+Wait for all agents (60-second timeout). Compile data freshness from each SITREP.
 
-**Security Data:**
-1. Run security audit script
-2. Parse for RED/AMBER items
-3. Compare against last known posture
+**From domain-medical:** Health Auto Export freshness, macro data, body comp, training status
+**From domain-finance:** Transaction CSV availability, dashboard JSON ages, financial plan freshness
+**From domain-security:** Security posture, network scan age, LaunchAgent health
+
+### Step 2.5: Additional Sequential Checks (fast reads)
+These are small enough to not warrant agent dispatch:
+
+```bash
+# Cronometer
+ls -la ~/Library/Mobile\ Documents/com~apple~CloudDocs/Health/cronometer/ 2>/dev/null
+
+# Hume Scale
+ls -la ~/Library/Mobile\ Documents/com~apple~CloudDocs/Health/hume/ 2>/dev/null
+
+# Apple Health XML
+ls -la ~/Library/Mobile\ Documents/com~apple~CloudDocs/apple_health_export/export.xml 2>/dev/null
+```
 
 ### Step 3: Freshness Report
 

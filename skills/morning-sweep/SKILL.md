@@ -99,14 +99,41 @@ The morning sweep does not typically update the COP (it's a read-heavy operation
 
 ---
 
-## Data Pull Protocol
+## Data Pull Protocol — PARALLEL DOMAIN AGENTS
 
-1. Check today's date and day of week
-2. If health data available: pull `~/Library/Mobile Documents/iCloud~com~ifunography~HealthExport/Documents/Health Metrics/` (latest JSON, format: `HealthAutoExport-YYYY-MM-DD.json`)
-3. If not available: note data gap, skip that section
-4. Check MEMORY.md for any time-sensitive items
-5. Check HISTORY.md for recent context (last 3 entries)
-6. Synthesize into brief — no padding
+**The morning sweep dispatches 5 domain agents in parallel.** This is a scatter-gather operation: dispatch all agents in a SINGLE message with 5 parallel Agent tool calls, wait for all to return, then synthesize into the brief.
+
+### Step 1: Dispatch (ONE message, FIVE parallel Agent calls)
+
+```
+Agent(subagent_type="domain-medical",  prompt="Run Medical SITREP for morning sweep. Return structured YAML.", run_in_background=true)
+Agent(subagent_type="domain-finance",  prompt="Run Finance SITREP for morning sweep. Return structured YAML.", run_in_background=true)
+Agent(subagent_type="domain-family",   prompt="Run Family SITREP for morning sweep. Include today's calendar and next 7 days.", run_in_background=true)
+Agent(subagent_type="domain-security", prompt="Run Security SITREP for morning sweep. Check LaunchAgent health.", run_in_background=true)
+Agent(subagent_type="domain-operations", prompt="Run Operations SITREP for morning sweep. Flag overdue items and battle rhythm status.", run_in_background=true)
+```
+
+**CRITICAL:** All 5 calls MUST be in a single message to execute in parallel. Sequential dispatch defeats the purpose.
+
+### Step 2: Gather (wait for all agents, 60-second timeout)
+
+Collect the structured YAML from each domain agent. If an agent times out or fails, note it in the brief as "[DOMAIN] — data unavailable" and continue.
+
+### Step 3: Synthesize
+
+Map domain agent outputs to the brief structure:
+- **HEALTH OPS** ← domain-medical SITREP
+- **PROTOCOL COMPLIANCE** ← domain-medical protocol_compliance section
+- **FINANCIAL PULSE** ← domain-finance SITREP
+- **FAMILY OPS** ← domain-family SITREP (today's events, dinner plan, kids)
+- **EVOLUTION INTEL** ← check evolution-intel-latest.md directly (fast read, not an agent)
+- **TOP 3 PRIORITIES** ← synthesize from all domain alerts + overdue items from domain-operations
+- **TODAY'S TRUTH** ← the most uncomfortable finding across ALL domains
+- **TONIGHT'S MISSION** ← from domain-family presence data + calendar
+
+### Step 4: Also check (fast reads, not agents)
+- MEMORY.md for time-sensitive items
+- HISTORY.md last 3 entries for recent context
 
 ## Health Protocol Compliance Check (MANDATORY — added 2026-03-14)
 
