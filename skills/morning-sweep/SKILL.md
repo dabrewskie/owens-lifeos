@@ -52,6 +52,28 @@ EVOLUTION INTEL
 [See Evolution Intelligence section below for data pull]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
+DAILY DEVOTION
+━━━━━━━━━━━━━━━━━━━━━━━━
+[One verse. One sentence of application to TODAY.
+Rotate through the 6 Values Foundation principles:
+Servant Leadership (Mark 10:45), Truth (Prov 12:22),
+Stewardship (Luke 16:10), Grace Under Pressure (James 1:2-4),
+Development of Others (Prov 27:17), Wisdom (Prov 4:7).
+Connect to whatever today's biggest challenge is.
+End with a one-line prayer intention for the day.
+This is not performative — it's calibration.]
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+COACHING CHALLENGE
+━━━━━━━━━━━━━━━━━━━━━━━━
+[One challenge from the Development Intelligence system.
+Could be: a concept to think about during the day,
+a leadership micro-practice to try in a meeting,
+a question to sit with, a relationship action item.
+Tracks to the 5 learning tracks and Director readiness gaps.
+Not homework — a growth edge for today.]
+
+━━━━━━━━━━━━━━━━━━━━━━━━
 TOP 3 PRIORITIES (Today only. Not 10. Three.)
 ━━━━━━━━━━━━━━━━━━━━━━━━
 1. [Most important thing — work, life, or both]
@@ -71,7 +93,14 @@ TONIGHT'S MISSION
 [One specific family presence action for tonight.
 Not vague. "Be home for dinner" is weak.
 "Put the phone down from 6:30–8:00, read to Harlan,
-ask Rylan one real question about her week" — that's a mission.]
+ask Rylan one real question about his day" — that's a mission.
+
+RELATIONSHIP TRACKER (rotate focus):
+- Lindsey: When did you last ask what SHE needs? (Not family — her.)
+- Rylan (14): When was the last 1-on-1 that was HIS choice? (Gaming counts.)
+- Emory (7): What's she excited about right now?
+- Harlan (3): Did you get floor time today?
+Flag if any relationship has gone 7+ days without intentional 1-on-1.]
 
 ════════════════════════════════════════
 ```
@@ -135,6 +164,17 @@ Map domain agent outputs to the brief structure:
 - MEMORY.md for time-sensitive items
 - HISTORY.md last 3 entries for recent context
 
+## Body Recomp Snapshot
+
+Read `~/Documents/S6_COMMS_TECH/dashboard/recomp_data.json`:
+- Current weight + 4-week trend direction
+- Current BF% + 4-week trend direction
+- Days since last progress photo
+- Current protocol phase + days in phase
+- Dashboard: http://localhost:8082/recomp.html
+
+---
+
 ## Health Protocol Compliance Check (MANDATORY — added 2026-03-14)
 
 Check yesterday's data against Health Protocol v1.0 targets and include in the brief:
@@ -172,6 +212,45 @@ If the file exists and was updated within the last 48 hours:
 
 If the file is >48hrs old or missing:
 - "Evolution Engine: no recent sweep (last: [date or 'never'])"
+
+---
+
+## LLY Holdings & Catalyst Watch
+
+**Data Source:** `~/Documents/S6_COMMS_TECH/dashboard/invest_intel_data.json`
+
+At each morning sweep invocation:
+
+1. **Read invest_intel_data.json** and locate LLY in the watchlist/holdings section
+2. **Report in the brief:**
+   ```
+   ━━━━━━━━━━━━━━━━━━━━━━━━
+   LLY HOLDINGS & CATALYSTS
+   ━━━━━━━━━━━━━━━━━━━━━━━━
+   LLY: $[price] ([+/-X.XX%] today | [+/-X.XX%] week)
+   RSU Value: 22.552 shares x $[price] = $[total]
+   Vested: 7.293 shares ($[value]) | Unvested: 15.259 shares ($[value])
+   Catalysts: [status of each — see below]
+   ```
+
+3. **Movement Alert:** If LLY moves >5% in a single day (up or down), flag prominently at the TOP of the brief:
+   ```
+   *** LLY ALERT: [+/-X.XX%] ($XXX.XX) — [direction] move ***
+   RSU impact: [+/-$X,XXX] on 22.552 shares
+   ```
+
+4. **Catalyst Monitoring (web search each run):**
+   - Search: `"orfoglipron FDA"` OR `"orfoglipron approval"` — report any news from last 48 hours
+   - Search: `"orfoglipron Phase 3"` OR `"orfoglipron trial results"` — report any clinical updates
+   - Search: `"Iran sanctions"` OR `"Iran conflict"` + `"market"` — report geopolitical headlines that could impact pharma/defense sectors
+   - If any catalyst has material news: elevate to TOP 3 PRIORITIES with recommended action (hold/monitor/review)
+
+5. **Strategy Reminder:** Commander directive 3/19/26 — HOLD all LLY. Do NOT sell in current environment. Key upside catalysts: orfoglipron FDA approval, Iran conflict resolution.
+
+6. **Budget Sentinel Integration:** If `~/Documents/S6_COMMS_TECH/dashboard/budget_alerts.json` exists, check its summary status and include in FINANCIAL PULSE:
+   - GREEN: "Budget Sentinel: all clear"
+   - AMBER: "Budget Sentinel: [count] warnings — [top alert message]"
+   - RED: "Budget Sentinel: [count] CRITICAL — [top alert message]"
 
 ---
 

@@ -124,6 +124,30 @@ Within $120/mo budget beyond current stack. For each recommendation:
 5. **Goal alignment** — which of the 3 goals it serves (recomp > longevity > energy)
 6. **Priority rank** — 1 = highest impact per dollar
 7. **Monthly cost estimate**
+8. **Quality certification** — MANDATORY. Must verify certification tier (see below)
+
+#### SUPPLEMENT QUALITY VERIFICATION REQUIREMENT (Standing Order — effective 2026-03-19)
+
+**Reference:** `~/Library/Mobile Documents/com~apple~CloudDocs/MEDICAL_HEALTH_PERFORMANCE/supplement-quality-audit.md`
+
+**Every supplement recommendation MUST include certification status.** No supplement may be recommended without verifying against this certification hierarchy:
+
+1. **NSF Certified for Sport** — gold standard (290+ banned substances + label accuracy)
+2. **NSF Contents Certified** — verifies label claims and contaminant levels
+3. **USP Verified** — verifies identity, strength, purity, composition
+4. **IFOS 5-Star** (fish oil only) — omega-3 purity, potency, freshness
+5. **Informed Sport / Informed Protein** — batch-tested for banned substances
+6. **ConsumerLab Approved** — independent lab testing with published results
+7. **NPA A-Rated GMP** — facility-level certification (minimum acceptable)
+8. **"Third-party tested" (certifier unnamed)** — INSUFFICIENT. Do not rely on this claim alone.
+
+**Rules:**
+- NEVER recommend a supplement with only Level 8 ("third-party tested, certifier unnamed") without flagging the quality risk
+- Prefer Level 1-3 certified products. If a certified alternative exists at comparable cost, recommend it over an uncertified option
+- For any supplement targeting a clinical marker (HbA1c, LDL, hematocrit), Level 1-3 certification is REQUIRED — potency accuracy is clinically critical
+- Always check military discount sources first: GovX (Thorne 20%, Momentous 25%), iHerb (ID.me 20%), WeSalute (MyProtein 45%), ShopMyExchange (tax-free)
+- Flag categories with known potency/contamination issues: berberine, NAD+/NMN, urolithin A, psyllium (lead), turmeric (mold)
+- Reference the supplement-quality-audit.md for current stack certification status before making changes
 
 **Research requirement:** Use WebSearch and PubMed MCP tools to find current evidence. Never recommend without citing at least one study. If evidence is weak or conflicting, say so.
 
@@ -137,6 +161,45 @@ Based on data pulled:
 - **Glucose management** — pre-diabetes protocol: meal timing, carb distribution, post-meal walks, CGM consideration
 - **Stress/HRV** — PTSD management intersects with HRV and sleep; note patterns
 
+### Phase 5b: COMPOUND CARDIOVASCULAR RISK MONITORING (Standing Protocol — effective 2026-03-19)
+
+**Reference Brief:** `~/Library/Mobile Documents/com~apple~CloudDocs/MEDICAL_HEALTH_PERFORMANCE/compound-cv-risk-brief.md`
+
+**Context:** Hematocrit and LDL are MULTIPLICATIVE risk factors, not additive. Elevated Hct increases blood viscosity, extending LDL particle residence time at the endothelium and accelerating atherogenesis. Both are worsened by TRT. This protocol must run on EVERY health-recommendations invocation.
+
+#### Compound Risk Dashboard (must populate every invocation)
+
+| Marker | Current | Threshold | Status |
+|--------|---------|-----------|--------|
+| Hematocrit | 53.4% | <50% optimal, 54% phlebotomy trigger | 0.6% margin — CRITICAL |
+| LDL-C | 144 mg/dL | <100 optimal, <70 high-risk | 44% above optimal |
+| ApoB | [from data] | <90 mg/dL | [from data] |
+| Compound CV Risk | ~2.0x baseline | 1.0x | ELEVATED — multiplicative interaction |
+
+#### Monitoring Rules
+
+1. **Always report Hct AND LDL together** — never assess one without the other. They are a compound risk pair.
+2. **Calculate compound risk estimate** using multiplicative model:
+   - Hct risk multiplier: 1.0 (Hct <46%), 1.3 (46-50%), 1.5 (50-53%), 1.7 (53-54%), 2.0+ (>54%)
+   - LDL risk multiplier: 1.0 (LDL <100), 1.1 (100-129), 1.2 (130-159), 1.4 (160-189), 1.6 (190+)
+   - Compound risk = Hct multiplier x LDL multiplier
+3. **Track direction of travel** — both markers trending up simultaneously is a CCIR (Commander's Critical Information Requirement).
+4. **Phlebotomy tracking** — note days since last donation, days until next eligible, and current Hct trajectory.
+5. **Supplement efficacy gate** — if bergamot + berberine have not reduced LDL below 120 by 90 days on certified brands, flag for statin discussion at Posterity.
+
+#### Escalation Triggers (auto-flag)
+
+- **RED (24-hour action):** Hct >=54%, LDL >=160, any acute CV/neurological symptoms, unilateral leg swelling
+- **AMBER (next visit):** Hct 52-53.9% and rising, LDL 130-159 after 3 months optimized supplements, ApoB elevated despite LDL improvement, BP >130/85
+- **GREEN (monitor):** Hct stable 50-52%, LDL trending toward <100
+
+#### TRT Formulation Monitoring
+
+- Current: IM injection (highest erythrocytosis risk — up to 40% incidence)
+- If Hct remains >52% despite phlebotomy, flag for transdermal/nasal gel discussion
+- Evidence: IM cypionate Hct +5.1% over 4 months vs nasal gel -1.1% (Journal of Urology, 2022)
+- Polycythemia (Hct >=54%): 10% on IM vs 0% on gel in head-to-head trials
+
 ### Phase 6: TREND DETECTION
 
 Flag any of these if detected:
@@ -145,6 +208,8 @@ Flag any of these if detected:
 - Deep sleep not improving despite peptide protocol
 - Fasting glucose trending up (pre-diabetes watch)
 - LDL/ApoB not responding to interventions
+- **Hct AND LDL both trending up simultaneously (compound CV risk escalation — CCIR)**
+- **Hct approaching 54% faster than donation schedule allows (phlebotomy timing gap)**
 - Resting heart rate increasing
 - Training frequency dropping
 - Macro compliance degrading

@@ -127,23 +127,29 @@ ACTION ITEMS:
 - **Value:** On a $300K home — saves $3,750-9,900 in funding fee alone
 - **Action:** Use for next home purchase or refinance. Compare rates regularly.
 
-### 6. Property Tax Exemptions (Indiana-Specific)
-- **Indiana:** 100% disabled veterans may qualify for property tax exemption
-- **Amount:** Up to $24,960 assessed value reduction (verify current limit)
-- **Application:** File with county assessor's office
-- **Value:** $500-2,000+/yr depending on property value
-- **Action:** Verify if currently claiming. If not, apply at county assessor.
+### 6. Property Tax Deductions (Indiana-Specific)
+- **Deduction 1 (IC 6-1.1-12-14):** $24,960 deduction for wartime veteran with 10%+ VA disability
+- **Deduction 2 (IC 6-1.1-12-14.5):** $14,000 deduction for totally disabled veteran (assessed value < $240K)
+- **Combined:** Up to $38,960 deduction from assessed value (~$779/yr savings at 2% rate)
+- **HB 1210 (2026 session):** Increases totally disabled veteran deduction to 100% of assessed value (effective taxes payable 2027). Estimated savings: $3,000-6,000/yr.
+- **Application:** File with county auditor (not assessor). Requires VA disability letter + DD-214.
+- **Action:** Verify BOTH deductions are filed. Monitor HB 1210 for governor signature.
+- **Full analysis:** `~/Library/Mobile Documents/com~apple~CloudDocs/indiana-veteran-tax-benefits.md`
 
-### 7. Vehicle Registration Exemption (Indiana)
-- **Eligibility:** 100% P&T veterans
-- **Benefit:** Free vehicle registration for one vehicle
-- **Action:** Apply at BMV with VA disability letter
-- **Value:** $50-150/yr
+### 7. Vehicle Excise Tax Credit (Indiana)
+- **Eligibility:** Veterans whose property tax deduction exceeds assessed value
+- **Benefit:** $2 credit per $100 of remaining deduction toward excise tax on up to 2 vehicles (max $70/vehicle)
+- **Value:** $70-140/yr
+- **CORRECTION:** Indiana does NOT offer free vehicle registration for disabled veterans. Previous entry was inaccurate.
+- **Action:** Should be automatically applied if property tax deduction is filed
 
 ### 8. State Income Tax Benefits (Indiana)
-- **VA disability:** Excluded from Indiana income tax
-- **Military retirement:** Up to $6,250 exempt from state income tax
-- **Action:** Verify these are reflected in state tax filing
+- **VA disability:** Excluded from Indiana income tax (automatic)
+- **Military retirement pay:** 100% exempt from Indiana income tax (since TY2022) — saves ~$3,864/yr at RPED ($63,864/yr x ~4.55% combined state+county rate)
+- **Active duty/Guard pay:** Exempt from Indiana income tax (since TY2024) — verify on state return
+- **$5,000 military income deduction:** Available for active/reserve component members on IT-40 Schedule 2 (~$228/yr savings)
+- **Action:** Verify Guard pay exclusion AND $5,000 deduction are claimed on Indiana return
+- **Full analysis:** `~/Library/Mobile Documents/com~apple~CloudDocs/indiana-veteran-tax-benefits.md`
 
 ### 9. Commissary and Exchange Privileges
 - **Eligibility:** 100% P&T veterans
@@ -185,6 +191,43 @@ ACTION ITEMS:
 - **VGLI:** Veterans Group Life Insurance — convert SGLI after separation
 - **S-DVI:** Service-Disabled Veterans Insurance
 - **Action:** Review current life insurance coverage status
+
+---
+
+## Indiana-Specific Benefits Summary (Updated 2026-03-19)
+
+**Full audit document:** `~/Library/Mobile Documents/com~apple~CloudDocs/indiana-veteran-tax-benefits.md`
+
+### Current Annual Value (2026)
+| Benefit | Est. Value |
+|---------|-----------|
+| Property tax deductions (both) | $500-779/yr |
+| Guard pay state tax exemption | $200-800/yr |
+| $5,000 military income deduction | ~$228/yr |
+| Vehicle excise tax credit | $70-140/yr |
+| Free hunting/fishing license + state parks | $100-150/yr |
+| **Total currently available** | **$1,098-2,097/yr** |
+
+### After HB 1210 (2027+)
+| Benefit | Est. Value |
+|---------|-----------|
+| Property tax (100% deduction for 100% disabled) | $3,000-6,000/yr |
+| Other benefits unchanged | $598-1,318/yr |
+| **Total** | **$3,598-7,318/yr** |
+
+### At RPED (2040+)
+| Benefit | Est. Value |
+|---------|-----------|
+| Military retirement income exemption (100%) | ~$3,864/yr |
+| Plus above benefits | $3,598-7,318/yr |
+| **Total** | **$7,462-11,182/yr** |
+
+### Key Corrections Made (2026-03-19)
+- Indiana does NOT offer free vehicle registration for disabled veterans (corrected)
+- Military retirement is 100% exempt (not $6,250 cap — that was wrong)
+- Guard pay exemption exists since TY2024 (was missing)
+- $5,000 military income deduction was missing
+- Property tax has TWO separate deductions that stack (was listed as one)
 
 ---
 

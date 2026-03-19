@@ -156,6 +156,83 @@ The system should watch for these patterns across all data sources:
 
 ---
 
+## Emerging Treatment Options (Researched 2026-03-19)
+
+Reference: `~/Library/Mobile Documents/com~apple~CloudDocs/MEDICAL_HEALTH_PERFORMANCE/ptsd-sleep-treatment-options.md`
+
+### Stellate Ganglion Block (SGB)
+- **What:** Minimally invasive injection of local anesthetic into stellate ganglion (neck). Resets sympathetic overdrive.
+- **Evidence:** Level 1B — 2020 JAMA Psychiatry RCT (n=113) showed significant PTSD symptom reduction. Ongoing VA multi-site triple-blind RCT (NCT05169190) will be definitive.
+- **Status:** Not yet standard VA treatment. Available through clinical trials and community care referrals.
+- **Action:** Ask VA provider about NCT05169190 enrollment or community care referral.
+
+### CBT-I (Cognitive Behavioral Therapy for Insomnia)
+- **What:** Structured 6-8 week behavioral program for insomnia. First-line treatment per ACP/AASM.
+- **Evidence:** 2024 RCT (n=126) confirmed effectiveness for TBI patients. Addresses the behavioral layer of Tory's 0.7h deep sleep deficit.
+- **VA Availability:** Confirmed at Roudebush VAMC Sleep Medicine Program. Also available via telehealth and free apps (CBT-i Coach, SleepEZ).
+- **Action:** Request referral to VA Indiana Sleep Medicine. Start CBT-i Coach app immediately.
+
+### tVNS (Transcutaneous Vagus Nerve Stimulation)
+- **What:** Non-invasive vagus nerve stimulation via consumer device. Promotes parasympathetic activation.
+- **Evidence:** Preliminary — improved sleep scores after 2-4 weeks in studies. Not FDA-cleared for PTSD/insomnia.
+- **Recommended Device:** Pulsetto Fit (~$296) — 100K+ users, 41% sleep improvement in 4-week study. Check ID.me/GovX first.
+- **Action:** Purchase after confirming no military discount. Use 2x/day as adjunct to CBT-I and professional treatment.
+
+### Combined Approach Rationale
+Deep sleep deficit at 0.7h/night is likely structural (TBI-related gray matter changes reduce slow-wave generation). No single treatment will fix this. The multi-modal stack:
+1. **CBT-I** — optimizes behavioral sleep architecture (free, VA)
+2. **SGB** — resets sympathetic overdrive driving hypervigilance/fragmentation (VA trial/referral)
+3. **tVNS** — daily vagal tone maintenance between treatments (~$300)
+4. **Medication review** — ensure current meds aren't suppressing deep sleep (VA appointment)
+
+---
+
+## Nightmare Management Protocol (Added 2026-03-19)
+
+Reference: `~/Library/Mobile Documents/com~apple~CloudDocs/MEDICAL_HEALTH_PERFORMANCE/nightmare-pharmacology-brief.md`
+
+### Current Status
+- **No nightmare-specific medication currently prescribed** (no prazosin, no clonidine)
+- Nightmares are an active symptom contributing to the 0.7 hr/night deep sleep deficit
+- Pharmacological intervention should be discussed at next VA appointment
+
+### Recommended Pharmacological Approach: Clonidine
+
+**Why clonidine over prazosin for Tory's profile (PTSD + TBI):**
+1. **Central mechanism** — clonidine acts in the brainstem (locus coeruleus) to reduce sympathetic outflow. Prazosin acts peripherally. For TBI patients with brainstem-level noradrenergic dysregulation, central action is more appropriate.
+2. **Prazosin's largest RCT was negative** — Raskind 2018 (NEJM, n=304, 13 VA sites) showed prazosin no better than placebo.
+3. **TBI-specific evidence** — Alao 2012 reported a combat veteran with PTSD+TBI whose nightmares failed on prazosin but resolved on clonidine 0.3mg.
+4. **GH synergy** — Clonidine stimulates growth hormone release, synergistic with CJC-1295/Ipamorelin peptide therapy.
+5. **May enhance deep sleep** — at therapeutic doses, clonidine increases NREM sleep proportion.
+
+**Dosing:** Start 0.1 mg at bedtime, titrate to 0.2-0.3 mg over 4-6 weeks based on response.
+
+### Drug Interaction Notes
+- **Tadalafil:** Minor — additive BP lowering. Take tadalafil earlier in day.
+- **CJC-1295/Ipamorelin:** Synergistic (both stimulate GH). Inform Posterity Health.
+- **TRT/AI:** No significant interaction.
+- **Ibuprofen:** NSAIDs can reduce clonidine's antihypertensive effect. Avoid daily concurrent use.
+- **All supplements (fish oil, creatine, vitamin D, magnesium):** No interactions.
+
+### Safety Warnings
+- Never stop clonidine abruptly (rebound hypertension risk)
+- Monitor BP first 2 weeks
+- Sedation expected — bedtime dosing only
+- Avoid alcohol on clonidine nights
+
+### Integration with Deep Sleep Stack
+Clonidine is the **pharmacological layer** of the multi-modal deep sleep optimization strategy:
+- CBT-I (behavioral) + tVNS (autonomic) + Clonidine (pharmacological) + CJC-1295/Ipamorelin (neuroendocrine) + SGB (procedural reset)
+- See `ptsd-sleep-treatment-options.md` and `nightmare-pharmacology-brief.md` for full details
+
+### Tracking
+- Log nightmare frequency in EOD close (baseline needed before starting medication)
+- Track deep sleep hours weekly via Apple Watch data
+- Compare 4-week and 8-week averages to 0.7h baseline
+- Target: 1.0-1.5 hrs deep sleep (50-100% improvement)
+
+---
+
 ## Integration Points
 
 - **health-pull:** Sleep data is the #1 PTSD leading indicator — surface it

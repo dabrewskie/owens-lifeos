@@ -135,13 +135,18 @@ Target monthly income at retirement (Sep 2040):
 
 **At Invocation End:**
 1. Update the `### S4 — Logistics/Finance` running estimate in COP.md with latest data
-2. Set CROSS-DOMAIN FLAGS if financial findings affect other domains:
+2. **Update `owens_future_data.json`** with any changed numbers (income, spending, FCF, contributions, pension, projections). This is the canonical data file for all financial dashboards.
+3. **Run financial sync:** `python3 ~/Documents/S6_COMMS_TECH/scripts/financial_data_sync.py` — this pushes changes to cop_data.json and validates consistency.
+4. **Run SWOT check** (Standing Order): Before presenting any financial update as complete, stress-test assumptions and call out blind spots.
+5. Set CROSS-DOMAIN FLAGS if financial findings affect other domains:
    - Aggressive savings plan → FLAG S1 (family budget pressure)
    - Net worth change >5% → FLAG CoS (CCIR triggered)
    - Benefit verification needed → FLAG S3 (admin action)
    - HSA/401k optimization → FLAG Medical (health spending strategy)
-3. Update `Last Updated` timestamp on S4 section
-4. If any CCIR triggered, flag for CoS immediate attention
+6. Update `Last Updated` timestamp on S4 section
+7. If any CCIR triggered, flag for CoS immediate attention
+
+**NEVER hardcode financial numbers in dashboard HTML.** Always update `owens_future_data.json` and let the dashboard read from it.
 
 ---
 

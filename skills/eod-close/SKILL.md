@@ -117,6 +117,10 @@ If data isn't available (Tory didn't report), note the gap. Gaps are data too â€
 
 ---
 
+## Step 4.5: Financial Data Sync
+Run: `python3 ~/Documents/S6_COMMS_TECH/scripts/financial_data_sync.py`
+This ensures owens_future_data.json (Lindsey's dashboard) and cop_data.json stay synchronized. If validation fails, reconcile before proceeding.
+
 ## Step 5: Cross-Platform Sync
 After updating the COP, push changes to all Claude instances:
 1. Run: `python3 ~/Documents/S6_COMMS_TECH/scripts/briefing_packet_generator.py`

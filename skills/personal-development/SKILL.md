@@ -110,12 +110,45 @@ From "excellent executor of other people's plans" to "strategic architect of out
 | Leadership | Maxwell Leadership files | `~/Library/Mobile Documents/com~apple~CloudDocs/Maxwell_Leadership/` | — |
 | Clinical Science | `~/Documents/S2-INTELLIGENCE/Clinical-Science/` | As needed | GPJA, GPJD, SURPASS-T1D |
 
+### Active — Executive Presence & ISTJ Growth Track (added 2026-03-19)
+
+**Full Reference:** `~/Library/Mobile Documents/com~apple~CloudDocs/S7_TRAINING_READINESS/director-readiness-package.md`
+
+#### ISTJ Blind Spot Development (Director-Critical)
+
+| Blind Spot | Growth Target | Practice |
+|------------|--------------|----------|
+| Getting stuck in the weeds | Altitude awareness — speak at 30,000 feet in senior meetings | Before speaking, ask: "Is this strategic or operational?" If operational, delegate or save for offline. |
+| Reluctance to decide without full data | Decide at 70% confidence | Set a personal rule: pattern recognition + 70% data = green light. Course-correct later. |
+| Over-explaining the "how" | Lead with the "so what" | Newspaper test: what is the headline? Start there. |
+| Discomfort with ambiguity | Reframe ambiguity as opportunity | Ambiguous problems are where Directors add value. Lean into Ti Co-Pilot. |
+| Resistance to self-promotion | Schedule strategic visibility | It is not bragging — it is operational communication. One visibility action per week. |
+| Perfectionism before sharing | Ship at 80% polish | The first person to frame the problem controls the solution. Speed of insight beats perfection. |
+
+#### Executive Presence — Gravitas Behaviors
+
+| Behavior | Current State | Target State |
+|----------|--------------|-------------|
+| Lead with conclusions | Developing | Default in all communications |
+| Brevity (90 seconds, not 5 minutes) | Developing | Automatic in meetings |
+| Conviction language (no hedging) | Developing | Eliminate "I think maybe," "It seems like" |
+| Composure under fire | Strong (military foundation) | Maintain — add the 3-second pause |
+| Strategic silence after strong points | Developing | Resist ISTJ urge to add more detail |
+| Decisive body language | Developing | Hands on table, lean forward, steady voice |
+
+#### Communication Patterns to Eliminate
+- "Just to clarify..." → "To be clear..."
+- "I was wondering if maybe..." → "I recommend..."
+- "Does that make sense?" → "Questions?" or silence
+- "Sorry, but..." → Drop it entirely
+- Starting with backstory → Start with the conclusion
+
 ### Recommended (Not Yet Started)
 
 | Topic | Why | Resource |
 |-------|-----|---------|
 | Strategic Influence | Moving from execution to strategy requires political intelligence | Books, course |
-| Executive Presence | The gap between AD and Director is often presence, not competence | — |
+| Executive Presence | **ACTIVE** — see Executive Presence track above | Director Readiness Package |
 | Investing (DIY CFP) | $7k+/mo in FCF needs a sophisticated deployment plan | — |
 | AI/Automation | Tory is already building this; formalize it | Claude, tools |
 

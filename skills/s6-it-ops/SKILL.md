@@ -367,6 +367,36 @@ AARs are stored in `~/Documents/S6-COMMS-TECH/scripts/aar_logs/` and significant
 
 ---
 
+## Apple Shortcuts — iOS Bridge (deployed 2026-03-19)
+
+**Reference Doc:** `~/Library/Mobile Documents/com~apple~CloudDocs/S6_COMMS_TECH/apple-shortcuts-claude-bridge.md`
+
+Life OS extends to iPhone via three iOS Shortcuts:
+
+| Shortcut | Function | API Required | Build Time |
+|----------|----------|-------------|-----------|
+| **Recomp Snap** | One-tap camera > save to "Recomp 2025 NOV-MAR" album | No | 2 min |
+| **COP Brief** | Read COP.md from iCloud, display or Claude-summarize | Optional | 2-5 min |
+| **Ask Life OS** | Send prompt to Claude API, get response on iPhone | Yes | 10 min |
+
+### Architecture
+- **Helper Shortcut:** "Claude API Key" — stores `sk-ant-api03-...` key, called by other shortcuts via "Run Shortcut"
+- **API Endpoint:** `https://api.anthropic.com/v1/messages` (POST, JSON body, headers: `x-api-key`, `anthropic-version: 2023-06-01`)
+- **Model:** claude-sonnet-4-20250514 (cost: ~$2.50/mo at 10 queries/day)
+- **Alternative:** Claude iOS app's built-in "Ask Claude" App Intent — no API key needed, uses subscription
+
+### Security Controls
+- API key stored on-device only (Shortcuts app), transmitted only to Anthropic HTTPS endpoint
+- Consider adding "Request Face ID" action as step 0 on API shortcuts
+- No new attack surface — uses existing iCloud sync and Photos library
+
+### Maintenance
+- If Anthropic API version changes, update `anthropic-version` header in all shortcuts
+- If COP.md moves, update the iCloud file path in COP Brief shortcut
+- If recomp album name changes (e.g., new quarter), update Recomp Snap shortcut
+
+---
+
 ## The Standard
 
 Tory's Mac holds: VA disability records, military OMPF, $563k net worth in financial data, medical records, children's personal information, and 23 years of service documentation. This is not a casual laptop. This is the digital equivalent of a classified filing cabinet.

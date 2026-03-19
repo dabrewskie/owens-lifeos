@@ -24,6 +24,7 @@ description: >
 | Month | Task | Notes |
 |-------|------|-------|
 | January | Tory's 401k contribution check | Ensure max $23,500 set |
+| January | Request CHAMPVA 1095-B from VA | No longer auto-mailed as of 2026; must be manually requested for tax filing |
 | February | Tax prep begins | W2s arrive; schedule accountant |
 | February 8 | Lindsey birthday | 2-week advance planning |
 | February 25 | Emory birthday | 2-week advance planning |

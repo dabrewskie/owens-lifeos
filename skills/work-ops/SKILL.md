@@ -77,7 +77,7 @@ Lilly is not just a job. It's a pension, a 401k match, an HSA, RSU vesting, and 
 | Open Enrollment | May (annually) | Review all elections — HSA, 401k, life insurance, disability |
 | 401k Contribution Review | January / after raise | Ensure 6% minimum maintained, evaluate Roth vs. Traditional |
 | HSA Investment Review | Quarterly | Invest all HSA funds — triple tax advantage |
-| RSU Vest Dates | Track per grant | Log in COP, evaluate hold vs. sell |
+| RSU Vest Dates | Track per grant | Log in COP, evaluate hold vs. sell. **RSU WITHHOLDING GAP:** Supplemental income withheld at 22% flat but actual marginal rate is 24-32% at household AGI ~$266K+. Risk: $1,500-$2,500 underpayment at filing. Action: Review W-4 Line 4(c) additional withholding to cover gap. See tax-intel SKILL.md for full analysis. |
 | Performance Review | Annual (typically Q1) | Compile wins, deliverables, impact metrics |
 | 8-Year Anniversary | July 10, 2026 | Milestone — assess pension vesting, career trajectory |
 
@@ -166,6 +166,33 @@ Lilly is not just a job. It's a pension, a 401k match, an HSA, RSU vesting, and 
 3. **Sponsor (Not Just Mentor):** Someone at Director+ level who will actively advocate for his promotion.
 4. **Lilly Leadership Competency Demonstration:** Map every win to Lilly's promotion criteria, not just job performance.
 
+### Director Track — Readiness System (added 2026-03-19)
+
+**Full Package:** `~/Library/Mobile Documents/com~apple~CloudDocs/S7_TRAINING_READINESS/director-readiness-package.md`
+
+**Key Frameworks:**
+- **SCQA Storytelling:** Situation-Complication-Question-Answer for all portfolio briefings. Lead with the recommendation. Never build to a conclusion.
+- **Skip-Level Playbook:** 3 strategic talking points (Portfolio Headline, Organizational Insight, Strategic Question). Prepare 48 hours before. Never give a status update.
+- **ISTJ Blind Spot Awareness:** "Stuck in weeds" is the #1 director killer (HBR). Practice altitude checks before speaking. Operate at 70% confidence, not 95%.
+- **Portfolio Narrative:** Tell the $327M story strategically, not operationally. Lead with complexity and vision, not tracking status.
+- **30-Day Visibility Protocol:** Active during reshuffle windows. Map new leaders, provide portfolio briefs, volunteer for visible initiatives.
+
+**Director Comp Benchmarks:** $200K+ base, ~$300K total comp. Current total comp ~$240K+ (excluding pension NPV). The gap is title and base, not total value delivered.
+
+**Executive Presence Priority Behaviors:**
+1. Lead with the conclusion in every communication
+2. Brevity — if it takes 5 minutes, say it in 90 seconds
+3. Conviction — eliminate hedging language ("I think maybe" → "My recommendation is")
+4. Composure under fire — pause, then respond with data
+5. Strategic silence — stop talking after making a strong point
+
+**Monthly Director Track Check:**
+- [ ] Did I deliver at least one SCQA-framed briefing this month?
+- [ ] Did I have a strategic interaction with someone 2+ levels above me?
+- [ ] Did I resist going into the weeds when I should have stayed at altitude?
+- [ ] Did I advance my sponsor relationship?
+- [ ] Is my promotion case file updated with this month's wins?
+
 ### Quarterly Career Check Protocol
 When triggered by "Career check" or "Director track":
 1. Review wins log — are they Director-level or AD-level?
@@ -173,7 +200,8 @@ When triggered by "Career check" or "Director track":
 3. Check initiative ownership — is he leading anything strategic?
 4. Evaluate sponsor relationship — active or stale?
 5. Calculate remaining runway — 3-5 year target means action items NOW
-6. Deliver honest assessment with specific next actions
+6. Review Director Readiness Package — are the frameworks being practiced?
+7. Deliver honest assessment with specific next actions
 
 ---
 

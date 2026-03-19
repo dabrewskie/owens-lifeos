@@ -31,6 +31,7 @@ The Life OS has multiple data sources, most requiring manual action:
 | Rocket Money transactions | ~/Downloads/*transactions*.csv | ✅ If downloaded | Monthly |
 | Security audit | Script | ✅ Yes | On demand |
 | Network scan | Script | ✅ Yes | Every 5 min (LaunchAgent) |
+| Body Recomp | Script + Health Export | ✅ Yes | Daily |
 
 **The gap:** Even "auto-ingestible" sources require someone to actually run the reader scripts, process the output, and update the COP. That someone should not be Tory.
 
@@ -43,7 +44,7 @@ The Life OS has multiple data sources, most requiring manual action:
 **Dispatch 3 domain agents in a SINGLE message for parallel data ingestion:**
 
 ```
-Agent(subagent_type="domain-medical",  prompt="Run Medical SITREP for data pipeline. Pull ALL health sources, check freshness of each, report 7-day trends.", run_in_background=true)
+Agent(subagent_type="domain-medical",  prompt="Run Medical SITREP for data pipeline. Pull ALL health sources, check freshness of each, report 7-day trends. Also run: python3 ~/Documents/S6_COMMS_TECH/scripts/recomp_ingestion.py", run_in_background=true)
 Agent(subagent_type="domain-finance",  prompt="Run Finance SITREP for data pipeline. Check Rocket Money CSV in ~/Downloads/, dashboard JSON freshness, transaction data availability.", run_in_background=true)
 Agent(subagent_type="domain-security", prompt="Run Security SITREP for data pipeline. Run security audit, check network scan freshness, LaunchAgent status.", run_in_background=true)
 ```

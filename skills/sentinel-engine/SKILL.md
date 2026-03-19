@@ -103,6 +103,17 @@ Read the `### Evolution Engine` section from COP.md and assess:
 
 The sentinel does NOT re-evaluate or second-guess evolution findings. It uses evolution data as an additional signal in its existing cascade analysis framework.
 
+#### G. Body Recomp Monitoring
+Source: ~/Documents/S6_COMMS_TECH/dashboard/recomp_data.json
+
+CCIR (Commander's Critical Information Requirements):
+- Weight trending UP for 3+ consecutive weeks
+- Body fat % trending UP for 3+ consecutive weeks
+- No progress photo uploaded in 10+ days
+- Recomp data stale (>48h since last_updated)
+- Lab draw overdue (>100 days since last lab)
+- Hematocrit approaching phlebotomy threshold (>53%)
+
 #### E. The Mask Check
 This is the most important scan. Look for behavioral indicators that the 1SG mask is up:
 - "I'm fine" or similar minimizing language in recent sessions
