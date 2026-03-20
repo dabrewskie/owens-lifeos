@@ -116,10 +116,14 @@ ACTION ITEMS:
 **TCJA Sunset Risk:** If TCJA expires (2026+), 24% bracket becomes 28%. Conversions still profitable vs. 33% in retirement but less so. Accelerate conversions if sunset appears imminent.
 
 **Action Items:**
-- [ ] Commander: Check TSP.gov Traditional vs. Roth balances
+- [x] Commander: Check TSP.gov Traditional vs. Roth balances — **CONFIRMED: $5,000 Traditional TSP (2026-03-19)**
+- [ ] Commander: **Confirm no existing Traditional IRA balance** (pro-rata rule — CRITICAL for Backdoor Roth)
+- [ ] Commander: **Confirm Lindsey has no existing Traditional IRA balance** (independent pro-rata)
+- [ ] Commander: Execute TSP $5K direct rollover → Roth IRA at Fidelity (Form TSP-99)
+- [ ] Commander: Open Traditional + Roth IRA pairs at Fidelity for Backdoor Roth (both spouses, before Jan 2027)
 - [ ] Commander: Check if Fidelity/Lilly 401k allows in-plan Roth conversions
 - [ ] tax-intel: Run first bracket-fill calculation November 2026
-- [ ] CoS: Add "November Roth Window" to annual battle rhythm
+- [ ] CoS: Add "January Backdoor Roth" + "November Roth Window" to annual battle rhythm
 
 ### 2. RSU Tax Management
 - Lilly RSUs are taxed as ordinary income at vest date
@@ -201,10 +205,36 @@ At $266K+ AGI (MFJ), the household is solidly in the **24% bracket** (2026 MFJ: 
 - Passive activity loss rules: Can losses offset W2 income? (AGI < $150K for full deduction — likely phased out)
 
 ### 4. Retirement Account Optimization
-- **401k (Transamerica):** Traditional vs Roth contributions — which is better at current bracket?
-- **TSP:** Roth TSP available? Traditional TSP contributions reduce taxable Guard income
-- **Backdoor Roth IRA:** If AGI exceeds Roth IRA limits, use backdoor conversion
+- **401k (Lilly/Fidelity):** Switched to 18% Pre-Tax 3/16/26. Deduction at 24% now, convert to Roth later via bracket-fill strategy.
+- **TSP (Guard):** $5,000 Traditional — rolling direct to Roth IRA (one-time, ~$1,422 tax). See `tsp-rollover-backdoor-roth-playbook.md`. **DO NOT roll to Traditional IRA** (pro-rata rule).
 - **HSA:** Triple tax advantage — contribute max ($8,300 family 2026), invest, don't spend until retirement
+
+### 4A. Backdoor Roth IRA — Annual Process (Added 2026-03-19)
+
+**Full Playbook:** `~/Library/Mobile Documents/com~apple~CloudDocs/tsp-rollover-backdoor-roth-playbook.md`
+
+**Why:** Combined MAGI ~$260K exceeds Roth IRA direct contribution limit (~$236K-$246K MFJ 2026). Backdoor Roth is the legal workaround.
+
+**Annual Execution (January of each year, starting 2027):**
+
+1. **Confirm Traditional IRA balance is $0** for both Tory and Lindsey (pro-rata rule check)
+2. **Contribute $7,000** each to non-deductible Traditional IRA (after-tax, no deduction)
+3. **Convert to Roth IRA within 1-3 business days** (do not let gains accrue)
+4. **Confirm Traditional IRA returns to $0** after conversion
+5. **File Form 8606** for BOTH spouses with tax return
+6. **Tax on conversion: $0** (non-deductible basis = no taxable amount)
+
+**Annual injection: $14,000/yr** ($7K Tory + $7K Lindsey). Rises to $16K+/yr at age 50 (catch-up).
+
+**Pro-Rata Rule — The Critical Constraint:**
+- If ANY Traditional IRA has pre-tax money on December 31, ALL Backdoor Roth conversions become partially taxable
+- This is why TSP must go direct to Roth IRA (not Traditional IRA)
+- Each spouse's pro-rata is calculated independently (Lindsey's accounts don't affect Tory's)
+- 401(k) balances do NOT count for pro-rata (only IRAs)
+
+**Legislative Risk:** Multiple bills have targeted eliminating Backdoor Roth. Monitor annually. If eliminated, contributions already made are safe.
+
+**Projected value at RPED (2040): ~$290,000+ tax-free** (on top of bracket-fill conversions)
 
 ### 5. Capital Gains Harvesting
 - In years with lower income (or large deductions), harvest gains at 0% rate
@@ -229,7 +259,7 @@ At $266K+ AGI (MFJ), the household is solidly in the **24% bracket** (2026 MFJ: 
 
 | When | Action |
 |------|--------|
-| January | Gather W-2s, 1099s, K-1s. Review prior year strategy. **Request CHAMPVA 1095-B from VA** (no longer auto-mailed as of 2026 — must be manually requested for tax filing). |
+| January | **BACKDOOR ROTH:** Execute $7K contribution + conversion for both Tory and Lindsey ($14K total). Confirm Traditional IRA balance is $0 before and after. Also: Gather W-2s, 1099s, K-1s. Review prior year strategy. **Request CHAMPVA 1095-B from VA** (no longer auto-mailed as of 2026 — must be manually requested for tax filing). |
 | February | Complete draft return. Identify optimization opportunities before filing. |
 | March | Lilly bonus — confirm withholding is adequate |
 | April 15 | Filing deadline. Confirm estimated payments if needed. |

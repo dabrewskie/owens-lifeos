@@ -107,6 +107,48 @@ Flag if any relationship has gone 7+ days without intentional 1-on-1.]
 
 ---
 
+## Apple + Google Intel Pull (MANDATORY — run first)
+
+**Before anything else, run the intel pull script:**
+```bash
+python3 ~/Documents/S6_COMMS_TECH/scripts/morning_intel_pull.py
+```
+
+Then read the output: `~/Documents/S6_COMMS_TECH/dashboard/morning_intel.json`
+
+**Integrate into the brief:**
+- **Today's calendar events** → list in brief header, flag family events prominently
+- **Tomorrow's events** → mention if prep needed (doctor appointments, school events, travel)
+- **Family events (3-day horizon)** → always surface these. Family First (SO#3)
+- **Overdue reminders** → flag at top of brief as action items
+
+**Also pull via MCP tools:**
+- `gmail_search_messages` — check for starred/important unread from last 24h (both tory.owens7@gmail.com)
+- `gcal_list_events` — cross-reference with Apple Calendar for any Google-only events
+- Flag any emails requiring action today
+
+**Apple Calendars tracked (all of these):**
+COS Command, Family, S1 Family & Personnel, S3 Life Admin, S4 Financial, S6 IT & Security, Medical Health & Fitness, Battle Rhythm, Recreation, Home, Birthdays, Holidays
+
+---
+
+## iMessage Morning Brief Delivery (MANDATORY)
+
+**After generating the brief, send a summary to Commander's phone via iMessage:**
+```bash
+python3 ~/Documents/S6_COMMS_TECH/scripts/s6_alert.py
+```
+
+Use the alert system to send a condensed version:
+- Top 3 priorities (one line each)
+- Fun money remaining
+- Today's calendar count
+- One truth
+
+This ensures the brief reaches Commander on iPhone even if Mac isn't open.
+
+---
+
 ## COP Synchronization Protocol (S6 Comms — Morning Brief)
 
 **COP Location:** `~/Library/Mobile Documents/com~apple~CloudDocs/COP.md`
@@ -282,6 +324,41 @@ File: ~/Library/Mobile Documents/com~apple~CloudDocs/morning-sweep-latest.md
 ```
 
 Write the FULL brief output to this file. This ensures the brief persists across sessions and syncs to all devices via iCloud. This is non-negotiable — scheduled tasks that don't persist output are invisible to the system.
+
+## Phone Delivery (MANDATORY)
+
+**After saving the file, send a condensed iMessage to Commander:**
+
+```python
+# Use the s6_alert system
+import sys
+sys.path.insert(0, os.path.expanduser('~/Documents/S6_COMMS_TECH/scripts'))
+from s6_alert import alert, MEDIUM
+
+alert(MEDIUM, "Morning Brief",
+    f"Top 3: {priority_1} | {priority_2} | {priority_3}\n"
+    f"Fun $$: ${fun_remaining} left ({days_left}d)\n"
+    f"Calendar: {today_event_count} today\n"
+    f"Truth: {todays_truth}",
+    send_text=True)
+```
+
+This ensures the brief reaches Commander's iPhone even when not at the Mac. The iMessage contains:
+- Top 3 priorities (one line)
+- Fun money remaining + days left
+- Today's calendar event count
+- Today's truth
+
+---
+
+## Cross-Platform Delivery
+
+The morning sweep reaches Commander on ALL platforms:
+1. **Mac (Claude Code)** — full brief in terminal + morning-sweep-latest.md
+2. **iPhone (iMessage)** — condensed 4-line summary via s6_alert
+3. **iPad/Web (iCloud)** — morning-sweep-latest.md syncs via iCloud Drive
+4. **Notion** — cop-sync pushes COP updates to Notion after morning sweep
+5. **claude.ai** — briefing packet updated for web/iOS Claude sessions
 
 ---
 
