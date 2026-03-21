@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Owens Life OS — Dashboard Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #181b24;
+    --card-hover: #1e2230;
+    --gold: #d4a55a;
+    --green: #4ade80;
+    --red: #f87171;
+    --amber: #fbbf24;
+    --text: #e8e6e1;
+    --dim: #8b8a87;
+    --muted: #5a5957;
+    --border: rgba(255,255,255,0.06);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 20px; }
+  h1 { font-family:'Playfair Display',serif; font-size:2.4rem; font-weight:400; text-align:center; margin-bottom:8px; }
+  h1 em { color:var(--gold); font-style:italic; }
+  .subtitle { color:var(--dim); text-align:center; margin-bottom:48px; font-size:0.9rem; }
+  .hub-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; max-width:960px; width:100%; }
+  .hub-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; text-decoration:none; color:var(--text); transition:all 0.3s; position:relative; overflow:hidden; cursor:pointer; }
+  .hub-card:hover { background:var(--card-hover); border-color:rgba(255,255,255,0.12); transform:translateY(-2px); }
+  .hub-card .hc-icon { font-size:2rem; margin-bottom:12px; }
+  .hub-card h3 { font-family:'Playfair Display',serif; font-size:1.15rem; margin-bottom:6px; }
+  .hub-card p { font-size:0.82rem; color:var(--dim); line-height:1.5; }
+  .hub-card .hc-status { display:inline-flex; align-items:center; gap:5px; font-size:0.7rem; font-weight:600; margin-top:12px; letter-spacing:0.05em; text-transform:uppercase; }
+  .hc-status .dot { width:6px; height:6px; border-radius:50%; }
+  .dot.green { background:var(--green); }
+  .dot.amber { background:var(--amber); }
+  .dot.red { background:var(--red); }
+  .footer { margin-top:48px; text-align:center; font-size:0.75rem; color:var(--muted); }
+  .footer a { color:var(--gold); text-decoration:none; }
+</style>
+</head>
+<body>
+  <h1>Owens <em>Life OS</em></h1>
+  <div class="subtitle">All dashboards. One place. Updated continuously.</div>
+
+  <div class="hub-grid">
+    <a href="index.html" class="hub-card">
+      <div class="hc-icon">&#9881;</div>
+      <h3>Common Operating Picture</h3>
+      <p>7-domain life scorecard. Financial, career, family, health, development status at a glance.</p>
+      <div class="hc-status"><span class="dot green"></span> Reactive (updates on COP.md edit)</div>
+    </a>
+
+    <a href="owens-future.html" class="hub-card" style="border-color:rgba(212,165,90,0.2)">
+      <div class="hc-icon">&#128176;</div>
+      <h3>Our Future</h3>
+      <p>Family financial plan for Lindsey. Retirement projections, action items, spending breakdown, countdowns.</p>
+      <div class="hc-status"><span class="dot green"></span> JSON-backed (owens_future_data.json)</div>
+    </a>
+
+    <a href="health-protocol.html" class="hub-card" style="border-color:rgba(74,222,128,0.2)">
+      <div class="hc-icon">&#129657;</div>
+      <h3>Tory's Health Protocol</h3>
+      <p>TRT, supplements, macros, biomarkers, 90-day targets, daily protocol timeline, lab schedule.</p>
+      <div class="hc-status"><span class="dot green"></span> JSON-backed (health_data.json)</div>
+    </a>
+
+    <a href="invest-intel.html" class="hub-card">
+      <div class="hc-icon">&#128200;</div>
+      <h3>Investment Intelligence</h3>
+      <p>33 tickers, 8 macro indicators, thesis tracking, opportunity scoring. Bloomberg-grade market view.</p>
+      <div class="hc-status"><span class="dot green"></span> 2x daily (0623 + 1647)</div>
+    </a>
+
+    <a href="predictions.html" class="hub-card">
+      <div class="hc-icon">&#127919;</div>
+      <h3>Predictions Engine</h3>
+      <p>Multi-domain forecasts with confidence levels. Market regime, health outcomes, career milestones.</p>
+      <div class="hc-status"><span class="dot green"></span> Real-time (predictive_engine)</div>
+    </a>
+
+    <a href="health/health.html" class="hub-card">
+      <div class="hc-icon">&#128154;</div>
+      <h3>Health Intelligence</h3>
+      <p>Weight, body comp, macros, sleep, biomarkers. Daily vitals from Apple Health Auto Export.</p>
+      <div class="hc-status"><span class="dot green"></span> Daily (morning-sweep)</div>
+    </a>
+
+    <a href="evolution-intel.html" class="hub-card">
+      <div class="hc-icon">&#128301;</div>
+      <h3>Evolution Engine</h3>
+      <p>7-domain intelligence sweep. Auto-implemented tier-1 findings, queued tier-2 upgrades.</p>
+      <div class="hc-status"><span class="dot green"></span> 2x weekly (Sun + Wed 2000)</div>
+    </a>
+
+    <a href="recomp.html" class="hub-card">
+      <div class="hc-icon">&#9883;</div>
+      <h3>Body Recomp Tracker</h3>
+      <p>TRT journey week-over-week. Body comp metrics, progress photos, lab values, protocol phase analysis.</p>
+      <div class="hc-status"><span class="dot green"></span> LIVE — :8082</div>
+    </a>
+
+    <a href="http://localhost:8083/learning.html" class="hub-card" style="border-color:rgba(41,121,255,0.2)">
+      <div class="hc-icon">&#127891;</div>
+      <h3>Development Intelligence</h3>
+      <p>Director-track learning plan. 5 tracks, AI advisor, learning journal, completion tracking. Values-driven, science-backed.</p>
+      <div class="hc-status"><span class="dot green"></span> LIVE — :8083 (AI-powered)</div>
+    </a>
+  </div>
+
+  <div class="footer">
+    Owens Life OS &bull; 9 dashboards &bull; 9 JSON feeds &bull; Automated updaters<br>
+    <a href="index.html">COP</a> &bull;
+    <a href="owens-future.html">Future</a> &bull;
+    <a href="health-protocol.html">Health Protocol</a> &bull;
+    <a href="invest-intel.html">Markets</a> &bull;
+    <a href="predictions.html">Predictions</a> &bull;
+    <a href="health/health.html">Health Intel</a> &bull;
+    <a href="evolution-intel.html">Evolution</a> &bull;
+    <a href="recomp.html">Body Recomp</a> &bull;
+    <a href="learning.html">Development</a>
+  </div>
+
+<script>
+// Dynamic data freshness — check actual JSON file timestamps
+const dashboards = [
+  {selector: '.hub-card:nth-child(1)', json: 'cop_data.json', maxAge: 24},
+  {selector: '.hub-card:nth-child(2)', json: 'owens_future_data.json', maxAge: 48},
+  {selector: '.hub-card:nth-child(3)', json: 'health/health_data.json', maxAge: 24},
+  {selector: '.hub-card:nth-child(4)', json: 'invest_intel_data.json', maxAge: 12},
+  {selector: '.hub-card:nth-child(5)', json: 'prediction_data.json', maxAge: 24},
+  {selector: '.hub-card:nth-child(6)', json: 'health/health_data.json', maxAge: 24},
+  {selector: '.hub-card:nth-child(7)', json: 'evolution_intel_data.json', maxAge: 96},
+  {selector: '.hub-card:nth-child(8)', json: 'recomp_data.json', maxAge: 48},
+  {selector: '.hub-card:nth-child(9)', json: 'learning_data.json', maxAge: 48},
+];
+
+dashboards.forEach(async (db) => {
+  try {
+    const resp = await fetch(db.json + '?_=' + Date.now());
+    if (!resp.ok) throw new Error('Not found');
+    const data = await resp.json();
+    const updated = data.last_updated || data.lastUpdated;
+    if (!updated) return;
+
+    const age = (Date.now() - new Date(updated).getTime()) / (1000 * 60 * 60);
+    const card = document.querySelector(db.selector);
+    if (!card) return;
+
+    const statusEl = card.querySelector('.hc-status');
+    const dotEl = card.querySelector('.dot');
+    if (!statusEl || !dotEl) return;
+
+    if (age > db.maxAge * 2) {
+      dotEl.className = 'dot red';
+      statusEl.innerHTML = '<span class="dot red"></span> STALE (' + Math.round(age) + 'h ago)';
+      statusEl.style.color = 'var(--red)';
+    } else if (age > db.maxAge) {
+      dotEl.className = 'dot amber';
+      statusEl.innerHTML = '<span class="dot amber"></span> ' + Math.round(age) + 'h ago';
+      statusEl.style.color = 'var(--amber)';
+    } else {
+      const label = age < 1 ? 'Live' : Math.round(age) + 'h ago';
+      statusEl.innerHTML = '<span class="dot green"></span> ' + label;
+    }
+  } catch(e) {
+    // JSON not available — leave as-is
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.lifeos.orchestrator</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Library/Developer/CommandLineTools/usr/bin/python3</string>
+        <string>/Users/toryowens/Documents/S6_COMMS_TECH/scripts/lifeos_orchestrator.py</string>
+    </array>
+    <key>StartInterval</key>
+    <integer>900</integer>
+    <key>StandardOutPath</key>
+    <string>/Users/toryowens/Documents/S6_COMMS_TECH/scripts/cleanup_logs/orchestrator_out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/toryowens/Documents/S6_COMMS_TECH/scripts/cleanup_logs/orchestrator_err.log</string>
+    <key>WorkingDirectory</key>
+    <string>/Users/toryowens/Documents/S6_COMMS_TECH/scripts</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/Library/Developer/CommandLineTools/usr/bin:/usr/local/bin:/usr/bin:/bin</string>
+    </dict>
+</dict>
+</plist>

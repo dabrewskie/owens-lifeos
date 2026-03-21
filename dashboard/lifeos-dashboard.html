@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Owens Life OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117;
+  --card: #181b24;
+  --card-hover: #1e2230;
+  --gold: #d4a55a;
+  --green: #4ade80;
+  --red: #f87171;
+  --amber: #fbbf24;
+  --text: #e8e6e1;
+  --dim: #8b8a87;
+  --muted: #5a5957;
+  --border: rgba(255,255,255,0.06);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 600; }
+a { color: var(--gold); text-decoration: none; }
+
+/* Header */
+.header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1.25rem 2rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+}
+.header h1 { font-size: 1.5rem; color: var(--gold); }
+.header .updated { font-size: 0.8rem; color: var(--dim); }
+
+/* Tab Nav */
+.tab-nav {
+  display: flex; gap: 0; padding: 0 2rem;
+  background: var(--card);
+  border-bottom: 2px solid var(--border);
+  overflow-x: auto;
+}
+.tab-btn {
+  background: none; border: none; color: var(--dim);
+  font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500;
+  padding: 0.85rem 1.5rem; cursor: pointer;
+  display: flex; align-items: center; gap: 0.5rem;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px; transition: all 0.2s;
+  white-space: nowrap;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  display: inline-block; flex-shrink: 0;
+}
+.dot-green { background: var(--green); }
+.dot-amber { background: var(--amber); }
+.dot-red { background: var(--red); }
+.dot-gray { background: var(--muted); }
+
+/* Content */
+.content { padding: 1.5rem 2rem; max-width: 1400px; margin: 0 auto; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Cards */
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem; transition: background 0.2s;
+}
+.card:hover { background: var(--card-hover); }
+.card-title {
+  font-family: 'Playfair Display', serif; font-size: 1.1rem;
+  color: var(--gold); margin-bottom: 0.75rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.card-subtitle { font-size: 0.8rem; color: var(--dim); margin-bottom: 0.5rem; }
+
+/* Grid Layouts */
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+.grid-5 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+
+/* Hero Card */
+.hero-card {
+  background: linear-gradient(135deg, var(--card), #1a1d2a);
+  border: 1px solid rgba(212,165,90,0.2);
+  border-radius: 16px; padding: 2rem; text-align: center;
+  margin-bottom: 1.5rem;
+}
+.hero-value { font-family: 'Playfair Display', serif; font-size: 2.8rem; color: var(--gold); font-weight: 700; }
+.hero-label { font-size: 0.85rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.25rem; }
+.hero-sub { display: flex; justify-content: center; gap: 2.5rem; margin-top: 1rem; }
+.hero-sub-item { text-align: center; }
+.hero-sub-value { font-size: 1.3rem; font-weight: 600; }
+.hero-sub-label { font-size: 0.75rem; color: var(--dim); }
+
+/* Tables */
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.data-table th {
+  text-align: left; padding: 0.6rem 0.75rem;
+  color: var(--dim); font-weight: 500; font-size: 0.75rem;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border);
+}
+.data-table td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.data-table tr:last-child td { border-bottom: none; }
+
+/* Progress Bar */
+.progress-wrap { margin-bottom: 0.75rem; }
+.progress-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.8rem; margin-bottom: 0.3rem;
+}
+.progress-label span:first-child { color: var(--text); }
+.progress-label span:last-child { color: var(--dim); }
+.progress-bar {
+  height: 8px; background: rgba(255,255,255,0.06);
+  border-radius: 4px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; border-radius: 4px;
+  background: var(--gold); transition: width 0.5s;
+}
+.progress-fill.over { background: var(--red); }
+.progress-fill.good { background: var(--green); }
+
+/* Badges */
+.badge {
+  display: inline-block; padding: 0.2rem 0.6rem;
+  border-radius: 6px; font-size: 0.75rem; font-weight: 600;
+}
+.badge-green { background: rgba(74,222,128,0.15); color: var(--green); }
+.badge-amber { background: rgba(251,191,36,0.15); color: var(--amber); }
+.badge-red { background: rgba(248,113,113,0.15); color: var(--red); }
+.badge-gold { background: rgba(212,165,90,0.15); color: var(--gold); }
+
+/* Freshness */
+.freshness { font-size: 0.7rem; color: var(--muted); }
+
+/* Mini Grid (orchestrator) */
+.mini-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.5rem; }
+.mini-item {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 0.75rem; border-radius: 8px;
+  background: rgba(255,255,255,0.02); font-size: 0.8rem;
+}
+
+/* Sparkline */
+.sparkline-container { display: flex; align-items: center; gap: 1rem; }
+svg.sparkline { overflow: visible; }
+.sparkline-value { font-size: 1.1rem; font-weight: 600; min-width: 60px; }
+
+/* Section Header */
+.section-header {
+  font-family: 'Playfair Display', serif; font-size: 1.3rem;
+  color: var(--text); margin: 1.5rem 0 1rem;
+  padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+}
+
+/* Unavailable */
+.unavailable {
+  text-align: center; padding: 3rem 1rem;
+  color: var(--muted); font-size: 0.95rem;
+}
+
+/* Macro Regime Badge */
+.regime-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 1.25rem; border-radius: 20px;
+  font-size: 1rem; font-weight: 600; margin-bottom: 1.5rem;
+}
+
+/* Milestones */
+.milestone-item {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 0.75rem 0; border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+.milestone-date { color: var(--dim); min-width: 90px; font-size: 0.8rem; }
+.milestone-check { color: var(--green); }
+.milestone-pending { color: var(--muted); }
+
+/* Scout Card */
+.scout-finding {
+  padding: 0.6rem 0; border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+.scout-finding:last-child { border-bottom: none; }
+
+/* Journal Entry */
+.journal-entry { margin-bottom: 1rem; }
+.journal-date { font-size: 0.75rem; color: var(--dim); margin-bottom: 0.25rem; }
+.journal-text { font-size: 0.85rem; color: var(--text); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header { padding: 1rem; }
+  .tab-nav { padding: 0 0.5rem; }
+  .tab-btn { padding: 0.75rem 1rem; font-size: 0.8rem; }
+  .content { padding: 1rem; }
+  .hero-value { font-size: 2rem; }
+  .hero-sub { flex-wrap: wrap; gap: 1rem; }
+  .grid-2, .grid-3, .grid-5 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Owens Life OS</h1>
+  <div class="updated" id="lastUpdated">Loading...</div>
+</div>
+
+<nav class="tab-nav" id="tabNav">
+  <button class="tab-btn active" data-tab="cop"><span class="status-dot dot-gray" id="dot-cop"></span> COP</button>
+  <button class="tab-btn" data-tab="money"><span class="status-dot dot-gray" id="dot-money"></span> Money</button>
+  <button class="tab-btn" data-tab="markets"><span class="status-dot dot-gray" id="dot-markets"></span> Markets</button>
+  <button class="tab-btn" data-tab="health"><span class="status-dot dot-gray" id="dot-health"></span> Health</button>
+  <button class="tab-btn" data-tab="evolution"><span class="status-dot dot-gray" id="dot-evolution"></span> Evolution</button>
+  <button class="tab-btn" data-tab="development"><span class="status-dot dot-gray" id="dot-development"></span> Development</button>
+</nav>
+
+<div class="content">
+  <!-- COP Tab -->
+  <div class="tab-panel active" id="panel-cop"></div>
+  <!-- Money Tab -->
+  <div class="tab-panel" id="panel-money"></div>
+  <!-- Markets Tab -->
+  <div class="tab-panel" id="panel-markets"></div>
+  <!-- Health Tab -->
+  <div class="tab-panel" id="panel-health"></div>
+  <!-- Evolution Tab -->
+  <div class="tab-panel" id="panel-evolution"></div>
+  <!-- Development Tab -->
+  <div class="tab-panel" id="panel-development"></div>
+</div>
+
+<script>
+// ── Utilities ──
+const fmt = {
+  currency: (v) => {
+    if (v == null) return '—';
+    const n = typeof v === 'string' ? parseFloat(v.replace(/[^0-9.-]/g,'')) : v;
+    if (isNaN(n)) return '—';
+    const abs = Math.abs(n);
+    if (abs >= 1e6) return (n < 0 ? '-' : '') + '$' + (abs/1e6).toFixed(1) + 'M';
+    return '$' + n.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+  },
+  pct: (v) => {
+    if (v == null) return '—';
+    const n = typeof v === 'string' ? parseFloat(v) : v;
+    return isNaN(n) ? '—' : n.toFixed(1) + '%';
+  },
+  num: (v, d=1) => {
+    if (v == null) return '—';
+    const n = typeof v === 'string' ? parseFloat(v) : v;
+    return isNaN(n) ? '—' : n.toFixed(d);
+  },
+  ago: (ts) => {
+    if (!ts) return '';
+    const d = new Date(ts);
+    if (isNaN(d)) return '';
+    const diff = (Date.now() - d.getTime()) / 1000;
+    if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+    return Math.floor(diff/86400) + 'd ago';
+  },
+  statusDot: (s) => {
+    if (!s) return '<span class="status-dot dot-gray"></span>';
+    const sl = String(s).toLowerCase();
+    if (sl === 'green' || sl === 'on track' || sl === 'ok' || sl === 'healthy' || sl === 'success' || sl === 'active') return '<span class="status-dot dot-green"></span>';
+    if (sl === 'amber' || sl === 'warning' || sl === 'caution' || sl === 'monitor') return '<span class="status-dot dot-amber"></span>';
+    if (sl === 'red' || sl === 'critical' || sl === 'alert' || sl === 'fail' || sl === 'failed' || sl === 'overdue') return '<span class="status-dot dot-red"></span>';
+    return '<span class="status-dot dot-gray"></span>';
+  },
+  badge: (s) => {
+    if (!s) return '<span class="badge">—</span>';
+    const sl = String(s).toLowerCase();
+    if (sl.includes('green') || sl.includes('track') || sl.includes('ok') || sl.includes('bull')) return `<span class="badge badge-green">${s}</span>`;
+    if (sl.includes('amber') || sl.includes('warn') || sl.includes('caution') || sl.includes('neutral') || sl.includes('mixed')) return `<span class="badge badge-amber">${s}</span>`;
+    if (sl.includes('red') || sl.includes('crit') || sl.includes('bear') || sl.includes('risk')) return `<span class="badge badge-red">${s}</span>`;
+    return `<span class="badge badge-gold">${s}</span>`;
+  },
+  dotClass: (s) => {
+    if (!s) return 'dot-gray';
+    const sl = String(s).toLowerCase();
+    if (sl === 'green' || sl === 'on track' || sl === 'ok' || sl === 'healthy' || sl === 'active') return 'dot-green';
+    if (sl === 'amber' || sl === 'warning' || sl === 'caution' || sl === 'monitor') return 'dot-amber';
+    if (sl === 'red' || sl === 'critical' || sl === 'alert') return 'dot-red';
+    return 'dot-gray';
+  },
+  sparkline: (data, w=120, h=30, color='#d4a55a') => {
+    if (!data || !data.length) return '';
+    const min = Math.min(...data), max = Math.max(...data);
+    const range = max - min || 1;
+    const step = w / (data.length - 1 || 1);
+    const points = data.map((v, i) => `${i * step},${h - ((v - min) / range) * h}`).join(' ');
+    return `<svg class="sparkline" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline fill="none" stroke="${color}" stroke-width="1.5" points="${points}"/></svg>`;
+  }
+};
+
+function worstStatus(statuses) {
+  const vals = statuses.map(s => String(s||'').toLowerCase());
+  if (vals.some(v => v === 'red' || v === 'critical' || v === 'alert')) return 'dot-red';
+  if (vals.some(v => v === 'amber' || v === 'warning' || v === 'caution')) return 'dot-amber';
+  if (vals.some(v => v === 'green' || v === 'on track' || v === 'ok' || v === 'healthy' || v === 'active')) return 'dot-green';
+  return 'dot-gray';
+}
+
+function safe(fn) { try { return fn(); } catch(e) { return ''; } }
+function safeVal(obj, ...path) { let v = obj; for (const k of path) { if (v == null) return undefined; v = v[k]; } return v; }
+
+// ── Data Store ──
+let DATA = {};
+const FILES = {
+  lifeos: 'lifeos_data.json',
+  market: 'market_data.json',
+  health: 'health_history.json',
+  evolution: 'evolution_data.json',
+  learning: 'learning_data.json'
+};
+
+async function loadData() {
+  const results = await Promise.allSettled(
+    Object.entries(FILES).map(async ([key, file]) => {
+      const r = await fetch(file + '?t=' + Date.now());
+      if (!r.ok) throw new Error(r.statusText);
+      DATA[key] = await r.json();
+    })
+  );
+  document.getElementById('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+  renderAll();
+}
+
+// ── Tab Switching ──
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tab));
+  window.location.hash = '#' + tab;
+}
+
+document.getElementById('tabNav').addEventListener('click', e => {
+  const btn = e.target.closest('.tab-btn');
+  if (btn) switchTab(btn.dataset.tab);
+});
+
+// Hash routing
+function routeFromHash() {
+  const hash = window.location.hash.replace('#','');
+  if (['cop','money','markets','health','evolution','development'].includes(hash)) switchTab(hash);
+}
+window.addEventListener('hashchange', routeFromHash);
+
+// ── Render All ──
+function renderAll() {
+  renderCOP();
+  renderMoney();
+  renderMarkets();
+  renderHealth();
+  renderEvolution();
+  renderDevelopment();
+  updateTabDots();
+}
+
+// ── COP Tab ──
+function renderCOP() {
+  const panel = document.getElementById('panel-cop');
+  const d = DATA.lifeos;
+  if (!d) { panel.innerHTML = '<div class="unavailable">COP data unavailable</div>'; return; }
+
+  const domains = safeVal(d, 'domains') || {};
+  const domainKeys = ['financial','health','family','career','security'];
+  const domainLabels = { financial: 'Financial', health: 'Health', family: 'Family', career: 'Career', security: 'Security' };
+
+  let html = '';
+
+  // Domain Status Cards
+  html += '<div class="grid-5" style="margin-bottom:1.5rem">';
+  for (const dk of domainKeys) {
+    const dm = domains[dk] || {};
+    const status = dm.status || dm.overall_status || '—';
+    const metric = dm.key_metric || dm.net_worth || dm.summary || '';
+    html += `<div class="card">
+      <div class="card-title">${fmt.statusDot(status)} ${domainLabels[dk]}</div>
+      <div style="font-size:0.85rem">${metric}</div>
+      <div class="freshness">${fmt.ago(dm.last_updated)}</div>
+    </div>`;
+  }
+  html += '</div>';
+
+  // LOE Scorecards
+  const loe = safeVal(d, 'loe_scorecards') || [];
+  if (loe.length) {
+    html += '<h3 class="section-header">LOE Scorecards</h3>';
+    html += '<div class="grid-3">';
+    for (const l of loe) {
+      html += `<div class="card">
+        <div class="card-title">${fmt.statusDot(l.status)} ${l.name || l.loe || '—'}</div>
+        <div style="font-size:0.85rem">${l.objective || l.description || ''}</div>
+        ${l.score != null ? `<div style="margin-top:0.5rem;font-size:1.1rem;font-weight:600;color:var(--gold)">${l.score}</div>` : ''}
+      </div>`;
+    }
+    html += '</div>';
+  }
+
+  // CCIR
+  const ccir = safeVal(d, 'ccir') || [];
+  if (ccir.length) {
+    html += '<h3 class="section-header">CCIRs</h3>';
+    html += '<div class="card"><table class="data-table"><thead><tr><th>CCIR</th><th>Status</th><th>Last Check</th></tr></thead><tbody>';
+    for (const c of ccir) {
+      html += `<tr><td>${c.description || c.item || c.name || '—'}</td><td>${fmt.badge(c.status)}</td><td class="freshness">${fmt.ago(c.last_checked || c.last_updated)}</td></tr>`;
+    }
+    html += '</tbody></table></div>';
+  }
+
+  // Action Items
+  const actions = safeVal(d, 'action_items') || [];
+  if (actions.length) {
+    html += '<h3 class="section-header">Action Items</h3>';
+    html += '<div class="card"><table class="data-table"><thead><tr><th>Action</th><th>Owner</th><th>Status</th><th>Due</th></tr></thead><tbody>';
+    for (const a of actions) {
+      html += `<tr><td>${a.description || a.action || a.item || '—'}</td><td>${a.owner || '—'}</td><td>${fmt.badge(a.status)}</td><td>${a.due || a.due_date || '—'}</td></tr>`;
+    }
+    html += '</tbody></table></div>';
+  }
+
+  // Orchestrator Health
+  const orch = safeVal(d, 'orchestrator_health') || {};
+  const tasks = orch.tasks || [];
+  if (tasks.length) {
+    html += '<h3 class="section-header">Orchestrator Health</h3>';
+    html += '<div class="card"><div class="mini-grid">';
+    for (const t of tasks) {
+      html += `<div class="mini-item">${fmt.statusDot(t.status)} <span>${t.name || t.task || '—'}</span></div>`;
+    }
+    html += '</div></div>';
+  }
+
+  // Data Freshness
+  const fresh = safeVal(d, 'data_freshness') || {};
+  const freshEntries = Object.entries(fresh);
+  if (freshEntries.length) {
+    html += '<h3 class="section-header">Data Freshness</h3>';
+    html += '<div class="card"><div class="mini-grid">';
+    for (const [k, v] of freshEntries) {
+      const ts = typeof v === 'string' ? v : (v && v.last_updated);
+      html += `<div class="mini-item"><span style="color:var(--dim)">${k}:</span> <span class="freshness">${fmt.ago(ts) || ts || '—'}</span></div>`;
+    }
+    html += '</div></div>';
+  }
+
+  // Battle Rhythm
+  const br = safeVal(d, 'battle_rhythm') || {};
+  const brEntries = Array.isArray(br) ? br : Object.entries(br);
+  if (brEntries.length) {
+    html += '<h3 class="section-header">Battle Rhythm</h3>';
+    html += '<div class="card">';
+    if (Array.isArray(br)) {
+      html += '<table class="data-table"><thead><tr><th>Event</th><th>Schedule</th><th>Status</th></tr></thead><tbody>';
+      for (const b of br) {
+        html += `<tr><td>${b.name || b.event || '—'}</td><td>${b.schedule || b.frequency || '—'}</td><td>${fmt.badge(b.status)}</td></tr>`;
+      }
+      html += '</tbody></table>';
+    } else {
+      html += '<div class="mini-grid">';
+      for (const [k, v] of brEntries) {
+        const val = typeof v === 'object' ? (v.status || v.schedule || JSON.stringify(v)) : v;
+        html += `<div class="mini-item"><span style="color:var(--dim)">${k}:</span> <span>${val}</span></div>`;
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  panel.innerHTML = html;
+}
+
+// ── Money Tab ──
+function renderMoney() {
+  const panel = document.getElementById('panel-money');
+  const d = DATA.lifeos;
+  if (!d) { panel.innerHTML = '<div class="unavailable">Financial data unavailable</div>'; return; }
+
+  const fin = safeVal(d, 'domains', 'financial') || {};
+  let html = '';
+
+  // Net Worth Hero
+  const nw = fin.net_worth || fin.total_net_worth;
+  const assets = fin.total_assets || fin.assets;
+  const liab = fin.total_liabilities || fin.liabilities;
+  html += `<div class="hero-card">
+    <div class="hero-label">Net Worth</div>
+    <div class="hero-value">${fmt.currency(nw)}</div>
+    <div class="hero-sub">
+      <div class="hero-sub-item"><div class="hero-sub-value" style="color:var(--green)">${fmt.currency(assets)}</div><div class="hero-sub-label">Assets</div></div>
+      <div class="hero-sub-item"><div class="hero-sub-value" style="color:var(--red)">${fmt.currency(liab)}</div><div class="hero-sub-label">Liabilities</div></div>
+    </div>
+  </div>`;
+
+  html += '<div class="grid-2">';
+
+  // Income Breakdown
+  const income = fin.income || fin.income_breakdown || {};
+  if (typeof income === 'object' && Object.keys(income).length) {
+    html += '<div class="card"><div class="card-title">Income Breakdown</div>';
+    const entries = Array.isArray(income) ? income : Object.entries(income);
+    if (Array.isArray(income)) {
+      for (const item of income) {
+        html += `<div style="display:flex;justify-content:space-between;padding:0.3rem 0;font-size:0.85rem"><span>${item.source || item.name}</span><span style="color:var(--green)">${fmt.currency(item.amount)}</span></div>`;
+      }
+    } else {
+      for (const [k, v] of entries) {
+        if (typeof v === 'number' || typeof v === 'string') {
+          html += `<div style="display:flex;justify-content:space-between;padding:0.3rem 0;font-size:0.85rem"><span>${k}</span><span style="color:var(--green)">${fmt.currency(v)}</span></div>`;
+        }
+      }
+    }
+    html += '</div>';
+  }
+
+  // FCF + E-Fund
+  const fcf = fin.fcf || fin.free_cash_flow;
+  const efund = fin.efund || fin.emergency_fund || {};
+  html += '<div class="card"><div class="card-title">Free Cash Flow & E-Fund</div>';
+  if (fcf != null) html += `<div style="font-size:1.4rem;font-weight:600;color:var(--gold);margin-bottom:0.75rem">${fmt.currency(fcf)}<span style="font-size:0.8rem;color:var(--dim)">/mo</span></div>`;
+  if (efund && (efund.current != null || efund.target != null)) {
+    const cur = efund.current || 0, tgt = efund.target || 1;
+    const pct = Math.min((cur / tgt) * 100, 100);
+    html += `<div class="progress-wrap">
+      <div class="progress-label"><span>Emergency Fund</span><span>${fmt.currency(cur)} / ${fmt.currency(tgt)}</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>`;
+    if (efund.funded_by) html += `<div style="font-size:0.75rem;color:var(--dim)">Target funded by: ${efund.funded_by}</div>`;
+  }
+  html += '</div>';
+  html += '</div>'; // close grid-2
+
+  // Budget Progress
+  const spending = fin.spending || {};
+  const categories = spending.categories || fin.budget_categories || fin.budget || [];
+  if (Array.isArray(categories) && categories.length) {
+    html += '<h3 class="section-header">Monthly Budget</h3>';
+    html += '<div class="card"><div class="grid-2">';
+    for (const cat of categories) {
+      const name = cat.name || cat.category || '—';
+      const budget = cat.budget || cat.budgeted || 0;
+      const spent = cat.spent_mtd || cat.spent || cat.actual || 0;
+      const pct = budget > 0 ? Math.min((spent / budget) * 100, 150) : 0;
+      const over = spent > budget;
+      html += `<div class="progress-wrap">
+        <div class="progress-label"><span>${name}</span><span>${fmt.currency(spent)} / ${fmt.currency(budget)}</span></div>
+        <div class="progress-bar"><div class="progress-fill ${over ? 'over' : ''}" style="width:${Math.min(pct,100)}%"></div></div>
+      </div>`;
+    }
+    html += '</div></div>';
+  }
+
+  // Retirement Projections
+  const ret = fin.retirement_projections || fin.retirement || {};
+  const floor = ret.guaranteed_floor || ret.floor;
+  const scenarios = ret.scenarios || [];
+  if (floor || scenarios.length) {
+    html += '<h3 class="section-header">Retirement Projections</h3>';
+    html += '<div class="card">';
+    if (floor) html += `<div style="margin-bottom:1rem"><span style="color:var(--dim);font-size:0.85rem">Guaranteed Monthly Floor: </span><span style="font-size:1.3rem;font-weight:600;color:var(--green)">${fmt.currency(floor)}</span></div>`;
+    if (scenarios.length) {
+      html += '<table class="data-table"><thead><tr><th>Scenario</th><th>Monthly</th><th>Annual</th><th>Notes</th></tr></thead><tbody>';
+      for (const s of scenarios) {
+        html += `<tr><td>${s.name || s.scenario || '—'}</td><td>${fmt.currency(s.monthly || s.monthly_income)}</td><td>${fmt.currency(s.annual || s.annual_income)}</td><td style="font-size:0.8rem;color:var(--dim)">${s.notes || s.assumptions || '—'}</td></tr>`;
+      }
+      html += '</tbody></table>';
+    }
+    html += '</div>';
+  }
+
+  // Milestones
+  const milestones = fin.milestones || [];
+  if (milestones.length) {
+    html += '<h3 class="section-header">Milestones</h3>';
+    html += '<div class="card">';
+    for (const m of milestones) {
+      const done = m.completed || m.status === 'completed' || m.status === 'done';
+      html += `<div class="milestone-item">
+        <span class="${done ? 'milestone-check' : 'milestone-pending'}">${done ? '&#10003;' : '&#9675;'}</span>
+        <span class="milestone-date">${m.date || m.target_date || ''}</span>
+        <span>${m.description || m.name || m.milestone || '—'}</span>
+      </div>`;
+    }
+    html += '</div>';
+  }
+
+  // Budget Alerts
+  const alerts = fin.budget_alerts || safeVal(d, 'budget_alerts') || [];
+  if (alerts.length) {
+    html += '<h3 class="section-header">Budget Alerts</h3>';
+    html += '<div class="card">';
+    for (const a of alerts) {
+      const sev = a.severity || a.level || 'amber';
+      html += `<div style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0;font-size:0.85rem;border-bottom:1px solid var(--border)">${fmt.statusDot(sev)} ${a.message || a.description || a.alert || '—'}</div>`;
+    }
+    html += '</div>';
+  }
+
+  // Blind Spots
+  const blindSpots = fin.blind_spots || fin.blindspots || [];
+  if (blindSpots.length) {
+    html += '<h3 class="section-header">Blind Spots</h3>';
+    html += '<div class="card"><ul style="padding-left:1.25rem">';
+    for (const b of blindSpots) {
+      html += `<li style="font-size:0.85rem;padding:0.25rem 0;color:var(--amber)">${typeof b === 'string' ? b : (b.description || b.item || '—')}</li>`;
+    }
+    html += '</ul></div>';
+  }
+
+  panel.innerHTML = html;
+}
+
+// ── Markets Tab ──
+function renderMarkets() {
+  const panel = document.getElementById('panel-markets');
+  const d = DATA.market;
+  if (!d) { panel.innerHTML = '<div class="unavailable">Market data unavailable</div>'; return; }
+
+  let html = '';
+
+  // Macro Regime
+  const regime = d.macro_regime || d.regime || '';
+  if (regime) {
+    const regimeStr = typeof regime === 'string' ? regime : (regime.label || regime.name || '');
+    html += `<div style="margin-bottom:1rem">${fmt.badge(regimeStr)}</div>`;
+  }
+
+  // Macro Indicators
+  const macro = d.macro_dashboard || d.macro_indicators || d.macro || {};
+  const indicators = Array.isArray(macro) ? macro : (macro.indicators || Object.entries(macro).map(([k,v]) => ({name:k, ...(typeof v === 'object' ? v : {value:v})})));
+  if (indicators.length) {
+    html += '<h3 class="section-header">Macro Dashboard</h3>';
+    html += '<div class="grid-3">';
+    for (const ind of indicators) {
+      const name = ind.name || ind.indicator || '—';
+      const val = ind.value != null ? ind.value : ind.reading;
+      const signal = ind.signal || ind.status || '';
+      html += `<div class="card">
+        <div style="font-size:0.8rem;color:var(--dim)">${name}</div>
+        <div style="font-size:1.2rem;font-weight:600">${val != null ? val : '—'}</div>
+        ${signal ? `<div style="margin-top:0.25rem">${fmt.badge(signal)}</div>` : ''}
+      </div>`;
+    }
+    html += '</div>';
+  }
+
+  // Watchlist
+  const watchlist = d.watchlist || [];
+  if (watchlist.length) {
+    html += '<h3 class="section-header">Watchlist</h3>';
+    html += '<div class="card"><table class="data-table"><thead><tr><th>Ticker</th><th>Price</th><th>Change</th><th>Signal</th><th>Thesis</th></tr></thead><tbody>';
+    for (const w of watchlist) {
+      const chg = w.change || w.change_pct || 0;
+      const chgNum = typeof chg === 'string' ? parseFloat(chg) : chg;
+      const chgColor = chgNum >= 0 ? 'var(--green)' : 'var(--red)';
+      const chgSign = chgNum >= 0 ? '+' : '';
+      html += `<tr>
+        <td style="font-weight:600;color:var(--gold)">${w.ticker || w.symbol || '—'}</td>
+        <td>${w.price != null ? '$' + Number(w.price).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) : '—'}</td>
+        <td style="color:${chgColor}">${chgSign}${fmt.pct(chgNum)}</td>
+        <td>${fmt.badge(w.signal || w.rating || '')}</td>
+        <td style="font-size:0.8rem;color:var(--dim);max-width:250px">${w.thesis || w.notes || '—'}</td>
+      </tr>`;
+    }
+    html += '</tbody></table></div>';
+  }
+
+  // Thesis Tracker
+  const thesis = d.thesis_tracker || d.theses || [];
+  const thesisArr = Array.isArray(thesis) ? thesis : Object.entries(thesis).map(([k,v]) => ({name:k, ...(typeof v === 'object' ? v : {status:v})}));
+  if (thesisArr.length) {
+    html += '<h3 class="section-header">Thesis Tracker</h3>';
+    html += '<div class="grid-2">';
+    for (const t of thesisArr) {
+      html += `<div class="card">
+        <div class="card-title">${t.name || t.thesis || '—'}</div>
+        <div style="font-size:0.85rem">${t.description || t.summary || ''}</div>
+        ${t.status ? `<div style="margin-top:0.5rem">${fmt.badge(t.status)}</div>` : ''}
+        ${t.conviction ? `<div style="margin-top:0.25rem;font-size:0.8rem;color:var(--dim)">Conviction: ${t.conviction}</div>` : ''}
+      </div>`;
+    }
+    html += '</div>';
+  }
+
+  // Opportunity Scores
+  const opps = d.opportunity_scores || [];
+  const oppsArr = Array.isArray(opps) ? opps : Object.entries(opps).map(([k,v]) => ({name:k, score:v}));
+  if (oppsArr.length) {
+    html += '<h3 class="section-header">Opportunity Scores</h3>';
+    html += '<div class="card"><table class="data-table"><thead><tr><th>Opportunity</th><th>Score</th></tr></thead><tbody>';
+    for (const o of oppsArr) {
+      html += `<tr><td>${o.name || o.ticker || '—'}</td><td style="font-weight:600;color:var(--gold)">${o.score != null ? o.score : '—'}</td></tr>`;
+    }
+    html += '</tbody></table></div>';
+  }
+
+  panel.innerHTML = html;
+}
+
+// ── Health Tab ──
+function renderHealth() {
+  const panel = document.getElementById('panel-health');
+  const hh = DATA.health;
+  const ld = DATA.lifeos;
+  if (!hh && !ld) { panel.innerHTML = '<div class="unavailable">Health data unavailable</div>'; return; }
+
+  let html = '';
+  const weeks = (hh && hh.weeks) || [];
+  const latest = weeks.length ? weeks[weeks.length - 1] : null;
+
+  // Health domain status from lifeos
+  const healthDomain = safeVal(ld, 'domains', 'health') || {};
+
+  // Current Stats Hero
+  if (latest) {
+    html += `<div class="hero-card">
+      <div class="hero-label">Current Stats — Week ${latest.week || ''} (${latest.date || ''})</div>
+      <div class="hero-sub" style="margin-top:0.75rem">
+        <div class="hero-sub-item"><div class="hero-sub-value" style="color:var(--gold)">${fmt.num(latest.weight)}lbs</div><div class="hero-sub-label">Weight</div></div>
+        <div class="hero-sub-item"><div class="hero-sub-value" style="color:var(--gold)">${fmt.pct(latest.body_fat_pct)}</div><div class="hero-sub-label">Body Fat</div></div>
+        <div class="hero-sub-item"><div class="hero-sub-value" style="color:var(--green)">${fmt.num(latest.lean_mass)}lbs</div><div class="hero-sub-label">Lean Mass</div></div>
+        <div class="hero-sub-item"><div class="hero-sub-value" style="color:var(--red)">${fmt.num(latest.fat_mass)}lbs</div><div class="hero-sub-label">Fat Mass</div></div>
+      </div>
+      ${latest.waist || latest.chest || latest.arms ? `<div class="hero-sub" style="margin-top:0.75rem">
+        ${latest.waist ? `<div class="hero-sub-item"><div class="hero-sub-value">${latest.waist}"</div><div class="hero-sub-label">Waist</div></div>` : ''}
+        ${latest.chest ? `<div class="hero-sub-item"><div class="hero-sub-value">${latest.chest}"</div><div class="hero-sub-label">Chest</div></div>` : ''}
+        ${latest.arms ? `<div class="hero-sub-item"><div class="hero-sub-value">${latest.arms}"</div><div class="hero-sub-label">Arms</div></div>` : ''}
+      </div>` : ''}
+    </div>`;
+  }
+
+  // Trend Sparklines
+  if (weeks.length > 2) {
+    const weights = weeks.map(w => w.weight).filter(v => v != null);
+    const bfs = weeks.map(w => w.body_fat_pct).filter(v => v != null);
+    html += '<div class="grid-2" style="margin-bottom:1rem">';
+    html += `<div class="card"><div class="card-title">Weight Trend</div><div class="sparkline-container"><div class="sparkline-value">${fmt.num(weights[weights.length-1])}</div>${fmt.sparkline(weights, 200, 40)}</div></div>`;
+    html += `<div class="card"><div class="card-title">Body Fat Trend</div><div class="sparkline-container"><div class="sparkline-value">${fmt.pct(bfs[bfs.length-1])}</div>${fmt.sparkline(bfs, 200, 40, '#f87171')}</div></div>`;
+    html += '</div>';
+  }
+
+  // Protocol Compliance
+  if (latest) {
+    html += '<h3 class="section-header">Protocol Compliance</h3>';
+    html += '<div class="card"><div class="grid-2">';
+    // Protein
+    const protein = latest.avg_protein || 0;
+    const proteinPct = Math.min((protein / 210) * 100, 100);
+    html += `<div class="progress-wrap"><div class="progress-label"><span>Protein (target 210g)</span><span>${fmt.num(protein, 0)}g</span></div><div class="progress-bar"><div class="progress-fill ${proteinPct >= 90 ? 'good' : ''}" style="width:${proteinPct}%"></div></div></div>`;
+    // Calories
+    const cals = latest.avg_calories || 0;
+    const calPct = Math.min((cals / 2000) * 100, 150);
+    const calOver = cals > 2200;
+    html += `<div class="progress-wrap"><div class="progress-label"><span>Calories (target 2000)</span><span>${fmt.num(cals, 0)}</span></div><div class="progress-bar"><div class="progress-fill ${calOver ? 'over' : ''}" style="width:${Math.min(calPct, 100)}%"></div></div></div>`;
+    // Training
+    const training = latest.training_days || 0;
+    const trainPct = Math.min((training / 4) * 100, 100);
+    html += `<div class="progress-wrap"><div class="progress-label"><span>Training Days (target 4/wk)</span><span>${training}</span></div><div class="progress-bar"><div class="progress-fill ${trainPct >= 100 ? 'good' : ''}" style="width:${trainPct}%"></div></div></div>`;
+    // Sleep
+    if (latest.avg_sleep != null) {
+      const sleepPct = Math.min((latest.avg_sleep / 8) * 100, 100);
+      html += `<div class="progress-wrap"><div class="progress-label"><span>Avg Sleep (target 8h)</span><span>${fmt.num(latest.avg_sleep)}h</span></div><div class="progress-bar"><div class="progress-fill ${sleepPct >= 87 ? 'good' : ''}" style="width:${sleepPct}%"></div></div></div>`;
+    }
+    html += '</div></div>';
+  }
+
+  // Weekly History Table
+  if (weeks.length) {
+    html += '<h3 class="section-header">Weekly History</h3>';
+    html += '<div class="card" style="overflow-x:auto"><table class="data-table"><thead><tr><th>Wk</th><th>Date</th><th>Weight</th><th>BF%</th><th>Lean</th><th>Fat</th><th>Protein</th><th>Cals</th><th>Train</th><th>Sleep</th></tr></thead><tbody>';
+    const displayWeeks = weeks.slice(-12).reverse();
+    for (const w of displayWeeks) {
+      html += `<tr>
+        <td>${w.week || ''}</td><td>${w.date || ''}</td>
+        <td>${fmt.num(w.weight)}</td><td>${fmt.pct(w.body_fat_pct)}</td>
+        <td>${fmt.num(w.lean_mass)}</td><td>${fmt.num(w.fat_mass)}</td>
+        <td>${fmt.num(w.avg_protein, 0)}g</td><td>${fmt.num(w.avg_calories, 0)}</td>
+        <td>${w.training_days != null ? w.training_days : '—'}</td>
+        <td>${w.avg_sleep != null ? fmt.num(w.avg_sleep) + 'h' : '—'}</td>
+      </tr>`;
+    }
+    html += '</tbody></table></div>';
+  }
+
+  panel.innerHTML = html;
+}
+
+// ── Evolution Tab ──
+function renderEvolution() {
+  const panel = document.getElementById('panel-evolution');
+  const d = DATA.evolution;
+  if (!d) { panel.innerHTML = '<div class="unavailable">Evolution data unavailable</div>'; return; }
+
+  let html = '';
+
+  // Last Sweep
+  if (d.last_sweep) {
+    html += `<div style="margin-bottom:1rem;font-size:0.85rem;color:var(--dim)">Last sweep: <span style="color:var(--text)">${d.last_sweep}</span></div>`;
+  }
+
+  // Metrics
+  const metrics = d.metrics || {};
+  if (Object.keys(metrics).length) {
+    html += '<div class="grid-3" style="margin-bottom:1rem">';
+    for (const [k, v] of Object.entries(metrics)) {
+      html += `<div class="card"><div style="font-size:0.8rem;color:var(--dim)">${k}</div><div style="font-size:1.3rem;font-weight:600;color:var(--gold)">${v}</div></div>`;
+    }
+    html += '</div>';
+  }
+
+  // Tier Status
+  const t1 = d.tier1_implemented || [];
+  const t2 = d.tier2_queued || [];
+  if (t1.length || t2.length) {
+    html += '<div class="grid-2" style="margin-bottom:1rem">';
+    html += `<div class="card"><div class="card-title" style="color:var(--green)">Tier 1 — Implemented (${t1.length})</div>`;
+    for (const item of t1) {
+      html += `<div style="font-size:0.85rem;padding:0.3rem 0;border-bottom:1px solid var(--border)">${typeof item === 'string' ? item : (item.name || item.description || '—')}</div>`;
+    }
+    html += '</div>';
+    html += `<div class="card"><div class="card-title" style="color:var(--amber)">Tier 2 — Queued (${t2.length})</div>`;
+    for (const item of t2) {
+      html += `<div style="font-size:0.85rem;padding:0.3rem 0;border-bottom:1px solid var(--border)">${typeof item === 'string' ? item : (item.name || item.description || '—')}</div>`;
+    }
+    html += '</div></div>';
+  }
+
+  // Scout Findings
+  const scouts = d.scouts || [];
+  if (scouts.length) {
+    html += '<h3 class="section-header">Scout Findings</h3>';
+    html += '<div class="grid-2">';
+    for (const scout of scouts) {
+      const domain = scout.domain || scout.name || '—';
+      const findings = scout.findings || scout.items || [];
+      html += `<div class="card"><div class="card-title">${domain}</div>`;
+      if (Array.isArray(findings)) {
+        for (const f of findings) {
+          html += `<div class="scout-finding">${typeof f === 'string' ? f : (f.description || f.finding || f.title || '—')}</div>`;
+        }
+      } else {
+        html += `<div style="font-size:0.85rem">${findings}</div>`;
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  panel.innerHTML = html;
+}
+
+// ── Development Tab ──
+function renderDevelopment() {
+  const panel = document.getElementById('panel-development');
+  const d = DATA.learning;
+  if (!d) { panel.innerHTML = '<div class="unavailable">Learning data unavailable</div>'; return; }
+
+  let html = '';
+
+  // Overall Progress
+  const progress = d.progress || {};
+  if (Object.keys(progress).length) {
+    html += '<div class="grid-3" style="margin-bottom:1rem">';
+    for (const [k, v] of Object.entries(progress)) {
+      html += `<div class="card"><div style="font-size:0.8rem;color:var(--dim)">${k}</div><div style="font-size:1.3rem;font-weight:600;color:var(--gold)">${v}</div></div>`;
+    }
+    html += '</div>';
+  }
+
+  // Tracks
+  const tracks = d.tracks || [];
+  if (tracks.length) {
+    html += '<h3 class="section-header">Learning Tracks</h3>';
+    html += '<div class="grid-2">';
+    for (const track of tracks) {
+      const name = track.name || track.track || '—';
+      const modules = track.modules || [];
+      const total = modules.length || track.total_modules || 0;
+      const completed = modules.filter(m => m.completed || m.status === 'completed' || m.status === 'done').length || track.completed_modules || 0;
+      const pctDone = total > 0 ? (completed / total) * 100 : (track.progress_pct || 0);
+      html += `<div class="card">
+        <div class="card-title">${name}</div>
+        ${track.description ? `<div style="font-size:0.8rem;color:var(--dim);margin-bottom:0.5rem">${track.description}</div>` : ''}
+        <div class="progress-wrap">
+          <div class="progress-label"><span>Progress</span><span>${total > 0 ? completed + '/' + total + ' modules' : fmt.pct(pctDone)}</span></div>
+          <div class="progress-bar"><div class="progress-fill ${pctDone >= 100 ? 'good' : ''}" style="width:${pctDone}%"></div></div>
+        </div>`;
+      if (modules.length) {
+        html += '<div style="margin-top:0.5rem">';
+        for (const m of modules) {
+          const mDone = m.completed || m.status === 'completed' || m.status === 'done';
+          html += `<div style="font-size:0.8rem;padding:0.2rem 0;color:${mDone ? 'var(--green)' : 'var(--dim)'}">${mDone ? '&#10003;' : '&#9675;'} ${m.name || m.title || m.module || '—'}</div>`;
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  // Journal
+  const journal = d.journal || [];
+  if (journal.length) {
+    html += '<h3 class="section-header">Development Journal</h3>';
+    html += '<div class="card">';
+    const recent = journal.slice(-10).reverse();
+    for (const entry of recent) {
+      html += `<div class="journal-entry">
+        <div class="journal-date">${entry.date || ''}</div>
+        <div class="journal-text">${entry.text || entry.entry || entry.content || entry.note || '—'}</div>
+      </div>`;
+    }
+    html += '</div>';
+  }
+
+  panel.innerHTML = html;
+}
+
+// ── Tab Status Dots ──
+function updateTabDots() {
+  // COP
+  const ld = DATA.lifeos;
+  if (ld) {
+    const domains = safeVal(ld, 'domains') || {};
+    const statuses = Object.values(domains).map(d => d.status || d.overall_status || '').filter(Boolean);
+    document.getElementById('dot-cop').className = 'status-dot ' + worstStatus(statuses);
+    document.getElementById('dot-money').className = 'status-dot ' + fmt.dotClass(safeVal(domains, 'financial', 'status') || safeVal(domains, 'financial', 'overall_status'));
+  }
+  // Markets
+  if (DATA.market) {
+    const regime = DATA.market.macro_regime || DATA.market.regime || '';
+    const regimeStr = typeof regime === 'string' ? regime : (regime.label || regime.name || '');
+    document.getElementById('dot-markets').className = 'status-dot ' + fmt.dotClass(regimeStr);
+  }
+  // Health
+  if (DATA.health || ld) {
+    const hs = safeVal(ld, 'domains', 'health', 'status') || '';
+    document.getElementById('dot-health').className = 'status-dot ' + (hs ? fmt.dotClass(hs) : 'dot-green');
+  }
+  // Evolution
+  if (DATA.evolution) {
+    document.getElementById('dot-evolution').className = 'status-dot dot-green';
+  }
+  // Development
+  if (DATA.learning) {
+    document.getElementById('dot-development').className = 'status-dot dot-green';
+  }
+}
+
+// ── Init ──
+loadData();
+routeFromHash();
+setInterval(loadData, 300000); // 5 min refresh
+</script>
+</body>
+</html>
