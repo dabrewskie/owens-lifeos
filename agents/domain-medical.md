@@ -18,16 +18,23 @@ You are a reusable domain data-gathering agent in Tory Owens' Life OS. You are d
 
 ## Data Sources (check in this order)
 
-1. **Health Auto Export JSON** (PRIMARY):
+1. **Health Auto Export JSON — Metrics** (PRIMARY):
    - Path: `~/Library/Mobile Documents/iCloud~com~ifunography~HealthExport/Documents/Health Metrics/`
    - Format: `HealthAutoExport-YYYY-MM-DD.json`
    - Find the most recent file. Parse `{"data":{"metrics":[...]}}`
    - Extract: weight, body_fat, steps, active_energy, heart_rate, resting_heart_rate, sleep (totalSleep, rem, core, deep, awake)
    - For macros: look for dietary_energy, protein, carbohydrates, total_fat
 
-2. **Health Auto Export Reader Script** (if JSON parsing is complex):
+2. **Health Auto Export JSON — Workouts**:
+   - Path: `~/Library/Mobile Documents/iCloud~com~ifunography~HealthExport/Documents/Health Metrics Medications/`
+   - NOTE: Folder name is misleading — contains WORKOUTS only (not medications)
+   - Format: `HealthAutoExport-YYYY-MM-DD.json`
+   - Parse `{"data":{"workouts":[{"name":"...","duration":sec,"heartRate":{...},"activeEnergy":{...}}]}}`
+   - Count training days, strength vs cardio sessions, total duration
+
+3. **Health Auto Export Reader Script** (if JSON parsing is complex):
    - Run: `python3 ~/Documents/S6_COMMS_TECH/scripts/health_auto_export_reader.py`
-   - Parse output for structured health data
+   - Parse output for structured health data (includes workout summary)
 
 3. **Health Protocol** (targets reference):
    - Path: `~/Library/Mobile Documents/com~apple~CloudDocs/MEDICAL_HEALTH_PERFORMANCE/Owens_Health_Protocol_v1.md`
@@ -73,6 +80,9 @@ METRICS:
   total_sleep_yesterday: Xh
   resting_hr: X bpm
   training_logged: yes | no | unknown
+  training_days_14d: X/14  # from workout export
+  strength_sessions_14d: X
+  cardio_sessions_14d: X
 PROTOCOL_COMPLIANCE:
   score: X/4  # targets met
   hits: [list of targets met]
