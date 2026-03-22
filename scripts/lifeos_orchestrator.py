@@ -54,7 +54,7 @@ TASKS = {
     "invest_intel": {
         "script": "invest_intel_updater.py",
         "schedule": {"hours": [(6, 23), (16, 47)]},
-        "timeout": 120,
+        "timeout": 360,
         "critical": True,
     },
     "budget_sentinel": {
@@ -110,6 +110,57 @@ TASKS = {
         "schedule": {"hours": [(6, 32)]},
         "timeout": 60,
         "critical": False,
+    },
+    # ── Battle Rhythm (headless Claude Code skill invocation) ──────
+    "battle_morning": {
+        "script": "battle_rhythm_runner.sh",
+        "schedule": {"hours": [(6, 0)]},
+        "timeout": 360,
+        "critical": True,
+        "args": ["morning"],
+    },
+    "battle_eod": {
+        "script": "battle_rhythm_runner.sh",
+        "schedule": {"hours": [(21, 0)]},
+        "timeout": 360,
+        "critical": True,
+        "args": ["eod"],
+    },
+    "battle_cop_sync": {
+        "script": "battle_rhythm_runner.sh",
+        "schedule": {"hours": [(12, 0)]},
+        "timeout": 240,
+        "critical": True,
+        "args": ["sync"],
+    },
+    "battle_data": {
+        "script": "battle_rhythm_runner.sh",
+        "schedule": {"hours": [(7, 30)]},
+        "timeout": 240,
+        "critical": False,
+        "args": ["data"],
+    },
+    # ── OverwatchTDO (Superagent — 3x daily) ─────────────────────
+    "overwatch_morning": {
+        "script": "battle_rhythm_runner.sh",
+        "schedule": {"hours": [(5, 30)]},
+        "timeout": 360,
+        "critical": True,
+        "args": ["overwatch"],
+    },
+    "overwatch_midday": {
+        "script": "battle_rhythm_runner.sh",
+        "schedule": {"hours": [(12, 0)]},
+        "timeout": 360,
+        "critical": True,
+        "args": ["overwatch"],
+    },
+    "overwatch_evening": {
+        "script": "battle_rhythm_runner.sh",
+        "schedule": {"hours": [(20, 0)]},
+        "timeout": 360,
+        "critical": True,
+        "args": ["overwatch"],
     },
 }
 
@@ -200,7 +251,11 @@ def run_task(name: str, task_cfg: dict) -> tuple[bool, str, float]:
     if not script_path.exists():
         return False, f"Script not found: {script_path}", 0.0
 
-    args = [PYTHON, str(script_path)] + task_cfg.get("args", [])
+    # Shell scripts run directly; Python scripts run via PYTHON interpreter
+    if str(script_path).endswith(".sh"):
+        args = ["/bin/bash", str(script_path)] + task_cfg.get("args", [])
+    else:
+        args = [PYTHON, str(script_path)] + task_cfg.get("args", [])
     timeout = task_cfg.get("timeout", 120)
 
     start = time.monotonic()

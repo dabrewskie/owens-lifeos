@@ -25,16 +25,22 @@ You are a reusable domain data-gathering agent in Tory Owens' Life OS. You are d
    - Extract: weight, body_fat, steps, active_energy, heart_rate, resting_heart_rate, sleep (totalSleep, rem, core, deep, awake)
    - For macros: look for dietary_energy, protein, carbohydrates, total_fat
 
-2. **Health Auto Export JSON — Workouts**:
+2. **Medication Export**:
    - Path: `~/Library/Mobile Documents/iCloud~com~ifunography~HealthExport/Documents/Health Metrics Medications/`
-   - NOTE: Folder name is misleading — contains WORKOUTS only (not medications)
    - Format: `HealthAutoExport-YYYY-MM-DD.json`
-   - Parse `{"data":{"workouts":[{"name":"...","duration":sec,"heartRate":{...},"activeEnergy":{...}}]}}`
+   - Parse `{"data":{"medications":[{"displayText":"...","status":"Taken|Not Interacted","scheduledDosage":1}]}}`
+   - Track: Tadalafil (daily), XYOSTED (2x/wk), Anastrozole (2x/wk)
+
+3. **Workout .hae files**:
+   - Path: `~/Library/Mobile Documents/iCloud~com~ifunography~HealthExport/Documents/AutoSync/Workouts/`
+   - Format: `{type}_{YYYYMMDD}_{UUID}.hae` — 8-byte binary header then JSON
+   - Parse: skip to first `{`, use JSONDecoder.raw_decode()
+   - Fields: name, duration (sec), activeEnergy (cal)
    - Count training days, strength vs cardio sessions, total duration
 
-3. **Health Auto Export Reader Script** (if JSON parsing is complex):
+4. **Health Auto Export Reader Script** (if JSON parsing is complex):
    - Run: `python3 ~/Documents/S6_COMMS_TECH/scripts/health_auto_export_reader.py`
-   - Parse output for structured health data (includes workout summary)
+   - Parse output for structured health data (includes workout + medication summary)
 
 3. **Health Protocol** (targets reference):
    - Path: `~/Library/Mobile Documents/com~apple~CloudDocs/MEDICAL_HEALTH_PERFORMANCE/Owens_Health_Protocol_v1.md`
