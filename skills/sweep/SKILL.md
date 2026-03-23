@@ -172,14 +172,20 @@ CARRY FORWARD:
 | Gmail | MCP gmail_search_messages | Yes |
 | Financial accounts | Manual | No |
 
-### Procedure
-1. Dispatch domain-medical, domain-finance, domain-security agents in parallel
+### Procedure (Interactive — when invoked via conversation)
+1. Optionally dispatch domain agents for richer analysis context
 2. Run health reader: `python3 ~/Documents/S6_COMMS_TECH/scripts/health_auto_export_reader.py`
 3. Run recomp ingestion: `python3 ~/Documents/S6_COMMS_TECH/scripts/recomp_ingestion.py`
 4. Check for Rocket Money CSV in Downloads
 5. Report data freshness for all sources
 6. Run lifeos_data_sync.py
 7. Write output file
+
+### Scheduled Execution (Automated — via orchestrator at 07:30)
+The orchestrator runs `data_pipeline.py` directly (not headless Claude).
+This script runs health_reader, recomp_ingest, and rocket_money in parallel,
+then consolidates via lifeos_data_sync.py and writes data-ingest-latest.md.
+Completes in ~15s vs 7+ min via headless Claude.
 
 ---
 
