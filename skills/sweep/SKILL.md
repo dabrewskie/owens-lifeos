@@ -120,6 +120,8 @@ HEALTH:
 
 FAMILY PRESENCE:
 - Dinner together: [yes/no]
+- Phone down after dinner: [yes/no]
+- 1-on-1 time: [which child, or none]
 - Quality time: [any 1:1 moments]
 
 FINANCIAL:
@@ -130,9 +132,15 @@ CARRY FORWARD:
 ```
 
 5. Update COP.md — medical running estimate, family presence, action item status
-6. Write output file
-7. Run lifeos_data_sync.py
-8. Check active watchlist items (Plaid approval, pending items from COP)
+6. Log family presence data to `~/Documents/S6_COMMS_TECH/dashboard/presence_log.json`:
+   ```json
+   {"date": "YYYY-MM-DD", "dinner_present": true/false, "phone_down": true/false, "one_on_one_child": "Rylan"/"Emory"/"Harlan"/null, "notes": "optional"}
+   ```
+   Append to the `entries` array. The accountability-tracker reads this to track CCIR #5 (family presence <3 dinners/week).
+   If the Commander doesn't provide answers, ask directly: "Were you present for dinner? Phone down? Any 1-on-1 time with the kids?"
+7. Write output file
+8. Run lifeos_data_sync.py
+9. Check active watchlist items (Plaid approval, pending items from COP)
 
 ---
 
