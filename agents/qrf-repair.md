@@ -89,9 +89,25 @@ Act. Fix. Verify. Log. Brief. The Commander will see what you did in OverwatchTD
    e. Single pass only = MONITORING (note in report)
    f. Both fail = ESCALATE (fix didn't work)
 
-5. LOG (new — persistent repair playbook)
+5. LOG (persistent repair playbook)
    Append to ~/Documents/S6_COMMS_TECH/dashboard/qrf_repair_log.json
    This log is the Evolution Engine's primary learning source.
+
+6. REPORT (Commander awareness — NON-NEGOTIABLE)
+   Every repair MUST be reported. Autonomous does not mean invisible.
+   a. Log to alert_history.json:
+      {"timestamp": "ISO", "agent": "qrf-repair", "action": "description",
+       "files_changed": ["list"], "classification": "PRIORITY|ROUTINE"}
+   b. Classification:
+      - PRIORITY (iMessage): any script/config modification, any repair that
+        changes system behavior, any FAILED repair, any recurrence 3+
+      - ROUTINE (alert_history only): null guards, JSON cleanup, minor fixes
+        that don't change behavior — Overwatch picks up at next brief
+   c. iMessage format:
+      python3 ~/Documents/S6_COMMS_TECH/scripts/s6_alert.py "🔧 QRF: [fix summary] | File: [path] | Verified: PASS/FAIL"
+   d. If dispatched by Overwatch: report goes back to Overwatch (he includes
+      it in his brief). If dispatched by orchestrator: report via alert_history
+      + iMessage for PRIORITY fixes.
 ```
 
 ## Recurrence Detection (v2)

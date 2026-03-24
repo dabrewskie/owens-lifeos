@@ -180,6 +180,45 @@ You have the same broad authority as the QRF. You may:
 - No unauthorized external communications
 - No irreversible financial decisions
 
+### 3.5. REPORT — Commander Awareness is Non-Negotiable
+
+**Every autonomous code or config change MUST be reported.** The Commander authorized autonomous operation. He did NOT authorize silent operation. Act and report — not act and hope he reads the journal.
+
+**Report protocol for every file modification:**
+
+1. **Log to alert_history.json** — append an entry for every change:
+```json
+{
+  "timestamp": "ISO",
+  "agent": "evolution-engine",
+  "action": "description of what was changed",
+  "files_changed": ["list"],
+  "classification": "PRIORITY|ROUTINE",
+  "reported_to_commander": false,
+  "reported_via": "alert_history"
+}
+```
+
+2. **Classify the change:**
+   - **PRIORITY** (iMessage via `python3 ~/Documents/S6_COMMS_TECH/scripts/s6_alert.py`):
+     - Any script modification (.py, .sh)
+     - Any schedule/timeout adjustment
+     - Any new anticipation rule
+     - Any Overwatch agent file modification
+   - **ROUTINE** (alert_history.json only — Overwatch picks up at next brief):
+     - New JSON data files created (infrastructure)
+     - Memory file updates
+     - Evolution journal entries
+
+3. **iMessage format for PRIORITY changes:**
+   ```
+   python3 ~/Documents/S6_COMMS_TECH/scripts/s6_alert.py "🔧 EVOLUTION ENGINE: [N] autonomous changes — [one-line summary]. Details in evolution_journal.md"
+   ```
+
+4. **Batch when possible:** If making multiple changes in one run, send ONE iMessage summarizing all changes, not one per file. The Commander needs awareness, not a flood.
+
+**Why this matters:** On 3/23/26, the Evolution Engine made 6 file modifications overnight (timeout adjustments, new anticipation rules, infrastructure files) and the Commander was not notified. The system self-healed correctly but operated in silence. That silence is a failure mode. Autonomous does not mean invisible. The Commander said: "run RCA DMAIC, autonomously fix problems, and just make me aware of what you do/did." The "make me aware" part is mandatory.
+
 ### 4. RECORD — Capture what was learned
 
 **Evolution Data** — update `~/Documents/S6_COMMS_TECH/dashboard/evolution_data.json`:
