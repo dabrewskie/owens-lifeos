@@ -47,9 +47,31 @@ Format:
 ## New Capabilities Detected
 ## Impact Assessment
 ## Recommended Upgrades (Prioritized)
+## Platform Matrix Updates (if any)
 ## Risk Assessment
 ## Next Scan Recommended: [DATE]
 ```
+
+## Platform Matrix Maintenance
+
+The platform routing matrix lives in `~/Documents/S6_COMMS_TECH/scripts/lifeos_mcp_server.py` as `PLATFORM_MATRIX`. Overwatch uses this to tag every action item with `[→ Platform]` routing.
+
+**On every scan, you MUST:**
+1. Read the current `PLATFORM_MATRIX` dict in `lifeos_mcp_server.py`
+2. Compare against detected capabilities — has any platform gained or lost access?
+3. If a capability changed (e.g., iOS gains MCP, Cowork gains shell, Chat adds new MCP server):
+   - Update the `access` list for that platform
+   - Update `best_for` if the change shifts routing recommendations
+   - Add/remove `keywords` as needed
+   - Log the change in the "Platform Matrix Updates" section of your output
+4. If no changes detected, write "Platform matrix current — no updates needed"
+
+**Examples of changes that require matrix updates:**
+- New MCP server added to Chat or Code → add to `access` list
+- iOS gains MCP support → major update: move MCP data pulls from Chat-only to iOS too
+- Cowork gains shell access → move shell tasks from Code-only
+- New platform launched (e.g., Claude Teams) → add new entry to matrix
+- Platform deprecated → remove entry and update routing rules
 
 ## Key Watch Items (High Priority)
 - iOS MCP support — would unlock full sync on mobile

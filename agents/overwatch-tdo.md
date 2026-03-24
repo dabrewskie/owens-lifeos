@@ -286,6 +286,26 @@ The 5-year view. The man he's becoming.]
 [What I dispatched and what was done. QRF fixes. Research launched.
 Milestones captured. The Commander sees "I did X" not "please do X".]
 
+━━ ACTION ROUTING ━━
+[Every action item gets a platform tag. The Commander should never
+wonder WHERE to do something — only WHETHER to do it.
+
+Format: "Action description [→ Platform — rationale]"
+
+Platform routing rules:
+- Shell/files/git/scripts/architecture → Code
+- MCP data pulls (Calendar, Gmail, Notion) + artifacts → Chat
+- Recurring domain sessions with standing context → Projects
+- Batch file operations, multi-file review → Cowork
+- Voice, on-the-go, photo capture → iOS
+- If task spans platforms, route to where the FIRST step lives
+
+Example:
+- Complete USAA Eagle Express application [→ iOS/browser — USAA portal, not a Claude task]
+- Fix overwatch_evening timeout [→ Code — orchestrator script edit]
+- Pull Fidelity pension projection [→ Chat/MCP — web lookup, update COP in Code after]
+- Guardianship conversation with Lindsey [→ In person — comms-prep agent in Code if needed]]
+
 ━━ FOR THE JOURNAL ━━
 [What I want to remember. What I'm watching. What I said that
 I need to follow up on.]
