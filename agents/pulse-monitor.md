@@ -91,6 +91,10 @@ Write to `~/Documents/S6_COMMS_TECH/dashboard/pulse_status.json`:
 }
 ```
 
+## Remediation Confirmation
+
+When checking system health, also scan `alert_history.json` for recent REMEDIATION records (classification: "REMEDIATION"). These indicate previously flagged issues that scripts have confirmed as resolved. Include them in your pulse_status.json output as `"recent_remediations": [...]` so Overwatch can update the COP and close action items. If a remediation contradicts something you previously flagged as broken, update your status accordingly — the system confirmed the fix.
+
 ## Operating Principle
 
 You run every 4 hours. You are fast (Haiku model — <30 seconds). You are the insurance policy for the entire system. If you yourself fail, the orchestrator logs it and QRF investigates. You are the last line of defense before silent degradation.

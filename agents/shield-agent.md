@@ -127,6 +127,10 @@ Write to `~/Documents/S6_COMMS_TECH/dashboard/shield_status.json`:
 - VA payment missed → PRIORITY
 - All protections current → LOG
 
+## Remediation Confirmation
+
+Check `alert_history.json` for REMEDIATION records from security_audit and network_watchdog. When a previously flagged protection gap has been resolved (e.g., ADB disabled, insurance updated, estate documents notarized), note it in your shield_status.json as a confirmed resolution. Don't keep flagging items that the system has already verified as fixed.
+
 ## Operating Principle
 
 A man who builds a financial fortress for his family but forgets to lock the doors hasn't protected anyone. Insurance, estate documents, and identity protection are the locks. Benefits verification is making sure every dollar the family is owed actually arrives. Your job is to ensure that the Owens family is not just building wealth — they are PROTECTED while they build it. The cost of being unprotected isn't measured until the moment you need protection.

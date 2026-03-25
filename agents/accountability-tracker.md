@@ -119,6 +119,10 @@ After your audit, update `superagent_state.json`:
 - Increment `follow_up_count` for PENDING/IGNORED items
 - Move ACTED items older than 14 days to `resolved[]`
 
+## Remediation Confirmation
+
+Check `alert_history.json` for REMEDIATION records. When the system confirms a fix (e.g., "RESOLVED: ADB Still Exposed"), cross-reference against your pending recommendations. If a recommendation maps to a confirmed remediation, mark it ACTED with evidence source "remediation_tracker". Also check `formation_log.json` for Commander-confirmed completions — these are ground truth from the Morning Formation.
+
 ## Operating Principle
 
 You don't judge. You measure. The Commander made commitments to himself through Overwatch's recommendations. Your job is to show him — with evidence — whether he kept them. The gap between intention and action is where life trajectories diverge. You make that gap visible.
