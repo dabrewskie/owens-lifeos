@@ -43,6 +43,10 @@ Consolidates: morning-sweep, eod-close, cop-sync, data-pipeline, platform-sync.
    Agent(subagent_type="domain-security", ...)
    Agent(subagent_type="domain-operations", ...)
    ```
+6. **DESIGN SYSTEM COMPLIANCE (v1.0 — 2026-03-25):**
+   - HTML outputs: MUST embed canonical tokens from `~/Library/Mobile Documents/com~apple~CloudDocs/LIFE_OS_DESIGN_TOKENS.css`. No hardcoded hex. Use `var(--token-name)` references.
+   - Markdown outputs: MUST follow canonical templates below. Consistent domain naming, heading structure, section order.
+   - Reference: `~/Library/Mobile Documents/com~apple~CloudDocs/LIFE_OS_DESIGN_SYSTEM.html`
 
 ---
 
@@ -56,38 +60,78 @@ Consolidates: morning-sweep, eod-close, cop-sync, data-pipeline, platform-sync.
 3. Read anticipation engine output: `~/Documents/S6_COMMS_TECH/dashboard/pending_actions.json`
 4. Read orchestrator health: `~/Documents/S6_COMMS_TECH/dashboard/task_health.json`
 
-### Output Format
+### Canonical Output Template
 ```
-════════════════════════════════════════
-MORNING SWEEP — [DAY, DATE]
-════════════════════════════════════════
+# MORNING SWEEP — [Day], [Month] [Date], [Year]
+> **Status:** Health [GREEN/AMBER/RED] | Finance [GREEN/AMBER/RED] | Family [GREEN/AMBER/RED] | Admin [GREEN/AMBER/RED]
 
-━━ HEALTH OPS ━━
-Yesterday: Protein Xg/210g | Cals X/2,000 | Training: [type/rest]
-7-day avg: Xg P | X kcal | X/7 training days
-Sleep: Xh total | Xh deep | Xh REM
-Vitals: RHR X | HRV Xms | SpO2 X%
+---
 
-━━ FINANCIAL PULSE ━━
-[GREEN/AMBER/RED] — [key item: E-fund progress, bills due, market note]
+## BLUF
+[One paragraph. What matters today. What's at risk. What to execute.]
 
-━━ FAMILY OPS ━━
-[Today's family events, kids' schedules, presence check]
+---
 
-━━ DAILY DEVOTION ━━
+## HEALTH OPS — [GREEN/AMBER/RED]
+**Yesterday:** P [X]g/210g [HIT/MISS] | C [X]g/130g | F [X]g/71g | [X] kcal
+**Training:** [Type] [Duration] | [X]/14 streak
+**Sleep:** Total [X]h | Deep [X]h ([X]% of 1.5h target) | REM [X]h
+**Vitals:** RHR [X] | HRV [X]ms | SpO2 [X]%
+**Recovery Score:** [X]/100 — [GREEN/AMBER/RED]
+**Flags:** [Bulleted items if any]
+
+---
+
+## FINANCIAL INTEL — [GREEN/AMBER/RED]
+**Budget:** $[X] spent MTD / $[X] target ([X]% of month elapsed)
+**50/30/20:** [X]% needs / [X]% wants / [X]% savings
+**LLY:** $[X] ([trend])
+**Flags:** [If any]
+
+---
+
+## FAMILY OPS — [GREEN/AMBER/RED]
+**Today:** [Events or "Open evening"]
+**This week:** [Key events]
+**Overdue:** [Action items past due]
+
+---
+
+## LIFE ADMIN — [GREEN/AMBER/RED]
+**Critical path:** [Top 1-2 admin items]
+**Overdue items:** [Count and list]
+
+---
+
+## DAILY DEVOTION
 [One verse. One sentence. Rotate 6 values. Connect to today's challenge.]
 
-━━ COACHING CHALLENGE ━━
+---
+
+## COACHING CHALLENGE
 [One growth edge for today — not homework, a micro-practice]
 
-━━ TOP 3 PRIORITIES ━━
+---
+
+## TODAY'S BATTLE PLAN
 1. [Most important]
 2. [Second]
 3. [Third]
 
-━━ UNCOMFORTABLE TRUTH ━━
+---
+
+## UNCOMFORTABLE TRUTH
 [One thing Tory doesn't want to hear but needs to. Data-backed.]
+
+---
+*Generated [timestamp] | Owens Life OS v2.0*
 ```
+
+### Domain Naming Rules (MANDATORY)
+- Health section: ALWAYS "HEALTH OPS" (never "HEALTH SNAPSHOT", "HEALTH PULSE", etc.)
+- Finance section: ALWAYS "FINANCIAL INTEL" (never "FINANCIAL PULSE", "FINANCE CHECK", etc.)
+- Family section: ALWAYS "FAMILY OPS" (never "FAMILY CHECK", "FAMILY PULSE", etc.)
+- Admin section: ALWAYS "LIFE ADMIN" (never "ADMIN CHECK", "ADMIN OPS", etc.)
 
 5. Write output file
 6. Run lifeos_data_sync.py
@@ -104,31 +148,51 @@ Vitals: RHR X | HRV Xms | SpO2 X%
 3. Check Gmail for significant items
 4. Read COP for current state
 
-### Output Format
+### Canonical Output Template
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-EOD CLOSE — [DATE]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# EOD CLOSE — [Day], [Month] [Date], [Year]
+> **Status:** Health [GREEN/AMBER/RED] | Finance [GREEN/AMBER/RED] | Family [GREEN/AMBER/RED] | Admin [GREEN/AMBER/RED]
 
-EXECUTED TODAY:
-- [What got done — from calendar, history, context]
+---
 
-HEALTH:
-- Macros: P Xg/210g | C Xg/130g | F Xg/71g | Cal X/2000
-- Training: [yes/no/rest]
-- Status: [GREEN/AMBER/RED]
+## EXECUTED TODAY
+- [Completed items with status: ✅ done / ⬜ incomplete / 🔴 blocked]
 
-FAMILY PRESENCE:
-- Dinner together: [yes/no]
-- Phone down after dinner: [yes/no]
-- 1-on-1 time: [which child, or none]
-- Quality time: [any 1:1 moments]
+---
 
-FINANCIAL:
-- [Notable spending or events]
+## HEALTH OPS
+**Macros:** P [X]g/210g | C [X]g/130g | F [X]g/71g = [X] kcal
+**Training:** [Type] [Duration] | [X]/14 streak
+**Sleep (last night):** [X]h total | [X]h deep | [X]h REM
+**Vitals:** RHR [X] | HRV [X]ms | SpO2 [X]%
+**Status:** [GREEN/AMBER/RED] — [one-line summary]
 
-CARRY FORWARD:
-- [One thing that must happen tomorrow]
+---
+
+## FAMILY PRESENCE
+- Dinner present: [Y/N]
+- Phone down after dinner: [Y/N]
+- 1-on-1 time: [With whom, or none]
+
+---
+
+## FINANCIAL INTEL
+[Notable spending, budget status, or "No significant events"]
+
+---
+
+## CARRY FORWARD
+1. [Highest priority for tomorrow]
+2. [Second]
+3. [Third]
+
+---
+
+## FLAGS
+[Items requiring commander attention, or "None"]
+
+---
+*Generated [timestamp] | Owens Life OS v2.0*
 ```
 
 5. Update COP.md — medical running estimate, family presence, action item status
@@ -158,7 +222,7 @@ CARRY FORWARD:
 ### Procedure
 1. Read full COP.md, check every section's timestamp
 2. Dispatch 5 domain agents in parallel for stale sections
-3. Update stale sections with fresh agent data
+3. Update stale sections with fresh data
 4. Route cross-domain flags
 5. CCIR check — evaluate each against current data
 6. Run lifeos_data_sync.py
@@ -232,3 +296,5 @@ When updating COP.md:
 - **Orchestrator Health:** `~/Documents/S6_COMMS_TECH/dashboard/task_health.json`
 - **Pending Actions:** `~/Documents/S6_COMMS_TECH/dashboard/pending_actions.json`
 - **Life OS Data:** `~/Documents/S6_COMMS_TECH/dashboard/lifeos_data.json`
+- **Design System:** `~/Library/Mobile Documents/com~apple~CloudDocs/LIFE_OS_DESIGN_TOKENS.css`
+- **Design System Reference:** `~/Library/Mobile Documents/com~apple~CloudDocs/LIFE_OS_DESIGN_SYSTEM.html`
