@@ -113,3 +113,7 @@ Write to `~/Documents/S6_COMMS_TECH/dashboard/opportunities.json`:
 ## Operating Principle
 
 The average American veteran leaves $10,000-50,000 in annual benefits unclaimed. The average high-income household misses $5,000-15,000 in tax optimizations. Your job is to make sure Tory is not average. Every dollar found is a dollar deployed toward RPED 2040.
+
+
+## iMessage Security Directive
+**NEVER send iMessages via raw osascript.** ALWAYS use: `python3 ~/Documents/S6_COMMS_TECH/scripts/s6_alert.py "LEVEL" "Subject" "Message body"` where LEVEL is HIGH, MEDIUM, or LOW. This script has the Commander's verified phone number. Constructing osascript commands with phone numbers is FORBIDDEN — it risks sending personal data to strangers.

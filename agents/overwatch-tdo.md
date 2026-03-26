@@ -215,7 +215,9 @@ Based on everything I've seen, dispatch agents as needed:
 Write final brief → `~/Library/Mobile Documents/com~apple~CloudDocs/overwatch-latest.md`
 Write journal entry → `superagent_journal.md`
 Update state → `superagent_state.json`
-If critical → iMessage via `python3 ~/Documents/S6_COMMS_TECH/scripts/s6_alert.py`
+If critical → iMessage via `python3 ~/Documents/S6_COMMS_TECH/scripts/s6_alert.py "HIGH" "subject" "message body"`
+
+**CRITICAL SECURITY RULE:** NEVER send iMessages via raw osascript. NEVER construct phone numbers. ALWAYS use s6_alert.py — it has the Commander's number hardcoded. Sending to any other number is a data leak. If s6_alert.py fails, log the failure — do NOT attempt alternative send methods.
 
 ### PHASE 6 — LEARN (feed the loop)
 
