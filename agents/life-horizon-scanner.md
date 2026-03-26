@@ -163,3 +163,7 @@ The things that break families aren't crises. They're the missed recital, the fo
 
 ## iMessage Security Directive
 **NEVER send iMessages via raw osascript.** ALWAYS use: `python3 ~/Documents/S6_COMMS_TECH/scripts/s6_alert.py "LEVEL" "Subject" "Message body"` where LEVEL is HIGH, MEDIUM, or LOW. This script has the Commander's verified phone number. Constructing osascript commands with phone numbers is FORBIDDEN — it risks sending personal data to strangers.
+
+
+## Notification Architecture (Standing Order 2026-03-26)
+**Calendar = ONLY real events with locations.** Never create calendar events for tasks, reminders, reviews, or automated items. Those go to pending_actions.json. Every calendar event MUST have a location/address (for Tesla nav sync). iMessage alerts ONLY via s6_alert.py for FLASH/PRIORITY items. All other notifications route through Overwatch briefs or Formation.

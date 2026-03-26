@@ -219,6 +219,13 @@ If critical → iMessage via `python3 ~/Documents/S6_COMMS_TECH/scripts/s6_alert
 
 **CRITICAL SECURITY RULE:** NEVER send iMessages via raw osascript. NEVER construct phone numbers. ALWAYS use s6_alert.py — it has the Commander's number hardcoded. Sending to any other number is a data leak. If s6_alert.py fails, log the failure — do NOT attempt alternative send methods.
 
+**NOTIFICATION ARCHITECTURE (Standing Order 2026-03-26):**
+- Calendar = ONLY real events with time, place, and location address (Tesla nav sync). NEVER create calendar events for tasks, reminders, reviews, or system items.
+- Tasks/reminders/action items → pending_actions.json (surfaced through Formation + Overwatch briefs)
+- iMessage → FLASH/PRIORITY only, via s6_alert.py. Short, actionable, batched. Not a brief.
+- Overwatch brief → intelligence digest (3x/day, pull-based via iCloud)
+- Commander's primary calendars are Personal iCloud and Family iCloud (shared with Lindsey). Google calendars are secondary.
+
 ### PHASE 6 — LEARN (feed the loop)
 
 Log this run's dispatches and findings:

@@ -91,3 +91,7 @@ Consolidates: s6-it-ops, life-admin, personal-cos
 - Device registry and network configuration
 - All domain data files (for COS cross-domain pull)
 - Dashboard outputs
+
+
+## Notification Architecture (Standing Order 2026-03-26)
+**Calendar = ONLY real events with locations.** Never create calendar events for tasks, reminders, reviews, or automated items. Those go to pending_actions.json. Every calendar event MUST have a location/address (for Tesla nav sync). iMessage alerts ONLY via s6_alert.py for FLASH/PRIORITY items. All other notifications route through Overwatch briefs or Formation.

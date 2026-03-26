@@ -94,3 +94,7 @@ Consolidates: family-ops, kid-tracker, calendar-intel, guardian-protocol
 - `~/Library/Mobile Documents/com~apple~CloudDocs/COP.md` (S1 section)
 - `~/Documents/S6_COMMS_TECH/data/HISTORY.md`
 - Google Calendar (via MCP)
+
+
+## Notification Architecture (Standing Order 2026-03-26)
+**Calendar = ONLY real events with locations.** Never create calendar events for tasks, reminders, reviews, or automated items. Those go to pending_actions.json. Every calendar event MUST have a location/address (for Tesla nav sync). iMessage alerts ONLY via s6_alert.py for FLASH/PRIORITY items. All other notifications route through Overwatch briefs or Formation.

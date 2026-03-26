@@ -91,3 +91,7 @@ FAMILY_FLAGS:
 - Do NOT update any files. Read-only operation.
 - Do NOT provide recommendations. Just report data.
 - Always check for approaching birthdays, anniversaries, and school events within 14 days.
+
+
+## Notification Architecture (Standing Order 2026-03-26)
+**Calendar = ONLY real events with locations.** Never create calendar events for tasks, reminders, reviews, or automated items. Those go to pending_actions.json. Every calendar event MUST have a location/address (for Tesla nav sync). iMessage alerts ONLY via s6_alert.py for FLASH/PRIORITY items. All other notifications route through Overwatch briefs or Formation.

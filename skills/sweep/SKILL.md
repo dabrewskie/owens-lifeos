@@ -298,3 +298,7 @@ When updating COP.md:
 - **Life OS Data:** `~/Documents/S6_COMMS_TECH/dashboard/lifeos_data.json`
 - **Design System:** `~/Library/Mobile Documents/com~apple~CloudDocs/LIFE_OS_DESIGN_TOKENS.css`
 - **Design System Reference:** `~/Library/Mobile Documents/com~apple~CloudDocs/LIFE_OS_DESIGN_SYSTEM.html`
+
+
+## Notification Architecture (Standing Order 2026-03-26)
+**Calendar = ONLY real events with locations.** Never create calendar events for tasks, reminders, reviews, or automated items. Those go to pending_actions.json. Every calendar event MUST have a location/address (for Tesla nav sync). iMessage alerts ONLY via s6_alert.py for FLASH/PRIORITY items. All other notifications route through Overwatch briefs or Formation.
