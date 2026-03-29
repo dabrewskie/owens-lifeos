@@ -123,6 +123,32 @@ DETECT -> INFORM -> ACT -> CONFIRM -> CLOSE
 }
 ```
 
+### Card Step Generation
+
+Every card promises numbered, specific, actionable steps. Two mechanisms, phased:
+
+**Phase 2 (ship): Step templates.** The card generator contains a template library mapping ~30 known signal types to step templates with variable substitution. Example:
+
+```python
+STEP_TEMPLATES = {
+    "protein_gap": [
+        "Add protein shake with lunch ({deficit_half}g)",
+        "Log all meals in Cronometer today",
+        "Target {checkpoint_target}g by 3pm checkpoint"
+    ],
+    "budget_overage": [
+        "Review {category} transactions in Rocket Money",
+        "Identify top 3 discretionary charges to cut or defer",
+        "Freeze {category} spending for remainder of month if over by >10%"
+    ],
+    ...
+}
+```
+
+Templates cover the known recurring signals. Novel findings (new Overwatch concerns, one-off opportunities) get a generic 2-step template: "1. Review details in drill-down panel 2. Take action or dismiss."
+
+**Phase 5 (mature): Agent-generated steps.** Update each patrol agent to output a `steps` array in their findings. Agents have domain context to write better steps than templates. Card generator passes agent-generated steps through when present, falls back to templates when absent. Gradual migration — agents adopt the schema one at a time.
+
 ### Card Generation Pipeline
 
 | Source | Generates | Default Priority |
@@ -316,12 +342,21 @@ Python `http.server` subclass. No external dependencies.
 2. For each finding, generate deterministic card ID
 3. If card exists and active: update, don't duplicate
 4. If card exists and resolved: skip
-5. If new: create with priority score
+5. If new: create with priority score, apply step template (or use agent-generated steps if present)
 6. Merge related cards (same domain + similar signal)
 7. Check auto-close conditions against current data
 8. Remove cards whose source finding no longer exists
 9. Enforce 30-card cap (overflow to `card_overflow.json`)
-10. Atomic write to `action_queue.json`
+10. **P1 escalation:** if any new card is priority 1, trigger `s6_alert.py` iMessage (FLASH)
+11. Atomic write to `action_queue.json`
+
+### P1 iMessage Escalation
+
+The dashboard is Tier 5 (pull-based, zero notifications) per the notification architecture standing order. But P1 FLASH cards represent safety, cascade failure, or financial breach. If a P1 card is generated and the Commander doesn't check the dashboard for hours, that's unacceptable silence on a critical finding.
+
+**Rule:** When the card generator creates a NEW P1 card (not an update to an existing one), it calls `s6_alert.py` with a one-line summary. This respects the existing notification architecture — iMessage is already the FLASH channel. The card still appears in The Stack for action. The iMessage is the nudge that says "open the dashboard now."
+
+Quiet hours (2200-0500) still apply — P1 FLASH sends regardless per existing s6_alert.py behavior.
 
 ### Write-Back Flow
 
@@ -329,12 +364,17 @@ Python `http.server` subclass. No external dependencies.
 ```
 Browser -> POST /api/cards/{id}/action {action: "done"}
   -> API locks action_queue.json
-  -> Updates card state (resolved, resolved_by: "commander", timestamp)
+  -> If card has auto_close condition: check condition NOW against current data
+     -> If condition met: resolved_by = "auto_confirmed" (Commander was right)
+     -> If condition not met: resolved_by = "commander" (trust the Commander, log the gap)
+  -> Updates card state (resolved, timestamp)
   -> Updates pending_actions.json (marks item complete)
   -> Writes alert_history.json (classification: COMMANDER_ACTION)
   -> Unlocks, returns updated card list
   -> Browser removes card with animation
 ```
+
+**Immediate auto-close check:** The 15-minute card generation cycle means auto-close conditions can lag. When the Commander taps "Done," the API checks the condition immediately rather than waiting for the next cycle. This eliminates the frustration of "I did the thing and the card is still yelling at me." The `POST /api/system/refresh` endpoint also re-runs all auto-close checks immediately.
 
 **From MCP (iPhone/claude.ai):**
 ```
@@ -367,6 +407,23 @@ New tools for `lifeos_mcp_server.py`:
 ### Learning Platform
 
 **Not absorbed.** Stays on port 8083. Dashboard links to it from Career drill-down. Card generator can read `learning_data.json` and `mastery_state.json` for Director-readiness cards.
+
+### Overwatch Brief Coexistence
+
+Cards and Overwatch briefs serve different purposes and **both continue:**
+
+- **Cards** are atomic, actionable, discrete. "Your protein is low. Here are 3 steps."
+- **Overwatch briefs** are narrative synthesis, coaching, challenges. "You've been under-eating for 8 days, your deep sleep is cratering, and you have a Director presentation Tuesday. The mask is going up."
+
+Overwatch generates cards for discrete actionable items AND continues writing narrative briefs to `overwatch-latest.md`. The brief may reference active cards ("I put 3 items in your Stack today — the protein one is the one that worries me most") but the brief is NOT replaced by cards. Cards handle the "what to do." Overwatch handles the "why it matters and what it means."
+
+### Offline / Degraded Mode
+
+**Problem:** 50/50 iPhone usage. Tailscale disconnects when VPN drops, on certain networks, or when Mac sleeps too long. Dashboard (:8443) and MCP server become unreachable.
+
+**Phase 2 mitigation (ship):** Dashboard detects API failure and renders from cached data. On every successful API response, the dashboard writes the card queue and vitals to `localStorage`. When the API is unreachable, render the cached queue with an amber banner: "Offline — showing data from [timestamp]." Cards cannot be actioned offline, but the Commander can see what's pending.
+
+**Phase 5 mitigation (future):** Lightweight PWA with service worker. Cache dashboard shell + last API responses. Enable offline viewing with full UI fidelity. Queue offline actions (done/defer/dismiss) and sync when connection restores.
 
 ---
 
@@ -402,18 +459,22 @@ Originals archived to `dashboard/_archive/`.
 
 ### Phase 1: Foundation — Card Generator (Days 2-3)
 - Build `card_generator.py` with atomic writes, dedup, merge, auto-close
+- Build step template library (~30 signal types)
+- Add P1 iMessage escalation via s6_alert.py
 - Create `action_queue.json` schema
 - Add to orchestrator (15 min cycle)
-- **Exit:** Valid card queue from real patrol data
+- **Exit:** Valid card queue from real patrol data, with steps, P1 alerts fire
 
 ### Phase 2: Core — API + Dashboard (Days 4-8)
 - Build `lifeos_api.py` (static + REST, file locking, degraded mode)
+- Immediate auto-close check on "Done" action (don't wait for 15-min cycle)
 - Build new `index.html` + modular CSS/JS/components
 - Action Card Web Component with full state machine
 - Vitals strip, filter bar, card cap (10 visible)
 - Write-back via POST
 - Desktop side panel, mobile inline expand
-- **Exit:** Cards render, actions write back, drill-down works for Health + Money
+- localStorage cache for offline/degraded rendering
+- **Exit:** Cards render, actions write back, drill-down works for Health + Money, offline shows cached data
 
 ### Phase 3: Polish — Drill-Downs & Consolidation (Days 9-12)
 - Build all 8 drill-down renderers
@@ -431,9 +492,10 @@ Originals archived to `dashboard/_archive/`.
 ### Phase 5: Continuous Optimization (Ongoing)
 - Migrate Anticipation Engine rules into card generator
 - Tune priority scoring from Commander response patterns
-- Agent card templates (direct schema generation)
+- Agent-generated steps: patrol agents output `steps` arrays directly, card generator passes through
 - Add `initialPrompt` frontmatter to expensive agents
 - Lazy-load drill-down data
+- PWA service worker for full offline support with queued actions
 
 ---
 
@@ -444,11 +506,16 @@ Originals archived to `dashboard/_archive/`.
 | SSE dies April 1 | Phase 0 is Day 1, independent |
 | `action_queue.json` corruption | Atomic writes (.tmp -> rename), JSON validation |
 | Concurrent file writes | `fcntl.flock` on every read-modify-write |
-| API server down | Dashboard falls back to direct JSON reads |
+| API server down | Dashboard falls back to localStorage cached data |
 | Card volume overwhelm | 30-card cap, 10 displayed, auto-merge, P4-5 collapsed |
 | MCP Apps format instability | Deferred to Phase 4 after stabilization |
 | Learning server absorption | Rejected -- stays separate |
 | Standalone HTML loss | Archived before consolidation |
+| P1 finding missed (dashboard not open) | Card generator triggers s6_alert.py iMessage on new P1 cards |
+| Auto-close lag after Commander action | API checks auto-close condition immediately on "Done" tap |
+| Novel findings lack good steps | Template fallback + Phase 5 agent-generated steps migration |
+| Tailscale offline (iPhone) | localStorage cache renders last-known state with timestamp |
+| Overwatch narrative lost to cards | Briefs continue alongside cards -- different purposes, both persist |
 
 ---
 
@@ -462,3 +529,6 @@ Originals archived to `dashboard/_archive/`.
 6. Dashboard renders usefully on mobile with zero pinch-zoom
 7. The Stack gets shorter as the Commander acts — empty state is the goal
 8. System runs without Commander as trigger — patrols generate cards, auto-close resolves them, only human-required items surface
+9. P1 cards trigger iMessage — Commander is never unaware of critical findings
+10. Overwatch narrative briefs continue alongside cards — coaching and synthesis preserved
+11. Dashboard works offline (cached state) when Tailscale is disconnected
