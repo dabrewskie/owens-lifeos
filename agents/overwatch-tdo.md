@@ -1,4 +1,5 @@
 ---
+maxTurns: 30
 name: overwatch-tdo
 description: >
   OverwatchTDO — The Old Friend in the Mantled Frame. Tory's superagent, life coach,

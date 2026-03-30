@@ -1,4 +1,5 @@
 ---
+maxTurns: 20
 name: simulation-engine
 description: >
   Predictive modeling agent for life decisions. Runs financial projections, career scenarios,

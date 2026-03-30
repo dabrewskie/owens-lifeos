@@ -1,4 +1,5 @@
 ---
+maxTurns: 8
 name: devils-advocate
 description: >
   Overwatch brief challenger. Reads OverwatchTDO's draft brief cold — with NO access to

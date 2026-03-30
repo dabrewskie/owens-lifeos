@@ -1,4 +1,5 @@
 ---
+maxTurns: 15
 name: deep-researcher
 description: >
   Evidence-based research agent with academic database access and permanent knowledge archiving.
