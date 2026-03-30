@@ -220,6 +220,22 @@ Consolidates: morning-sweep, eod-close, cop-sync, data-pipeline, platform-sync.
 | 15+ days | RED | Escalate |
 
 ### Procedure
+
+**STEP 0 — Completion Queue Processing (BEFORE anything else):**
+Process completions logged by web conversations via MCP `log_completion` tool.
+1. Read `~/Library/Mobile Documents/com~apple~CloudDocs/completion_queue.jsonl`
+2. Parse each line as JSON
+3. For entries where `"processed"` is `false`:
+   a. Find matching action item in COP.md by `action_id` number or `description` text
+   b. Update COP.md: change status to "COMPLETE [date] (synced from web)" — remove from overdue/pending
+   c. If the completion resolves a cross-domain flag or S1 running estimate item (e.g., Gulf Shores lodging), update those sections too
+   d. Mark the entry as processed: set `"processed": true` in the JSONL
+4. Rewrite `completion_queue.jsonl` with all entries (processed entries kept for audit trail)
+5. Log: "Processed N completions from web queue" (or "No pending completions" if empty)
+
+This ensures COP.md reflects actions taken in web conversations BEFORE the sync checks for staleness. Without this step, completed items show as overdue.
+
+**Then continue with the normal sync:**
 1. Read full COP.md, check every section's timestamp
 2. Dispatch 5 domain agents in parallel for stale sections
 3. Update stale sections with fresh data
