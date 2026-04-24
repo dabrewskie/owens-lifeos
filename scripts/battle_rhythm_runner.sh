@@ -20,6 +20,14 @@ set -uo pipefail
 # Note: -e intentionally omitted — the run_with_timeout function needs
 # to handle non-zero exits from kill/wait without the script aborting
 
+# COST LEAK DEFENSE (2026-04-23): Force `claude -p` to use the Max
+# subscription's OAuth token by unsetting any raw API key that may have
+# leaked into the environment. If ANTHROPIC_API_KEY is set, Claude Code's
+# auth precedence bills the raw API instead of the subscription — ~$10/day
+# across 30+ daily orchestrator calls. Belt-and-suspenders with ~/.zprofile
+# and com.lifeos.orchestrator.plist.
+unset ANTHROPIC_API_KEY
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 LOG_DIR="$SCRIPT_DIR/cleanup_logs"
 ICLOUD="$HOME/Library/Mobile Documents/com~apple~CloudDocs"
