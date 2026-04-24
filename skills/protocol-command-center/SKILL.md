@@ -1,224 +1,158 @@
 ---
 name: protocol-command-center
 description: >
-  Health protocol execution dashboard ("PCC") for Operation Iron Discipline Phase 3. Mobile-first interactive
-  interface for daily compliance tracking, weekly Hume scan import, decision trigger detection, and phase
-  progression management toward 10-12% BF end state. Triggers on (1) "PCC", "Protocol Command Center",
-  (2) "Daily check-in", "Morning protocol", (3) "Scan import", "Import Hume", (4) "Phase A/B/C", "Phase gate",
-  (5) "Protocol trigger", "Trigger alert". V1 is a Claude artifact with window.storage persistence; V2 is a
-  Code-hosted dashboard wired into Life OS health pipeline.
+  Health protocol execution dashboard ("PCC") for Operation Iron Discipline Phase 3. Mobile-first passive
+  interface that pulls from Apple Health for ambient status, requires active engagement only on Wednesdays
+  (Hume scan import + photos + week-over-week analysis) or when triggers fire. Toward end state 10-12% BF
+  with lean mass held or increased. V1 was daily-input artifact (killed — anti-pattern). V2 is passive
+  Code-hosted dashboard wired to health_data.json.
 ---
 
-# Protocol Command Center (PCC)
+# Protocol Command Center (PCC) — V2
 
-**Project:** Protocol Command Center
-**Status:** V1 DEPLOYED (Claude Artifact) — 2026-04-24
+**Status:** V1 KILLED · V2 IN BUILD — 2026-04-24
 **Owner:** Commander Owens
-**Parent Protocol:** Operation Iron Discipline Phase 3 Rebuild
-**End State:** 10-12% BF with lean mass held or increased. No deadline.
 
----
+## V1 POST-MORTEM
 
-## PROJECT PURPOSE
+V1 daily morning check-in killed same day. Root cause: daily-input compliance tracker conflicts with ISTJ-A model. All four data points already in Apple Health. Manual entry was ceremony, not signal.
 
-Reduce friction on daily protocol compliance. Surface decision triggers before they become problems. Replace fragmented tracking (Cronometer + Apple Watch + Hume app + Notes + memory) with one operator interface.
+**Principle codified:**
+> Ambient by Default, Active by Exception. If the data exists, read it. Don't collect it daily.
 
-**Primary success metric:** 14-day use test yields ≥80% daily input compliance and ≥3 weekly scan imports. If yes → green-light V2 port to Life OS. If no → debrief what failed and rebuild or kill.
+## V2 DATA FLOW
 
----
-
-## VERSION STATUS
-
-### V1 — Claude Artifact (ACTIVE)
-- **Location:** Claude artifact in conversation thread dated 2026-04-24
-- **Tech:** React + Tailwind + window.storage + Claude API (sonnet-4-20250514)
-- **Persistence:** Browser-local via window.storage — NOT synced across devices
-- **Data model:** See Section 5 of this doc
-- **Home screen:** Installable via Safari "Add to Home Screen"
-- **Limitations:** Manual input only; no HealthKit; no COP integration
-
-### V2 — Code-Hosted (PLANNED, post-14-day bake)
-- **Target location:** `~/owens-lifeos/dashboards/protocol_command_center.html`
-- **Host:** New port on orchestrator (suggest 8079, verify free)
-- **Data source:** `health_data.json` (Apple Watch → HAE pipeline, already flowing)
-- **Cross-platform:** Tailscale accessible from iPhone
-- **Integration points:**
-  - Read from `health_data.json` (replaces manual daily input)
-  - Write compliance signals to COP.md via `lifeos:log_completion`
-  - Fire trigger alerts through `anticipation_engine.py`
-  - New MCP tool required: `lifeos:log_protocol_day`
-- **PWA:** Manifest + service worker for true installable app
-- **Model:** MUST upgrade to current Sonnet (not claude-sonnet-4-20250514 — deprecated June 15)
-
----
-
-## PROTOCOL REFERENCE (embedded in artifact + authoritative source)
-
-### Phase A — Foundation Recomp (19.5% → ~16% BF)
-**Calorie avg:** ~2,470/day | **Expected loss:** 0.5-0.7 lb/week
-
-| Day Type | Days | Cal | P | C | F |
-|---|---|---|---|---|---|
-| High (heavy lift) | Mon, Thu | 2,600 | 220 | 280 | 70 |
-| Moderate | Tue, Fri | 2,450 | 220 | 230 | 70 |
-| Active recovery | Sat | 2,400 | 220 | 200 | 75 |
-| Rest (low) | Wed, Sun | 2,200 | 220 | 130 | 80 |
-
-**Diet break:** Every 6 weeks, 5-7 days at 2,800 kcal.
-
-### Phase B — Precision Cut (~16% → ~13% BF)
-**Calorie avg:** ~2,290/day | **Expected loss:** 0.4-0.5 lb/week
-
-| Day Type | Days | Cal | P | C | F |
-|---|---|---|---|---|---|
-| Refeed (heavy lift) | Mon, Thu | 2,600 | 230 | 320 | 60 |
-| Moderate | Tue, Fri | 2,300 | 230 | 200 | 65 |
-| Active recovery | Sat | 2,200 | 230 | 170 | 65 |
-| Rest (low) | Wed, Sun | 2,000 | 230 | 100 | 75 |
-
-**Diet break:** Every 4-5 weeks, 5 days maintenance.
-
-### Phase C — Single Digits (~13% → 10-12% BF)
-**Calorie avg:** ~2,200/day | **Expected loss:** 0.25-0.4 lb/week
-
-| Day Type | Days | Cal | P | C | F |
-|---|---|---|---|---|---|
-| Refeed (heavy lift) | Mon, Thu | 2,500 | 240 | 320 | 55 |
-| Moderate | Tue, Fri | 2,200 | 240 | 180 | 60 |
-| Active recovery | Sat | 2,100 | 240 | 140 | 65 |
-| Rest (low) | Wed, Sun | 1,900 | 240 | 80 | 70 |
-
-**Diet break:** Every 3-4 weeks, 5-7 days mandatory.
-
-### Training Split (constant across phases, volume/intensity varies)
-| Day | Focus |
-|---|---|
-| Mon | Upper Push (heavy) |
-| Tue | Lower Strength |
-| Wed | Active rest / mobility / Zone 2 (45 min) |
-| Thu | Upper Pull (heavy) |
-| Fri | Lower Power |
-| Sat | Zone 2 cardio (45-60 min) |
-| Sun | Full rest + meal prep |
-
----
-
-## DECISION TRIGGERS (codified)
-
-| Trigger | Detection Logic | Severity | Action |
-|---|---|---|---|
-| Lean mass drop | Δ LM ≤ -2.0 lb over trailing 3 scans | RED | +200 kcal/day, diet break next week |
-| Strength drop | 2+ main lifts regress over 2 weeks | AMBER | Sleep audit + deload |
-| Weight stall | 4-wk rolling avg flat ±0.5 lb × 3 weeks | AMBER | Diet break, then resume |
-| Sleep crater | <6h on 3+ nights in rolling 7 | RED | Skip training, walk only |
-| HRV drop | 15% below 30-day baseline | AMBER | Deload week |
-| Hct threshold | Scan imports value ≥54% | RED | Donate blood, hydration audit |
-| Deep sleep chronic | 14-day avg <0.5h | AMBER | Sleep intervention escalation |
-
-## PHASE GATES
-
-| Gate | Criteria | Effect |
-|---|---|---|
-| A → B | BF ≤ 16.5% × 2 weeks + LM ≥ 173 lb | Advance available |
-| B → C | BF ≤ 13.2% × 2 weeks + LM ≥ 173 lb | Advance available |
-| C → Maintenance | BF ≤ 12% × 4 weeks + LM stable | Transition to maintenance macros |
-
----
-
-## DATA MODEL (for V2 port reference)
-
-### DailyLog (keyed by date)
 ```
-{
-  date: "YYYY-MM-DD",
-  weight: float,
-  sleep_total: float,
-  sleep_deep: float,
-  hrv: int,
-  rhr: int,
-  training_done: bool,
-  training_rpe: int,
-  supplements: { trt, tadalafil, mag, creatine },
-  macros_est: { kcal, protein, carbs, fat },
-  mood: int,
-  notes: string
-}
+Apple Watch → Apple Health → Health Auto Export → ~/lifeos/data/health_data.json
+                                                          ↓
+                                              Local HTTP endpoint (:8077 or :8079)
+                                                          ↓
+                                       PCC HTML fetches JSON (Tailscale for mobile)
 ```
 
-### WeeklyScan (keyed by date)
+### Auto-Pulled (health_data.json)
+Weight (latest + rolling) · Sleep (total/deep/REM) · HRV (+ 30d baseline) · RHR · Steps · Active energy · Workouts (type/duration)
+
+### Manual — Wednesday only (~5 min)
+Hume scan (8 fields + optional Hct) · Progress photos (front/side/back)
+
+### Manual — Ad-hoc
+Phase advance · Diet break · Deload declaration · Notes/overrides
+
+## NEW IA (4 TABS)
+
+### OVERVIEW (ambient landing — no inputs)
+- Status dot (composite)
+- Today's fuel card (phase + DOW → macros)
+- Today's training card (DOW → session)
+- Last night recovery snapshot (Apple Health, display-only)
+- Active trigger banners
+- Top-line scan delta (weight/BF/LM)
+
+### WEDNESDAY (active work)
+- Scan import form (8 fields + Hct opt)
+- Photo uploads × 3
+- Week-over-week delta table
+- AI weekly insight (OverwatchTDO voice)
+- Trigger check summary
+- Phase gate progress + advance button
+
+### TRENDS
+- Weight: daily (Apple Health) + Wed scans + 7d rolling
+- BF%: scan-only, phase markers, gate lines
+- Lean mass: scan-only, floor line
+- Sleep: 14d stacked (total+deep)
+- HRV: 14d vs 30d baseline
+- Workout heatmap (28d, Apple Health)
+- Trigger status panel
+
+### PROTOCOL (reference)
+Phase A/B/C macros · Gates · Trigger defs · Advance action
+
+## PROTOCOL (unchanged from V1)
+
+**Phase A** 19.5→16% · 2,470kcal avg · 0.5-0.7lb/wk
+High(M/Th) 2600·220·280·70 | Mod(T/F) 2450·220·230·70 | ActRec(Sat) 2400·220·200·75 | Rest(W/Sun) 2200·220·130·80
+
+**Phase B** 16→13% · 2,290kcal avg · 0.4-0.5lb/wk
+Refeed 2600·230·320·60 | Mod 2300·230·200·65 | ActRec 2200·230·170·65 | Rest 2000·230·100·75
+
+**Phase C** 13→10-12% · 2,200kcal avg · 0.25-0.4lb/wk
+Refeed 2500·240·320·55 | Mod 2200·240·180·60 | ActRec 2100·240·140·65 | Rest 1900·240·80·70
+
+**Training:** Mon UPush · Tue LStr · Wed Z2/Mob · Thu UPull · Fri LPow · Sat Z2 · Sun Rest
+
+**Triggers:** LM drop Δ≤-2lb/3scans(RED) · Weight stall 3wk flat(AMB) · Sleep <6h 3+nights(RED) · HRV -15%(AMB) · Hct ≥54%(RED) · Deep sleep 14d<0.5h(AMB)
+
+**Gates:** A→B: BF≤16.5% × 2wk + LM≥161 | B→C: BF≤13.2% × 2wk + LM≥161 | C→M: BF≤12% × 4wk + LM stable
+
+## V2 BUILD REQUIREMENTS FOR CODE
+
+### Infrastructure
+1. **Local HTTP endpoint for health_data.json** — prefer reusing :8077 dashboard server, CORS-enabled for localhost + Tailscale
+2. **File locations:**
+   - HTML: `~/owens-lifeos/dashboards/protocol_command_center.html`
+   - Manifest: `~/owens-lifeos/dashboards/pcc-manifest.json`
+   - SW: `~/owens-lifeos/dashboards/pcc-sw.js`
+   - Icons: `~/owens-lifeos/dashboards/pcc-icon-{192,512}.png`
+3. **Photo storage:** `~/owens-lifeos/data/progress_photos/YYYY-MM-DD/{front,side,back}.jpg`
+4. **New MCP tools:**
+   - `lifeos:save_scan` → writes `~/owens-lifeos/data/scans.json`
+   - `lifeos:save_photo` → base64 → jpg write
+   - `lifeos:log_protocol_day` → compliance signals to COP
+5. **Anticipation engine:**
+   - Task `protocol_trigger_scan` every 6h
+   - Push via Pushover (verify user has account) when RED fires
+   - Wed 0700 reminder: "Hume scan + photos today"
+6. **Model upgrade:** Replace `claude-sonnet-4-20250514` throughout (June 15 deprecation)
+
+### Data Contracts
+
+`health_data.json` expected shape:
 ```
-{
-  date: "YYYY-MM-DD",
-  weight: float,
-  bf_pct: float,
-  fat_mass: float,
-  lean_mass: float,
-  skeletal_muscle: float,
-  body_water_pct: float,
-  visceral_fat: int,
-  ai_analysis: string,
-  delta_vs_prior: { weight, bf, lm }
-}
+{ "updated_at": "ISO", "metrics": {
+  "weight": { "latest": 216.7, "history": [{"date","value"}] },
+  "sleep": { "total": 6.7, "deep": 0.54, "rem": 1.8, "history": [...] },
+  "hrv": { "latest": 39, "avg_30d": 39, "history": [...] },
+  "rhr": { "latest": 71, "history": [...] },
+  "steps": { "today": 8500, "history": [...] },
+  "workouts": [{"date","type","duration_min"}]
+}}
+```
+If actual format differs, adapter layer in PCC fetch.
+
+`scans.json` (new, PCC writes):
+```
+[{ "date": "YYYY-MM-DD", "weight": float, "bf_pct": float, "fat_mass": float,
+   "lean_mass": float, "skeletal_muscle": float, "body_water_pct": float,
+   "visceral_fat": int, "hct": float|null, "photos": [paths], "ai_analysis": string }]
 ```
 
-### PhaseState (single object)
-```
-{
-  current_phase: "A" | "B" | "C" | "M",
-  week_in_phase: int,
-  phase_start_date: "YYYY-MM-DD",
-  last_diet_break: "YYYY-MM-DD" | null,
-  triggers: { lean_mass_drop, strength_drop, weight_stall, sleep_crater,
-              hrv_drop, hematocrit, deep_sleep_chronic }
-}
-```
-
----
-
-## V1 STORAGE KEYS (window.storage — private scope)
-
-| Key | Content |
-|---|---|
-| `pcc:daily:YYYY-MM-DD` | DailyLog |
-| `pcc:scan:YYYY-MM-DD` | WeeklyScan |
-| `pcc:phase_state` | PhaseState |
-| `pcc:settings` | User prefs |
-
----
+### Build Checklist
+- [ ] Expose health_data.json via local endpoint
+- [ ] Port V2 prototype artifact → production HTML
+- [ ] Swap mock data fetcher → real fetch
+- [ ] Implement photo uploads + MCP save
+- [ ] Implement scan save via MCP
+- [ ] PWA manifest + SW + icons
+- [ ] anticipation_engine task + Wed reminder
+- [ ] Push notifications (verify Pushover)
+- [ ] Test Tailscale access from iPhone
+- [ ] Back-link to COP via log_protocol_day
+- [ ] Upgrade AI model throughout
 
 ## ITERATION LOG
 
-| Date | Version | Change | Notes |
-|---|---|---|---|
-| 2026-04-24 | 1.0 | Initial V1 artifact deployed | Spec approved as-is. 14-day bake period started. |
+| Date | Version | Change |
+|---|---|---|
+| 2026-04-24 | 1.0 | V1 artifact deployed |
+| 2026-04-24 | 1.0 KILLED | Daily check-in anti-pattern. Commander rejection same day. |
+| 2026-04-24 | 2.0 | V2: passive dashboard + Wednesday active + trigger-driven. Prototype delivered. |
+
+## PRINCIPLE (propagate to health-performance + COS)
+
+> **Ambient by Default, Active by Exception.**
+> Read data that already exists. Active engagement permitted on cadence (weekly scan) or exception (trigger). Daily manual input must justify against this principle or be killed.
 
 ---
-
-## COP INTEGRATION (CURRENT)
-
-This skill exists so Claude Code can locate the project when referenced. V1 operates independently of COP. V2 will integrate via:
-- `lifeos:log_completion` on daily input submission
-- New MCP tool `lifeos:log_protocol_day` (to be built with V2)
-- Anticipation engine task `protocol_trigger_scan` (to be built with V2)
-
----
-
-## NOTES FOR CLAUDE CODE (V2 BUILD)
-
-When building V2, reference:
-- This skill file for full spec
-- `health-performance` skill for protocol philosophy
-- `personal-cos` skill for COP integration patterns
-- The V1 artifact code (captured in Conversation 2026-04-24 — ask Commander for URL if needed)
-
-Critical V2 requirements:
-1. **Model upgrade:** Replace `claude-sonnet-4-20250514` with current Sonnet model (June 15 deprecation)
-2. **Data source switch:** Read `health_data.json` instead of manual input — preserve manual override for fields not covered by Apple Watch (macros, supplement compliance)
-3. **COP writeback:** Daily compliance → staff section running estimates
-4. **PWA packaging:** Installable app via Tailscale URL
-5. **Trigger integration:** Fire into `anticipation_engine.py` for morning sweep surfacing
-6. **Weekly feedback loop:** Commander provides weekly notes; update this skill's ITERATION LOG
-
----
-
-*"You don't need motivation. You need clarity and friction removal."*
+*Ambient by default. Active by exception.*
