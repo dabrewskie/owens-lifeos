@@ -4,155 +4,260 @@ description: >
   Health protocol execution dashboard ("PCC") for Operation Iron Discipline Phase 3. Mobile-first passive
   interface that pulls from Apple Health for ambient status, requires active engagement only on Wednesdays
   (Hume scan import + photos + week-over-week analysis) or when triggers fire. Toward end state 10-12% BF
-  with lean mass held or increased. V1 was daily-input artifact (killed — anti-pattern). V2 is passive
-  Code-hosted dashboard wired to health_data.json.
+  with lean mass held or increased. V2 production deployed via Tailscale on port 8079. Triggers on
+  (1) "PCC", "Protocol Command Center", (2) "Scan import", "Wednesday check-in", (3) "Phase A/B/C",
+  (4) "Protocol trigger". When commander references PCC deployment or production build, execute the
+  CODE BUILD ORDER below.
 ---
 
-# Protocol Command Center (PCC) — V2
+# Protocol Command Center (PCC) — V2 PRODUCTION
 
-**Status:** V1 KILLED · V2 IN BUILD — 2026-04-24
+**Status:** V2 PRODUCTION DEPLOYED — 2026-04-24
 **Owner:** Commander Owens
+**URL:** `https://torys-macbook-pro.<tailnet>.ts.net:8079/` (verify tailnet hostname)
+**Service:** `com.lifeos.pcc` LaunchAgent on port 8079
 
-## V1 POST-MORTEM
+---
+
+## QUICK START FOR COMMANDER
+
+**On iPhone:**
+1. Connect to Tailscale (already running)
+2. Open Safari → `https://torys-macbook-pro.<tailnet>.ts.net:8079/`
+3. Tap Share → Add to Home Screen → name "PCC"
+4. PCC icon now opens fullscreen — bookmark this
+
+**On Mac:**
+- Browser: `http://localhost:8079/`
+- Logs: `~/owens-lifeos/logs/pcc.{out,err}.log`
+- Service control: `launchctl {load,unload} ~/Library/LaunchAgents/com.lifeos.pcc.plist`
+
+---
+
+## V1 POST-MORTEM (kept for institutional memory)
 
 V1 daily morning check-in killed same day. Root cause: daily-input compliance tracker conflicts with ISTJ-A model. All four data points already in Apple Health. Manual entry was ceremony, not signal.
 
 **Principle codified:**
 > Ambient by Default, Active by Exception. If the data exists, read it. Don't collect it daily.
 
-## V2 DATA FLOW
+---
+
+## V2 ARCHITECTURE
 
 ```
-Apple Watch → Apple Health → Health Auto Export → ~/lifeos/data/health_data.json
-                                                          ↓
-                                              Local HTTP endpoint (:8077 or :8079)
-                                                          ↓
-                                       PCC HTML fetches JSON (Tailscale for mobile)
+Apple Watch → Apple Health → Health Auto Export
+       ↓
+~/owens-lifeos/data/health_data.json
+       ↓
+serve_pcc.py (port 8079, LaunchAgent com.lifeos.pcc)
+       ↓
+Tailscale → iPhone Safari → "PCC" home screen icon
 ```
 
-### Auto-Pulled (health_data.json)
-Weight (latest + rolling) · Sleep (total/deep/REM) · HRV (+ 30d baseline) · RHR · Steps · Active energy · Workouts (type/duration)
+### Data Flow
+- **Read:** PCC fetches `/api/health_data` → `serve_pcc.py` reads `health_data.json` → returns adapted shape
+- **Write:** Wednesday scan submit → POST `/api/save_scan` → writes `scans.json` + photos to `progress_photos/YYYY-MM-DD/`
+- **Insight:** POST `/api/insight` → invokes Claude CLI (subscription, $0 marginal) → returns OverwatchTDO weekly insight
 
-### Manual — Wednesday only (~5 min)
-Hume scan (8 fields + optional Hct) · Progress photos (front/side/back)
+### File Locations
+| File | Path |
+|---|---|
+| HTML (single-file React via CDN) | `~/owens-lifeos/dashboards/protocol_command_center.html` |
+| Server | `~/owens-lifeos/dashboards/serve_pcc.py` |
+| LaunchAgent | `~/Library/LaunchAgents/com.lifeos.pcc.plist` |
+| Health data input | `~/owens-lifeos/data/health_data.json` |
+| Scan persistence | `~/owens-lifeos/data/scans.json` |
+| Photos | `~/owens-lifeos/data/progress_photos/YYYY-MM-DD/{front,side,back}.{jpg,png}` |
+| Logs | `~/owens-lifeos/logs/pcc.{out,err}.log` |
 
-### Manual — Ad-hoc
-Phase advance · Diet break · Deload declaration · Notes/overrides
+---
 
-## NEW IA (4 TABS)
+## CODE BUILD ORDER
 
-### OVERVIEW (ambient landing — no inputs)
-- Status dot (composite)
-- Today's fuel card (phase + DOW → macros)
-- Today's training card (DOW → session)
-- Last night recovery snapshot (Apple Health, display-only)
-- Active trigger banners
-- Top-line scan delta (weight/BF/LM)
+When Commander invokes "deploy PCC" or "publish PCC to Tailscale", execute these steps in order:
 
-### WEDNESDAY (active work)
-- Scan import form (8 fields + Hct opt)
-- Photo uploads × 3
-- Week-over-week delta table
-- AI weekly insight (OverwatchTDO voice)
-- Trigger check summary
-- Phase gate progress + advance button
+### Step 1: Locate source files
+The Commander will provide three files (downloaded from Claude.ai):
+- `protocol_command_center.html`
+- `serve_pcc.py`
+- `com.lifeos.pcc.plist`
 
-### TRENDS
-- Weight: daily (Apple Health) + Wed scans + 7d rolling
-- BF%: scan-only, phase markers, gate lines
-- Lean mass: scan-only, floor line
-- Sleep: 14d stacked (total+deep)
-- HRV: 14d vs 30d baseline
-- Workout heatmap (28d, Apple Health)
-- Trigger status panel
+These should be saved by Commander to `~/Downloads/` first. Confirm locations before proceeding.
 
-### PROTOCOL (reference)
-Phase A/B/C macros · Gates · Trigger defs · Advance action
+### Step 2: Deploy to repo
+```bash
+mkdir -p ~/owens-lifeos/dashboards
+mkdir -p ~/owens-lifeos/data/progress_photos
+mkdir -p ~/owens-lifeos/logs
 
-## PROTOCOL (unchanged from V1)
+cp ~/Downloads/protocol_command_center.html ~/owens-lifeos/dashboards/
+cp ~/Downloads/serve_pcc.py ~/owens-lifeos/dashboards/
+chmod +x ~/owens-lifeos/dashboards/serve_pcc.py
 
-**Phase A** 19.5→16% · 2,470kcal avg · 0.5-0.7lb/wk
-High(M/Th) 2600·220·280·70 | Mod(T/F) 2450·220·230·70 | ActRec(Sat) 2400·220·200·75 | Rest(W/Sun) 2200·220·130·80
-
-**Phase B** 16→13% · 2,290kcal avg · 0.4-0.5lb/wk
-Refeed 2600·230·320·60 | Mod 2300·230·200·65 | ActRec 2200·230·170·65 | Rest 2000·230·100·75
-
-**Phase C** 13→10-12% · 2,200kcal avg · 0.25-0.4lb/wk
-Refeed 2500·240·320·55 | Mod 2200·240·180·60 | ActRec 2100·240·140·65 | Rest 1900·240·80·70
-
-**Training:** Mon UPush · Tue LStr · Wed Z2/Mob · Thu UPull · Fri LPow · Sat Z2 · Sun Rest
-
-**Triggers:** LM drop Δ≤-2lb/3scans(RED) · Weight stall 3wk flat(AMB) · Sleep <6h 3+nights(RED) · HRV -15%(AMB) · Hct ≥54%(RED) · Deep sleep 14d<0.5h(AMB)
-
-**Gates:** A→B: BF≤16.5% × 2wk + LM≥161 | B→C: BF≤13.2% × 2wk + LM≥161 | C→M: BF≤12% × 4wk + LM stable
-
-## V2 BUILD REQUIREMENTS FOR CODE
-
-### Infrastructure
-1. **Local HTTP endpoint for health_data.json** — prefer reusing :8077 dashboard server, CORS-enabled for localhost + Tailscale
-2. **File locations:**
-   - HTML: `~/owens-lifeos/dashboards/protocol_command_center.html`
-   - Manifest: `~/owens-lifeos/dashboards/pcc-manifest.json`
-   - SW: `~/owens-lifeos/dashboards/pcc-sw.js`
-   - Icons: `~/owens-lifeos/dashboards/pcc-icon-{192,512}.png`
-3. **Photo storage:** `~/owens-lifeos/data/progress_photos/YYYY-MM-DD/{front,side,back}.jpg`
-4. **New MCP tools:**
-   - `lifeos:save_scan` → writes `~/owens-lifeos/data/scans.json`
-   - `lifeos:save_photo` → base64 → jpg write
-   - `lifeos:log_protocol_day` → compliance signals to COP
-5. **Anticipation engine:**
-   - Task `protocol_trigger_scan` every 6h
-   - Push via Pushover (verify user has account) when RED fires
-   - Wed 0700 reminder: "Hume scan + photos today"
-6. **Model upgrade:** Replace `claude-sonnet-4-20250514` throughout (June 15 deprecation)
-
-### Data Contracts
-
-`health_data.json` expected shape:
-```
-{ "updated_at": "ISO", "metrics": {
-  "weight": { "latest": 216.7, "history": [{"date","value"}] },
-  "sleep": { "total": 6.7, "deep": 0.54, "rem": 1.8, "history": [...] },
-  "hrv": { "latest": 39, "avg_30d": 39, "history": [...] },
-  "rhr": { "latest": 71, "history": [...] },
-  "steps": { "today": 8500, "history": [...] },
-  "workouts": [{"date","type","duration_min"}]
-}}
-```
-If actual format differs, adapter layer in PCC fetch.
-
-`scans.json` (new, PCC writes):
-```
-[{ "date": "YYYY-MM-DD", "weight": float, "bf_pct": float, "fat_mass": float,
-   "lean_mass": float, "skeletal_muscle": float, "body_water_pct": float,
-   "visceral_fat": int, "hct": float|null, "photos": [paths], "ai_analysis": string }]
+# Test the server runs
+python3 ~/owens-lifeos/dashboards/serve_pcc.py --port 8079 &
+SERVER_PID=$!
+sleep 2
+curl -sf http://localhost:8079/api/health_data | head -50
+kill $SERVER_PID
 ```
 
-### Build Checklist
-- [ ] Expose health_data.json via local endpoint
-- [ ] Port V2 prototype artifact → production HTML
-- [ ] Swap mock data fetcher → real fetch
-- [ ] Implement photo uploads + MCP save
-- [ ] Implement scan save via MCP
-- [ ] PWA manifest + SW + icons
-- [ ] anticipation_engine task + Wed reminder
-- [ ] Push notifications (verify Pushover)
-- [ ] Test Tailscale access from iPhone
-- [ ] Back-link to COP via log_protocol_day
-- [ ] Upgrade AI model throughout
+### Step 3: Install LaunchAgent
+```bash
+# Stop any existing PCC service
+launchctl unload ~/Library/LaunchAgents/com.lifeos.pcc.plist 2>/dev/null || true
+
+# Install plist
+cp ~/Downloads/com.lifeos.pcc.plist ~/Library/LaunchAgents/
+
+# Load and start
+launchctl load ~/Library/LaunchAgents/com.lifeos.pcc.plist
+
+# Verify
+sleep 2
+curl -sf http://localhost:8079/ | head -5
+ps aux | grep serve_pcc | grep -v grep
+```
+
+### Step 4: Verify Tailscale exposure
+```bash
+# Get tailnet hostname
+TAILSCALE_NAME=$(tailscale status --json 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('Self',{}).get('DNSName','').rstrip('.'))")
+echo "Tailscale URL: https://${TAILSCALE_NAME}:8079/"
+
+# Verify port is bound to 0.0.0.0 (not just localhost)
+lsof -iTCP:8079 -sTCP:LISTEN | grep -E '\*:8079|0\.0\.0\.0:8079' || echo "WARN: not bound to all interfaces"
+
+# macOS firewall — allow incoming on 8079 if not already
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add /usr/bin/python3 2>/dev/null || true
+```
+
+### Step 5: Commit and report
+```bash
+cd ~/owens-lifeos
+git add dashboards/protocol_command_center.html dashboards/serve_pcc.py
+git commit -m "deploy: PCC v2 production server on :8079"
+git push
+```
+
+Report to Commander:
+- ✅ HTML deployed to dashboards/
+- ✅ Server running as LaunchAgent on :8079
+- ✅ Tailscale URL: https://<hostname>:8079/
+- ✅ Health data adapter: live | mock-fallback (depending on health_data.json presence)
+- Next action for Commander: Open Safari on iPhone → URL → Add to Home Screen
+
+---
+
+## HEALTH DATA ADAPTER
+
+`serve_pcc.py` includes `load_health_data()` which adapts whatever shape `health_data.json` has into the shape PCC expects. The adapter is conservative — if the file already matches PCC shape (has `history`, `latest`, `avg_30d`), it passes through. Otherwise it builds the shape from `metrics.weight.history`, `metrics.sleep.history`, etc.
+
+**If the actual `health_data.json` schema differs from the adapter's assumptions:** modify `load_health_data()` in `serve_pcc.py`. The PCC HTML expects this returned shape:
+
+```json
+{
+  "updated_at": "ISO timestamp",
+  "source": "live",
+  "latest": {
+    "weight": float, "sleep_total": float, "sleep_deep": float, "sleep_rem": float,
+    "hrv": int, "rhr": int, "steps": int, "active_cal": int,
+    "workout_today": { "type": str, "duration_min": int } | null
+  },
+  "avg_30d": { "hrv": int, "sleep_total": float, "sleep_deep": float },
+  "history": [
+    { "date": "YYYY-MM-DD", "dow": int (0=Sun),
+      "weight": float, "sleep_total": float, "sleep_deep": float, "sleep_rem": float,
+      "hrv": int, "rhr": int, "steps": int, "active_cal": int,
+      "workout": { "type": str, "duration_min": int } | null }
+  ]
+}
+```
+
+If the live endpoint fails, PCC HTML automatically falls back to a mock so the UI still renders. The header shows `LIVE` vs `MOCK` so Commander knows which is active.
+
+---
+
+## PROTOCOL DATA (embedded in HTML — authoritative reference here)
+
+### Phase A — Foundation Recomp (19.5% → 16% BF)
+Avg 2,470 kcal · 0.5-0.7 lb/wk · Diet break every 6 wk @ 2,800 kcal × 5-7 days
+
+| Day | Days | Cal | P | C | F |
+|---|---|---|---|---|---|
+| HIGH | Mon, Thu | 2,600 | 220 | 280 | 70 |
+| MODERATE | Tue, Fri | 2,450 | 220 | 230 | 70 |
+| ACTIVE REC | Sat | 2,400 | 220 | 200 | 75 |
+| REST | Wed, Sun | 2,200 | 220 | 130 | 80 |
+
+### Phase B — Precision Cut (16% → 13% BF)
+Avg 2,290 kcal · 0.4-0.5 lb/wk · Diet break every 4-5 wk × 5 days
+
+### Phase C — Single Digits (13% → 10-12% BF)
+Avg 2,200 kcal · 0.25-0.4 lb/wk · Diet break every 3-4 wk × 5-7 days MANDATORY
+
+### Training Split
+Mon UPush · Tue LStr · Wed Z2/Mob · Thu UPull · Fri LPow · Sat Z2 · Sun Rest
+
+### Triggers
+LM drop Δ≤-2lb/3scans (RED) · Weight stall 3wk flat (AMB) · Sleep <6h 3+nights (RED) · HRV -15% (AMB) · Hct ≥54% (RED) · Deep sleep 14d<0.5h (AMB)
+
+### Phase Gates
+A→B: BF≤16.5% × 2wk + LM≥161 | B→C: BF≤13.2% × 2wk + LM≥161 | C→M: BF≤12% × 4wk
+
+---
+
+## V2 PRODUCTION ENHANCEMENTS (Code post-deploy iteration)
+
+After Commander has used the deployed PCC for 1-2 weeks, evaluate these enhancements:
+
+### Push Notifications
+- Wed 0700 reminder: "Hume scan + photos today"
+- Trigger fires (RED only): "PCC ALERT: Lean mass dropping — check dashboard"
+- Implementation: Pushover API (verify Commander has account) → orchestrator task fires curl
+
+### Anticipation Engine Integration
+- New task: `protocol_trigger_scan` every 6h
+- Reads `scans.json` + `health_data.json`, runs trigger detection, emits to morning sweep
+- Surfaces RED triggers in Morning Sweep priority slot
+
+### COP Writeback
+- New MCP tool: `lifeos:log_protocol_day` — daily compliance signals
+- Wednesday scan submit auto-fires `lifeos:log_completion` for Medical domain
+
+### Real Cron-Aware Reminders
+- Wed 0700 calendar event auto-created if missing
+- "Scan day" presence detected by checking `scans.json` for current week
+
+### Model Upgrade (Hard Deadline)
+- `claude-sonnet-4-20250514` deprecated June 15
+- `serve_pcc.py` uses Claude CLI (no model lock-in) — but if anywhere hardcoded, upgrade
+
+---
+
+## TROUBLESHOOTING
+
+| Symptom | Likely Cause | Fix |
+|---|---|---|
+| 502 / connection refused | LaunchAgent not loaded | `launchctl load ~/Library/LaunchAgents/com.lifeos.pcc.plist` |
+| Header shows "MOCK" | health_data.json missing or shape mismatch | Check `~/owens-lifeos/data/health_data.json` exists; review adapter |
+| Photos not saving | `progress_photos/` not writable | `mkdir -p ~/owens-lifeos/data/progress_photos && chmod 755` |
+| AI insight is fallback text | Claude CLI not in PATH | Verify `which claude` works for user `toryowens` |
+| Tailscale 401 / blocked | Firewall or wrong host | `tailscale status` → verify hostname; check macOS Firewall |
+| Server crashes | Check logs | `tail -50 ~/owens-lifeos/logs/pcc.err.log` |
+
+---
 
 ## ITERATION LOG
 
 | Date | Version | Change |
 |---|---|---|
 | 2026-04-24 | 1.0 | V1 artifact deployed |
-| 2026-04-24 | 1.0 KILLED | Daily check-in anti-pattern. Commander rejection same day. |
-| 2026-04-24 | 2.0 | V2: passive dashboard + Wednesday active + trigger-driven. Prototype delivered. |
-
-## PRINCIPLE (propagate to health-performance + COS)
-
-> **Ambient by Default, Active by Exception.**
-> Read data that already exists. Active engagement permitted on cadence (weekly scan) or exception (trigger). Daily manual input must justify against this principle or be killed.
+| 2026-04-24 | 1.0 KILLED | Daily check-in anti-pattern |
+| 2026-04-24 | 2.0 prototype | V2: passive + Wed-centric + trigger-driven |
+| 2026-04-24 | 2.0 production | Single-file HTML + serve_pcc.py + LaunchAgent. Tailscale-published. CODE BUILD ORDER documented in this skill. |
 
 ---
-*Ambient by default. Active by exception.*
+
+*"Ambient by default. Active by exception. Read the data, don't collect it."*
