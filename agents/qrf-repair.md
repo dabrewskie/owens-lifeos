@@ -81,13 +81,38 @@ Act. Fix. Verify. Log. Brief. The Commander will see what you did in OverwatchTD
 3. PATCH
    Make the fix. Prefer minimal changes. If the root cause is deeper than a quick patch can address, make the quick patch AND log the deeper issue for Evolution Engine.
 
-4. VERIFY (expanded — double-pass)
-   a. Run the fixed script/check the output — PASS 1
-   b. Wait 10 seconds
-   c. Run it again — PASS 2
-   d. Two consecutive passes = VERIFIED
-   e. Single pass only = MONITORING (note in report)
-   f. Both fail = ESCALATE (fix didn't work)
+4. VERIFY (SO #14 — TRIPLE VALIDATION, MANDATORY)
+   Per CLAUDE.md SO #14, every QRF fix must pass THREE independent validations
+   before closure. A single passing run is NOT sufficient. A symptom that
+   disappeared is NOT validation.
+
+   a. V1 — DIRECT PATH
+      Run the specific broken path end-to-end (the actual failing task,
+      not a smoke-test surrogate). Must succeed in production form.
+
+   b. V2 — ROOT CAUSE
+      State why the failure occurred in one sentence. The explanation must
+      PREDICT the failure if the broken state were reintroduced. Test the
+      mechanism directly when possible (e.g., revert the fix in a copy and
+      observe failure recurs; or demonstrate the causal chain via help-text,
+      docs, env inspection). Symptom correlation alone is NOT root cause.
+
+   c. V3 — DURABILITY
+      Confirm:
+        - At least one ADJACENT path (different mode/agent/timeout, same
+          subsystem) also passes — the fix isn't local-only.
+        - The fix cannot be silently undone by another mechanism. Audit
+          for: auto-update, cache invalidation, race conditions, scheduled
+          reverts, symlink swaps, environment drift.
+        - A DETECTOR exists for the class of failure (existing test, new
+          smoke check, monitoring rule, or pre-flight assertion). If none
+          exists, ADD ONE before closing.
+
+   Outcome:
+    - All 3 pass → VERIFIED, close repair
+    - Any fail → return to RCA. Do NOT mark VERIFIED. Do NOT report success.
+    - Cannot run V3 detector now (e.g., scheduled task, downstream system) →
+      MONITORING; document the gap and the next-run validation plan.
 
 5. LOG (persistent repair playbook)
    Append to ~/Documents/S6_COMMS_TECH/dashboard/qrf_repair_log.json
@@ -139,7 +164,10 @@ Append to `~/Documents/S6_COMMS_TECH/dashboard/qrf_repair_log.json`:
       "cascade_risk": "none|low|medium",
       "cascade_check": "description of what was checked",
       "verification": "VERIFIED|MONITORING|FAILED",
-      "passes": "2/2 or 1/2 or 0/2",
+      "v1_direct_path": "PASS|FAIL — what was tested",
+      "v2_root_cause": "PASS|FAIL — one-sentence causal mechanism",
+      "v3_durability": "PASS|FAIL — adjacent path tested + detector in place",
+      "validations_passed": "3/3 or 2/3 or 1/3 or 0/3",
       "recurrence_count": N,
       "escalate_to_evolution": false,
       "risk": "LOW|MEDIUM",
