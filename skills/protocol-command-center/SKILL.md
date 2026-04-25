@@ -48,12 +48,27 @@ V1 daily morning check-in killed same day. Root cause: daily-input compliance tr
 ```
 Apple Watch → Apple Health → Health Auto Export
        ↓
-~/owens-lifeos/data/health_data.json
+~/Documents/S6_COMMS_TECH/dashboard/health/health_data.json   (canonical iCloud)
        ↓
-serve_pcc.py (port 8079, LaunchAgent com.lifeos.pcc)
+[orchestrator task: pcc_mirror_health, every 15 min — runs in FDA context]
+       ↓
+~/owens-lifeos/data/health_data.json   (TCC-safe local mirror)
+       ↓
+serve_pcc.py (port 8079, LaunchAgent com.lifeos.pcc — no FDA needed)
        ↓
 Tailscale → iPhone Safari → "PCC" home screen icon
 ```
+
+### Why the mirror?
+The PCC LaunchAgent does not have Full Disk Access — so it cannot read
+iCloud-mirrored paths under `~/Documents/`. The orchestrator's LaunchAgent
+DOES have FDA, so a small mirror task copies the canonical file to the
+non-protected repo path on a 15-minute interval (idempotent, SHA-gated).
+PCC reads the mirror; canonical file remains the single source of truth.
+
+If the mirror is missing, PCC tries the iCloud path directly (works only
+when invoked from a foreground/FDA context). If both fail, deterministic
+mock keeps the UI rendering. Header shows `LIVE` vs `MOCK` either way.
 
 ### Data Flow
 - **Read:** PCC fetches `/api/health_data` → `serve_pcc.py` reads `health_data.json` → returns adapted shape
@@ -66,9 +81,11 @@ Tailscale → iPhone Safari → "PCC" home screen icon
 | HTML (single-file React via CDN) | `~/owens-lifeos/dashboards/protocol_command_center.html` |
 | Server | `~/owens-lifeos/dashboards/serve_pcc.py` |
 | LaunchAgent | `~/Library/LaunchAgents/com.lifeos.pcc.plist` |
-| Health data input | `~/owens-lifeos/data/health_data.json` |
+| Mirror script | `~/Documents/S6_COMMS_TECH/scripts/pcc_mirror_health.py` |
+| Health data canonical | `~/Documents/S6_COMMS_TECH/dashboard/health/health_data.json` |
+| Health data mirror | `~/owens-lifeos/data/health_data.json` |
 | Scan persistence | `~/owens-lifeos/data/scans.json` |
-| Photos | `~/owens-lifeos/data/progress_photos/YYYY-MM-DD/{front,side,back}.{jpg,png}` |
+| Photos | `~/owens-lifeos/data/progress_photos/YYYY-MM-DD/{front,side,back}.jpg` |
 | Logs | `~/owens-lifeos/logs/pcc.{out,err}.log` |
 
 ---
@@ -243,7 +260,7 @@ After Commander has used the deployed PCC for 1-2 weeks, evaluate these enhancem
 | 502 / connection refused | LaunchAgent not loaded | `launchctl load ~/Library/LaunchAgents/com.lifeos.pcc.plist` |
 | Header shows "MOCK" | health_data.json missing or shape mismatch | Check `~/owens-lifeos/data/health_data.json` exists; review adapter |
 | Photos not saving | `progress_photos/` not writable | `mkdir -p ~/owens-lifeos/data/progress_photos && chmod 755` |
-| AI insight is fallback text | Claude CLI not in PATH | Verify `which claude` works for user `toryowens` |
+| AI insight is fallback text | Claude CLI hangs under launchd context (config-bootstrap or TCC path) | Known V2.1 limitation. Fallback is graceful. To diagnose: `launchctl unload com.lifeos.pcc.plist`, run server in foreground, retry `/api/insight` — if it works there, daemon-context auth is the issue |
 | Tailscale 401 / blocked | Firewall or wrong host | `tailscale status` → verify hostname; check macOS Firewall |
 | Server crashes | Check logs | `tail -50 ~/owens-lifeos/logs/pcc.err.log` |
 
@@ -257,6 +274,7 @@ After Commander has used the deployed PCC for 1-2 weeks, evaluate these enhancem
 | 2026-04-24 | 1.0 KILLED | Daily check-in anti-pattern |
 | 2026-04-24 | 2.0 prototype | V2: passive + Wed-centric + trigger-driven |
 | 2026-04-24 | 2.0 production | Single-file HTML + serve_pcc.py + LaunchAgent. Tailscale-published. CODE BUILD ORDER documented in this skill. |
+| 2026-04-25 | 2.1 production | RCA fix: PCC LaunchAgent lacks FDA → cannot read iCloud `~/Documents/`. Solution: TCC-safe local mirror at `~/owens-lifeos/data/health_data.json`, refreshed every 15min by `pcc_mirror_health.py` task in orchestrator (which has FDA). Triple-validated per SO #14. Insight via Claude CLI gracefully falls back under launchd (known limitation). |
 
 ---
 

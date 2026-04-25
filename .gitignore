@@ -1,1 +1,6 @@
 .backup-originals/
+
+# Runtime artifacts (PCC + future dashboards)
+logs/
+data/
+!data/.gitkeep
