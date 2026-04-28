@@ -101,6 +101,30 @@
     .footer-note { color: var(--muted); font-size: 11px; margin-top: 14px; text-align: center; }
     .stale { color: var(--amber); }
     .ok    { color: var(--green); }
+
+    /* Iron Discipline drawer + recommendations */
+    details.train-drawer { padding: 12px 14px; cursor: pointer; }
+    details.train-drawer summary { list-style: none; outline: none; }
+    details.train-drawer summary::-webkit-details-marker { display: none; }
+    details.train-drawer summary::after { content: '\25B8'; color: var(--muted); font-size: 14px; float: right; margin-top: 2px; transition: transform 120ms; }
+    details.train-drawer[open] summary::after { transform: rotate(90deg); }
+    .train-body { padding-top: 12px; border-top: 1px solid var(--line); margin-top: 10px; }
+    .ex-table { width: 100%; }
+    .ex-table th { font-size: 11px; text-transform: uppercase; color: var(--muted); letter-spacing: 0.06em; }
+    .ex-table td { padding: 6px 4px; font-size: 13px; }
+    .ex-table tr td:first-child { color: var(--text); font-weight: 500; }
+    .tier-heavy     td:nth-child(3) { color: var(--accent); font-weight: 600; }
+    .tier-moderate  td:nth-child(3) { color: var(--text); }
+    .tier-accessory td:nth-child(3) { color: var(--muted); }
+    .suggest { color: var(--green); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .suggest.flat { color: var(--muted); }
+    .train-foot { margin-top: 10px; color: var(--muted); }
+
+    .reco { padding: 8px 10px; border-radius: 8px; margin-bottom: 6px; border: 1px solid var(--line); }
+    .reco.g { background: rgba(34,197,94,0.06);  border-color: rgba(34,197,94,0.25); }
+    .reco.a { background: rgba(245,158,11,0.06); border-color: rgba(245,158,11,0.25); }
+    .reco.r { background: rgba(239,68,68,0.08);  border-color: rgba(239,68,68,0.35); }
+    .reco-title { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
   </style>
 </head>
 <body>
@@ -145,14 +169,28 @@
     </div>
 
     <h2>Today's Training</h2>
-    <div class="card">
-      <div class="kv">
-        <div>
-          <div class="v lg" id="train-name">—</div>
-          <div class="small" id="train-context">—</div>
+    <details class="card train-drawer" id="train-drawer">
+      <summary>
+        <div class="kv">
+          <div>
+            <div class="v lg" id="train-name">—</div>
+            <div class="small" id="train-context">—</div>
+          </div>
+          <span class="pill" id="train-badge">scheduled</span>
         </div>
-        <span class="pill" id="train-badge">scheduled</span>
+      </summary>
+      <div class="train-body">
+        <table class="ex-table" id="train-exercises">
+          <thead><tr><th>Exercise</th><th>Sets x Reps</th><th>Last Wk</th><th>Suggest</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="train-foot small" id="train-foot">—</div>
       </div>
+    </details>
+
+    <h2>Recommendations</h2>
+    <div class="card" id="reco-card">
+      <div class="reco-list" id="reco-list"></div>
     </div>
 
     <h2>Last Night Recovery</h2>
@@ -340,22 +378,32 @@
 const API_BASE = '';
 const HEALTH_URL = '/health/health_data.json';
 const SCANS_URL  = '/data/scans.json';
-const TRAINING_WEEK = ['Sun-Rest','Mon-UPush','Tue-LStr','Wed-Z2/Mob','Thu-UPull','Fri-LPow','Sat-Z2'];
-const TRAINING_LONG = {
-  'Sun-Rest':'Rest','Mon-UPush':'Upper Push','Tue-LStr':'Lower Strength',
-  'Wed-Z2/Mob':'Z2 / Mobility','Thu-UPull':'Upper Pull','Fri-LPow':'Lower Power','Sat-Z2':'Z2'
-};
-const PHASE_DEFS = {
-  A: { range:'19.5 → 16% BF', kcal:2470, gate:'BF ≤ 16.5% × 2wk + LM ≥ 161' },
-  B: { range:'16 → 13% BF',   kcal:2290, gate:'BF ≤ 13.2% × 2wk + LM ≥ 161' },
-  C: { range:'13 → 10-12% BF',kcal:2200, gate:'BF ≤ 12% × 4wk + LM stable' }
-};
-const MACROS = {
-  A: { high:[2600,220,280,70], mod:[2450,220,230,70], actrec:[2400,220,200,75], rest:[2200,220,130,80] },
-  B: { high:[2600,230,320,60], mod:[2300,230,200,65], actrec:[2200,230,170,65], rest:[2000,230,100,75] },
-  C: { high:[2500,240,320,55], mod:[2200,240,180,60], actrec:[2100,240,140,65], rest:[1900,240, 80,70] }
-};
-const DAY_TYPE = ['rest','high','mod','rest','high','mod','actrec'];
+const IRON_URL   = '/api/iron_discipline';
+
+// Plan-driven — replaces hardcoded MACROS/DAY_TYPE/PHASE_DEFS/TRAINING_WEEK
+let IRON_PLAN = null;
+
+function dayKey(dow /* 0..6, Sun=0 */) {
+  return ['SUN','MON','TUE','WED','THU','FRI','SAT'][dow];
+}
+function todayDayKey() { return dayKey(new Date().getDay()); }
+function todaysSessionId() {
+  const map = {MON:'MON_UPPER_PUSH', TUE:'TUE_LOWER_STRENGTH', THU:'THU_UPPER_PULL', FRI:'FRI_LOWER_POWER'};
+  return map[todayDayKey()] || null;
+}
+function todaysMacros() {
+  if (!IRON_PLAN) return null;
+  const dk = todayDayKey();
+  const type = (IRON_PLAN.weekly_structure[dk] || {}).type || 'FULL_REST';
+  return { type, ...IRON_PLAN.macros[type] };
+}
+function currentWeekNumber() {
+  if (!IRON_PLAN) return 0;
+  const start = new Date(IRON_PLAN.meta.start_date + 'T00:00:00');
+  const today = new Date();
+  const days = Math.floor((today - start) / 86400000);
+  return Math.min(IRON_PLAN.meta.total_weeks, Math.max(1, Math.floor(days / 7) + 1));
+}
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -390,6 +438,10 @@ function switchTab(name) {
 
 async function load() {
   clear($('#banners'));
+  try {
+    const r = await fetch(IRON_URL, { cache: 'no-cache' });
+    if (r.ok) IRON_PLAN = await r.json();
+  } catch (e) { IRON_PLAN = null; }
   try {
     const r = await fetch(HEALTH_URL, { cache: 'no-cache' });
     if (!r.ok) throw new Error('health ' + r.status);
@@ -431,28 +483,40 @@ function render() {
     stamp.className = 'stamp ' + (ago > 90 ? 'stale' : 'ok');
   }
 
-  const phase = (HEALTH.protocol && HEALTH.protocol.phase) || 'A';
-  const def = PHASE_DEFS[phase] || PHASE_DEFS.A;
-  $('#phase-name').textContent = 'Phase ' + phase;
-  $('#phase-target').textContent = def.range + ' · ' + def.kcal + ' kcal avg';
-  const dow = new Date().getDay();
-  const dt = DAY_TYPE[dow];
-  const dayLabel = { high:'High / Refeed', mod:'Moderate', actrec:'Active Recovery', rest:'Rest' }[dt];
-  $('#day-type').textContent = dayLabel;
-  $('#day-context').textContent = TRAINING_LONG[TRAINING_WEEK[dow]] || '—';
-  const m = (MACROS[phase] || MACROS.A)[dt];
-  $('#m-kcal').textContent = m[0];
-  $('#m-p').textContent = m[1] + 'g';
-  $('#m-c').textContent = m[2] + 'g';
-  $('#m-f').textContent = m[3] + 'g';
+  if (IRON_PLAN) {
+    const wk = currentWeekNumber();
+    $('#phase-name').textContent = 'Week ' + wk + ' of ' + IRON_PLAN.meta.total_weeks;
+    $('#phase-target').textContent = IRON_PLAN.meta.program + ' · ' +
+      IRON_PLAN.meta.start_date + ' -> ' + IRON_PLAN.meta.end_date;
+  } else {
+    $('#phase-name').textContent = 'Phase A';
+    $('#phase-target').textContent = '—';
+  }
+
+  const m = todaysMacros();
+  if (m) {
+    $('#m-kcal').textContent = m.kcal;
+    $('#m-p').textContent = m.protein_g + 'g';
+    const c = (m.carb_g_min === m.carb_g_max) ? String(m.carb_g_min) : (m.carb_g_min + '-' + m.carb_g_max);
+    $('#m-c').textContent = c + 'g';
+    const f = (m.fat_g_min === m.fat_g_max) ? String(m.fat_g_min) : (m.fat_g_min + '-' + m.fat_g_max);
+    $('#m-f').textContent = f + 'g';
+    const label = {TRAINING:'Training',ACTIVE_RECOVERY:'Active Recovery',FULL_REST:'Full Rest'}[m.type] || m.type;
+    $('#day-type').textContent = label;
+    $('#day-context').textContent = m.timing_note || '';
+  } else {
+    $('#m-kcal').textContent = '—';
+    $('#m-p').textContent = '—';
+    $('#m-c').textContent = '—';
+    $('#m-f').textContent = '—';
+    $('#day-type').textContent = '—';
+    $('#day-context').textContent = 'Plan unavailable';
+  }
   const protein = (HEALTH.macros && HEALTH.macros.protein) || {};
   $('#m-eaten-p').textContent = (protein.current != null ? protein.current : '—') + ' g';
   $('#m-avg-p').textContent = fmt(protein.avg_7d, 0) + ' g';
 
-  const trainShort = TRAINING_WEEK[dow];
-  $('#train-name').textContent = TRAINING_LONG[trainShort] || trainShort;
-  $('#train-context').textContent = trainShort;
-  $('#train-badge').textContent = (dt === 'rest') ? 'rest day' : 'scheduled';
+  renderTrainingDrawer();
 
   const v = HEALTH.vital_signs || {};
   const sleep = v.sleep_avg || {};
@@ -499,6 +563,142 @@ function render() {
   renderWoW();
   renderTrends();
   renderGate();
+  renderRecommendations();
+}
+
+function renderTrainingDrawer() {
+  const sid = todaysSessionId();
+  const dk = todayDayKey();
+  const session = (IRON_PLAN && sid) ? IRON_PLAN.sessions[sid] : null;
+  const tbody = $('#train-exercises tbody');
+  if (tbody) clear(tbody);
+  if (!session) {
+    if (!IRON_PLAN) {
+      $('#train-name').textContent = 'Plan unavailable';
+      $('#train-context').textContent = 'iron_discipline.json missing';
+      $('#train-badge').textContent = '—';
+    } else if (dk === 'WED' || dk === 'SUN') {
+      $('#train-name').textContent = 'Full Rest';
+      $('#train-context').textContent = 'No lift today';
+      $('#train-badge').textContent = 'rest';
+    } else if (dk === 'SAT') {
+      $('#train-name').textContent = 'Active Recovery';
+      $('#train-context').textContent = '30-40 min standalone Z2';
+      $('#train-badge').textContent = 'recovery';
+    } else {
+      $('#train-name').textContent = '—';
+      $('#train-context').textContent = '—';
+      $('#train-badge').textContent = 'scheduled';
+    }
+    $('#train-foot').textContent = (IRON_PLAN && IRON_PLAN.progressive_overload_rule) || '—';
+    return;
+  }
+  $('#train-name').textContent = session.name;
+  $('#train-context').textContent = (session.exercises || []).length + ' exercises · Z2 25-30 min post-lift';
+  $('#train-badge').textContent = 'training';
+
+  const wk = currentWeekNumber();
+  for (const ex of (session.exercises || [])) {
+    const lastWk = (ex.history || []).filter(h => h.week === wk - 1).slice(-1)[0]
+                  || (ex.history || []).slice(-1)[0]
+                  || null;
+    const lastTxt = lastWk ? (lastWk.weight + ' x ' + lastWk.reps) : '—';
+    const suggestion = computeSuggestion(ex, lastWk);
+    const tr = el('tr', { class: 'tier-' + ex.tier },
+      el('td', null, ex.name),
+      el('td', null, ex.sets + ' x ' + ex.reps),
+      el('td', null, lastTxt),
+      el('td', null, el('span', { class: suggestion.cls }, suggestion.text))
+    );
+    tbody.appendChild(tr);
+  }
+  $('#train-foot').textContent = IRON_PLAN.progressive_overload_rule;
+}
+
+function computeSuggestion(ex, lastWk) {
+  if (!lastWk || typeof lastWk.weight !== 'number') return { text: '—', cls: 'suggest flat' };
+  const weight = lastWk.weight;
+  if (ex.tier === 'heavy') return { text: (weight + 5) + ' x 5', cls: 'suggest' };
+  const repMatch = String(ex.reps).match(/(\d+)\s*(?:\/leg)?\s*$/);
+  const repMax = repMatch ? parseInt(repMatch[1], 10) : 8;
+  const lastReps = typeof lastWk.reps === 'number' ? lastWk.reps : 0;
+  if (lastReps >= repMax) return { text: (weight + 5) + ' x ' + Math.max(repMax - 2, 8), cls: 'suggest' };
+  return { text: weight + ' x ' + Math.min(lastReps + 1, repMax), cls: 'suggest' };
+}
+
+function renderRecommendations() {
+  const list = $('#reco-list');
+  if (!list) return;
+  clear(list);
+  const recos = computeRecommendations();
+  if (!recos.length) {
+    list.appendChild(el('div', { class: 'small' }, 'On track — nothing to flag.'));
+    return;
+  }
+  recos.forEach(r => {
+    list.appendChild(el('div', { class: 'reco ' + (r.sev || 'a') },
+      el('div', { class: 'reco-title' }, r.title),
+      el('div', { class: 'small' }, r.body)
+    ));
+  });
+}
+
+function computeRecommendations() {
+  const out = [];
+  if (!IRON_PLAN) {
+    out.push({ sev: 'a', title: 'Plan not loaded',
+      body: 'iron_discipline.json unreachable. Macros + workouts will fall back to placeholder text.' });
+    return out;
+  }
+  const wk = currentWeekNumber();
+  const total = IRON_PLAN.meta.total_weeks;
+
+  out.push({
+    sev: 'g',
+    title: 'Week ' + wk + ' of ' + total + ' — ' + IRON_PLAN.meta.program,
+    body: (total - wk) + ' weeks remaining. Plan ends ' + IRON_PLAN.meta.end_date +
+          '. Schedule next phase planning by week ' + (total - 1) + '.'
+  });
+
+  const prevWk = (IRON_PLAN.weekly_progress.weeks || []).find(w => w.week === wk - 1);
+  if (prevWk && (!SCANS || SCANS.length === 0)) {
+    const nextScan = (IRON_PLAN.weekly_progress.weeks.find(w => w.week === wk) || {}).scan_date || '—';
+    out.push({
+      sev: 'r',
+      title: 'Last scan (week ' + (wk - 1) + ', ' + prevWk.scan_date + ') was NOT logged',
+      body: 'Hume scan + photos missed. Capture next scan ' + nextScan + ' on Wednesday.'
+    });
+  }
+
+  const m = todaysMacros();
+  const protein = (HEALTH && HEALTH.macros && HEALTH.macros.protein) || {};
+  if (m && protein.current != null && protein.current < m.protein_g * 0.5) {
+    out.push({
+      sev: 'a',
+      title: 'Protein ' + protein.current + 'g — need ' + m.protein_g + 'g today',
+      body: (m.protein_g - protein.current) + 'g remaining. Time-block a 60g protein shake + a 60g meal to close the gap.'
+    });
+  }
+
+  const deep = HEALTH && HEALTH.vital_signs && HEALTH.vital_signs.deep_sleep_avg;
+  if (deep && deep.status === 'red') {
+    out.push({
+      sev: 'a',
+      title: 'Deep sleep RED — consider deload on heavy compound',
+      body: 'Deep sleep ' + deep.value + 'h vs target ' + deep.target + 'h. CNS not recovered. Drop top set 5%.'
+    });
+  }
+
+  const daysLeft = Math.ceil((new Date(IRON_PLAN.meta.end_date + 'T23:59:59') - Date.now()) / 86400000);
+  if (daysLeft <= 14 && daysLeft >= 0) {
+    out.push({
+      sev: 'a',
+      title: 'Plan ends in ' + daysLeft + ' days',
+      body: 'Time to plan Phase 3. Decide: continue cut, switch to recomp, or maintain.'
+    });
+  }
+
+  return out;
 }
 
 function computeCompositeStatus() {
@@ -578,14 +778,19 @@ function renderWoW() {
   });
 }
 
+const PHASE_GATE = {
+  A: { gate: 'BF ≤ 16.5% × 2wk + LM ≥ 161', target: 16.5 },
+  B: { gate: 'BF ≤ 13.2% × 2wk + LM ≥ 161', target: 13.2 },
+  C: { gate: 'BF ≤ 12% × 4wk + LM stable',  target: 12.0 }
+};
+
 function renderGate() {
   const phase = (HEALTH.protocol && HEALTH.protocol.phase) || 'A';
-  const def = PHASE_DEFS[phase];
+  const def = PHASE_GATE[phase] || PHASE_GATE.A;
   const next = phase === 'A' ? 'B' : phase === 'B' ? 'C' : 'M';
   $('#gate-name').textContent = phase + ' → ' + next;
   $('#gate-detail').textContent = def.gate;
-  const thresholds = { A: 16.5, B: 13.2, C: 12.0 };
-  const target = thresholds[phase];
+  const target = def.target;
   const recent = SCANS.slice(-2).filter(s => s.bf_pct != null);
   const passing = recent.filter(s => s.bf_pct <= target).length;
   $('#gate-progress').textContent = recent.length
@@ -596,7 +801,7 @@ function renderGate() {
 
 function renderTrends() {
   const v = HEALTH.vital_signs || {};
-  drawSpark('spark-weight', [v.weight && v.weight.value]);
+  drawWeightTrend();
   $('#weight-stats').textContent = 'latest ' + fmt(v.weight && v.weight.value, 1) + ' lbs · trend ' + ((v.weight && v.weight.trend) || '—');
   drawSpark('spark-sleep', [v.sleep_avg && v.sleep_avg.value]);
   $('#sleep-stats').textContent = '7d avg ' + fmt(v.sleep_avg && v.sleep_avg.value, 1) + 'h';
@@ -637,6 +842,25 @@ function renderTrends() {
       );
       body.appendChild(tr);
     });
+  }
+}
+
+function drawWeightTrend() {
+  const v = HEALTH && HEALTH.vital_signs && HEALTH.vital_signs.weight;
+  const t = HEALTH && HEALTH.trends;
+  let series = null;
+  if (t) {
+    const cand = t.weight_30d || t.weight_14d || t.weight;
+    if (Array.isArray(cand)) {
+      series = cand.map(p => (p && (p.value != null ? p.value : p.lbs))).map(x => (x == null ? null : x));
+    } else if (cand && Array.isArray(cand.values)) {
+      series = cand.values.map(x => (x == null ? null : x));
+    }
+  }
+  if (series && series.some(x => x != null)) {
+    drawSpark('spark-weight', series);
+  } else {
+    drawSpark('spark-weight', [v && v.value]);
   }
 }
 

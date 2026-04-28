@@ -4,6 +4,7 @@
 logs/
 data/
 !data/.gitkeep
+!data/iron_discipline.json
 
 # Local backups (kept out of repo)
 *.bak

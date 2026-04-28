@@ -666,6 +666,15 @@ class PCCHandler(BaseHTTPRequestHandler):
             return self._send_json(load_canonical_health())
         if path == "/data/scans.json":
             return self._send_json(load_scans())
+        if path == "/api/iron_discipline":
+            try:
+                p = DATA_DIR / "iron_discipline.json"
+                if p.exists():
+                    body = json.loads(p.read_text())
+                    return self._send_json(body)
+            except Exception:
+                pass
+            return self._send_json({"error": "iron_discipline.json missing"}, 404)
         # Legacy (kept for backward compat)
         if path == "/api/health_data":
             return self._send_json(load_health_data())

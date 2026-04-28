@@ -1,0 +1,618 @@
+{
+  "meta": {
+    "program": "Iron Discipline \u2014 Phase 2",
+    "subtitle": "8-Week Cut",
+    "start_date": "2026-04-14",
+    "end_date": "2026-06-07",
+    "total_weeks": 8,
+    "source_file": "iron_discipline_phase2.xlsx",
+    "drive_file_id": "1uvxwHWQXCpDReDZEPnkLqAq7SE-ItDpm",
+    "last_synced": "2026-04-28T01:27:32Z"
+  },
+  "weekly_structure": {
+    "MON": {
+      "focus": "Upper Push",
+      "type": "TRAINING",
+      "z2_min": "25-30",
+      "rep_scheme": "Heavy \u2192 Volume"
+    },
+    "TUE": {
+      "focus": "Lower Strength",
+      "type": "TRAINING",
+      "z2_min": "25-30",
+      "rep_scheme": "Heavy \u2192 Volume"
+    },
+    "WED": {
+      "focus": null,
+      "type": "FULL_REST",
+      "z2_min": null,
+      "rep_scheme": null
+    },
+    "THU": {
+      "focus": "Upper Pull",
+      "type": "TRAINING",
+      "z2_min": "25-30",
+      "rep_scheme": "Heavy \u2192 Volume"
+    },
+    "FRI": {
+      "focus": "Lower Power",
+      "type": "TRAINING",
+      "z2_min": "25-30",
+      "rep_scheme": "Heavy \u2192 Volume"
+    },
+    "SAT": {
+      "focus": null,
+      "type": "ACTIVE_RECOVERY",
+      "z2_min": "30-40",
+      "rep_scheme": null
+    },
+    "SUN": {
+      "focus": null,
+      "type": "FULL_REST",
+      "z2_min": null,
+      "rep_scheme": null
+    }
+  },
+  "macros": {
+    "TRAINING": {
+      "kcal": 2250,
+      "protein_g": 220,
+      "carb_g_min": 200,
+      "carb_g_max": 220,
+      "fat_g_min": 60,
+      "fat_g_max": 70,
+      "timing_note": "Biggest carb meal post-Z2"
+    },
+    "ACTIVE_RECOVERY": {
+      "kcal": 1900,
+      "protein_g": 220,
+      "carb_g_min": 120,
+      "carb_g_max": 140,
+      "fat_g_min": 70,
+      "fat_g_max": 80,
+      "timing_note": "Moderate carbs around walk"
+    },
+    "FULL_REST": {
+      "kcal": 1750,
+      "protein_g": 220,
+      "carb_g_min": 80,
+      "carb_g_max": 100,
+      "fat_g_min": 80,
+      "fat_g_max": 90,
+      "timing_note": "Protein+fats, minimal carbs PM"
+    }
+  },
+  "weekly_avg": {
+    "kcal": 2050,
+    "protein_g": 220,
+    "carb_g": 165,
+    "fat_g": 70,
+    "deficit_kcal": "~500-600/day"
+  },
+  "rep_scheme": {
+    "heavy": {
+      "sets": 4,
+      "reps": "4-6",
+      "intensity": "85%+ 1RM",
+      "rest_min": "2-3",
+      "purpose": "Maintain neural drive. Prevent strength bleed."
+    },
+    "moderate": {
+      "sets": "3-4",
+      "reps": "8-10",
+      "intensity": "70-75%",
+      "rest_sec": "90",
+      "purpose": "Build volume without CNS overload."
+    },
+    "accessory": {
+      "sets": 3,
+      "reps": "12-15",
+      "intensity": "60-65%",
+      "rest_sec": "60",
+      "purpose": "Chase the pump. Metabolic stress for recomp."
+    }
+  },
+  "progressive_overload_rule": "Add 5 lbs to heavy compound OR 1 rep to each set before adding weight.",
+  "sessions": {
+    "MON_UPPER_PUSH": {
+      "day": "MON",
+      "name": "Upper Push",
+      "focus": "Upper Push",
+      "exercises": [
+        {
+          "name": "Flat Barbell Bench Press",
+          "sets": 4,
+          "reps": "4-6",
+          "tier": "heavy",
+          "notes": "HEAVY \u2014 strength insurance",
+          "history": [
+            {
+              "week": 1,
+              "weight": 275,
+              "reps": 6
+            },
+            {
+              "week": 2,
+              "weight": 285,
+              "reps": 4
+            },
+            {
+              "week": 3,
+              "weight": 285,
+              "reps": 5
+            }
+          ]
+        },
+        {
+          "name": "Overhead Press (DB or BB)",
+          "sets": 4,
+          "reps": "8-10",
+          "tier": "moderate",
+          "notes": "Moderate \u2014 shoulder mass",
+          "history": [
+            {
+              "week": 1,
+              "weight": 165,
+              "reps": 8
+            },
+            {
+              "week": 2,
+              "weight": 165,
+              "reps": 8
+            },
+            {
+              "week": 3,
+              "weight": 175,
+              "reps": 8
+            }
+          ]
+        },
+        {
+          "name": "Incline DB Press",
+          "sets": 3,
+          "reps": "10-12",
+          "tier": "moderate",
+          "notes": "Moderate \u2014 upper chest",
+          "history": [
+            {
+              "week": 1,
+              "weight": 70,
+              "reps": 10
+            },
+            {
+              "week": 2,
+              "weight": 75,
+              "reps": 10
+            },
+            {
+              "week": 3,
+              "weight": 80,
+              "reps": 10
+            }
+          ]
+        },
+        {
+          "name": "Lateral Raises",
+          "sets": 3,
+          "reps": "12-15",
+          "tier": "accessory",
+          "notes": "Accessory \u2014 cap the delts",
+          "history": [
+            {
+              "week": 1,
+              "weight": 20,
+              "reps": 15
+            },
+            {
+              "week": 2,
+              "weight": 25,
+              "reps": 15
+            },
+            {
+              "week": 3,
+              "weight": 22.5,
+              "reps": 15
+            }
+          ]
+        },
+        {
+          "name": "Tricep Dips or Pushdowns",
+          "sets": 3,
+          "reps": "12-15",
+          "tier": "accessory",
+          "notes": "Accessory \u2014 lockout strength",
+          "history": [
+            {
+              "week": 1,
+              "weight": 217,
+              "reps": 15
+            },
+            {
+              "week": 2,
+              "weight": 217,
+              "reps": 15
+            },
+            {
+              "week": 3,
+              "weight": 217,
+              "reps": 15
+            }
+          ]
+        },
+        {
+          "name": "Face Pulls",
+          "sets": 3,
+          "reps": "15-20",
+          "tier": "accessory",
+          "notes": "Prehab \u2014 shoulder health non-negotiable",
+          "history": [
+            {
+              "week": 1,
+              "weight": 42.5,
+              "reps": 20
+            },
+            {
+              "week": 2,
+              "weight": 42.5,
+              "reps": 20
+            },
+            {
+              "week": 3,
+              "weight": 50,
+              "reps": 20
+            }
+          ]
+        }
+      ]
+    },
+    "TUE_LOWER_STRENGTH": {
+      "day": "TUE",
+      "name": "Lower Strength",
+      "focus": "Lower Strength",
+      "exercises": [
+        {
+          "name": "Back Squat",
+          "sets": 4,
+          "reps": "4-6",
+          "tier": "heavy",
+          "notes": "HEAVY \u2014 king of all lifts",
+          "history": [
+            {
+              "week": 1,
+              "weight": 315,
+              "reps": 5
+            },
+            {
+              "week": 2,
+              "weight": 325,
+              "reps": 5
+            }
+          ]
+        },
+        {
+          "name": "Bulgarian Split Squat",
+          "sets": 3,
+          "reps": "8-10/leg",
+          "tier": "moderate",
+          "notes": "Moderate \u2014 unilateral balance",
+          "history": []
+        },
+        {
+          "name": "Leg Press",
+          "sets": 3,
+          "reps": "10-12",
+          "tier": "moderate",
+          "notes": "Moderate \u2014 volume without spinal load",
+          "history": [
+            {
+              "week": 1,
+              "weight": 540,
+              "reps": 3
+            },
+            {
+              "week": 2,
+              "weight": 540,
+              "reps": 12
+            }
+          ]
+        },
+        {
+          "name": "Walking Lunges",
+          "sets": 2,
+          "reps": "12/leg",
+          "tier": "accessory",
+          "notes": "Accessory \u2014 functional movement",
+          "history": []
+        },
+        {
+          "name": "Calf Raises",
+          "sets": 4,
+          "reps": "15-20",
+          "tier": "accessory",
+          "notes": "Accessory \u2014 high rep, full ROM",
+          "history": [
+            {
+              "week": 1,
+              "weight": 540,
+              "reps": 15
+            },
+            {
+              "week": 2,
+              "weight": 540,
+              "reps": 15
+            }
+          ]
+        },
+        {
+          "name": "Hanging Leg Raise",
+          "sets": 3,
+          "reps": "12-15",
+          "tier": "accessory",
+          "notes": "Core \u2014 anti-extension",
+          "history": []
+        }
+      ]
+    },
+    "THU_UPPER_PULL": {
+      "day": "THU",
+      "name": "Upper Pull",
+      "focus": "Upper Pull",
+      "exercises": [
+        {
+          "name": "Barbell Row (Pendlay or Bent)",
+          "sets": 4,
+          "reps": "4-6",
+          "tier": "heavy",
+          "notes": "HEAVY \u2014 thick back",
+          "history": [
+            {
+              "week": 1,
+              "weight": 185,
+              "reps": 6
+            },
+            {
+              "week": 2,
+              "weight": 195,
+              "reps": 5
+            }
+          ]
+        },
+        {
+          "name": "Weighted Pull-ups or Lat PD",
+          "sets": 4,
+          "reps": "8-10",
+          "tier": "moderate",
+          "notes": "Moderate \u2014 vertical pull",
+          "history": [
+            {
+              "week": 1,
+              "weight": "BW",
+              "reps": 8
+            },
+            {
+              "week": 2,
+              "weight": "BW",
+              "reps": 8
+            }
+          ]
+        },
+        {
+          "name": "Cable Row (close grip)",
+          "sets": 3,
+          "reps": "10-12",
+          "tier": "moderate",
+          "notes": "Moderate \u2014 squeeze and hold",
+          "history": [
+            {
+              "week": 1,
+              "weight": 57.5,
+              "reps": 12
+            },
+            {
+              "week": 2,
+              "weight": 65,
+              "reps": 12
+            }
+          ]
+        },
+        {
+          "name": "Barbell Curl",
+          "sets": 3,
+          "reps": "10-12",
+          "tier": "accessory",
+          "notes": "Accessory \u2014 arm mass",
+          "history": [
+            {
+              "week": 1,
+              "weight": 85,
+              "reps": 12
+            },
+            {
+              "week": 2,
+              "weight": 90,
+              "reps": 12
+            }
+          ]
+        },
+        {
+          "name": "Hammer Curls",
+          "sets": 3,
+          "reps": "12-15",
+          "tier": "accessory",
+          "notes": "Accessory \u2014 brachialis",
+          "history": [
+            {
+              "week": 1,
+              "weight": 35,
+              "reps": 12
+            },
+            {
+              "week": 2,
+              "weight": 35,
+              "reps": 12
+            }
+          ]
+        },
+        {
+          "name": "Rear Delt Fly",
+          "sets": 3,
+          "reps": "15-20",
+          "tier": "accessory",
+          "notes": "Prehab \u2014 posture and balance",
+          "history": [
+            {
+              "week": 1,
+              "weight": 90,
+              "reps": 15
+            }
+          ]
+        }
+      ]
+    },
+    "FRI_LOWER_POWER": {
+      "day": "FRI",
+      "name": "Lower Power",
+      "focus": "Lower Power",
+      "exercises": [
+        {
+          "name": "Deadlift",
+          "sets": 4,
+          "reps": "4-6",
+          "tier": "heavy",
+          "notes": "HEAVY \u2014 posterior chain king",
+          "history": [
+            {
+              "week": 1,
+              "weight": 275,
+              "reps": 5
+            },
+            {
+              "week": 2,
+              "weight": 275,
+              "reps": 5
+            }
+          ]
+        },
+        {
+          "name": "Romanian Deadlift",
+          "sets": 3,
+          "reps": "8-10",
+          "tier": "moderate",
+          "notes": "Moderate \u2014 glute activation",
+          "history": [
+            {
+              "week": 1,
+              "weight": 135,
+              "reps": 9
+            },
+            {
+              "week": 2,
+              "weight": 155,
+              "reps": 9
+            }
+          ]
+        },
+        {
+          "name": "Leg Curl (seated or lying)",
+          "sets": 3,
+          "reps": "10-12",
+          "tier": "moderate",
+          "notes": "Moderate \u2014 hamstring isolation",
+          "history": [
+            {
+              "week": 1,
+              "weight": 110,
+              "reps": 12
+            },
+            {
+              "week": 2,
+              "weight": 110,
+              "reps": 12
+            }
+          ]
+        },
+        {
+          "name": "Goblet Squat",
+          "sets": 3,
+          "reps": "15",
+          "tier": "accessory",
+          "notes": "Accessory \u2014 lighter, pump focus",
+          "history": [
+            {
+              "week": 1,
+              "weight": 35,
+              "reps": 15
+            }
+          ]
+        },
+        {
+          "name": "Farmer's Carry",
+          "sets": 3,
+          "reps": "40 yards",
+          "tier": "accessory",
+          "notes": "Functional \u2014 grip, core, traps",
+          "history": [
+            {
+              "week": 1,
+              "weight": 90,
+              "reps": "40yd"
+            }
+          ]
+        },
+        {
+          "name": "Plank Variations",
+          "sets": 3,
+          "reps": "45 sec",
+          "tier": "accessory",
+          "notes": "Core \u2014 stability",
+          "history": []
+        }
+      ]
+    }
+  },
+  "weekly_progress": {
+    "schema": "Bodyweight, BF%, Skeletal Muscle, Fat Mass, Waist, Sleep Avg, Training Sessions, Z2 Sessions, Avg Daily Protein, Avg Daily Calories, RPE Avg, Energy 1-10, Notes",
+    "weeks": [
+      {
+        "week": 1,
+        "scan_date": "2026-04-16",
+        "logged": false
+      },
+      {
+        "week": 2,
+        "scan_date": "2026-04-23",
+        "logged": false
+      },
+      {
+        "week": 3,
+        "scan_date": "2026-04-30",
+        "logged": false
+      },
+      {
+        "week": 4,
+        "scan_date": "2026-05-07",
+        "logged": false
+      },
+      {
+        "week": 5,
+        "scan_date": "2026-05-14",
+        "logged": false
+      },
+      {
+        "week": 6,
+        "scan_date": "2026-05-21",
+        "logged": false
+      },
+      {
+        "week": 7,
+        "scan_date": "2026-05-28",
+        "logged": false
+      },
+      {
+        "week": 8,
+        "scan_date": "2026-06-04",
+        "logged": false
+      }
+    ]
+  }
+}
