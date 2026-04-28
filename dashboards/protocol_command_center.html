@@ -120,11 +120,119 @@
     .suggest.flat { color: var(--muted); }
     .train-foot { margin-top: 10px; color: var(--muted); }
 
-    .reco { padding: 8px 10px; border-radius: 8px; margin-bottom: 6px; border: 1px solid var(--line); }
+    .reco { padding: 8px 10px; border-radius: 8px; margin-bottom: 6px; border: 1px solid var(--line);
+      position: relative; transition: opacity 180ms; }
     .reco.g { background: rgba(34,197,94,0.06);  border-color: rgba(34,197,94,0.25); }
     .reco.a { background: rgba(245,158,11,0.06); border-color: rgba(245,158,11,0.25); }
     .reco.r { background: rgba(239,68,68,0.08);  border-color: rgba(239,68,68,0.35); }
     .reco-title { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+    .reco-actions { display: flex; gap: 6px; margin-top: 8px; }
+    .reco-act { padding: 4px 10px; border-radius: 999px; font-size: 11px; cursor: pointer;
+      background: transparent; border: 1px solid var(--line); color: var(--muted); }
+    .reco-act.ack { color: var(--green); border-color: rgba(34,197,94,0.4); }
+    .reco-act.defer { color: var(--accent); border-color: rgba(56,189,248,0.4); }
+    .reco-act:hover { background: var(--panel-2); }
+    .reco.dismissed { opacity: 0.4; }
+
+    /* MODAL — bottom sheet */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100;
+      opacity: 0; pointer-events: none; transition: opacity 180ms ease; }
+    .modal-backdrop.open { opacity: 1; pointer-events: auto; }
+    .modal { position: fixed; left: 0; right: 0; bottom: 0; z-index: 101;
+      background: var(--panel); border-top: 1px solid var(--line);
+      border-radius: 20px 20px 0 0; padding: 18px 18px calc(24px + var(--safe-bot));
+      max-width: 720px; margin: 0 auto; max-height: 85vh; overflow-y: auto;
+      transform: translateY(100%); transition: transform 220ms cubic-bezier(.2,.9,.2,1); }
+    .modal.open { transform: translateY(0); }
+    .modal-handle { width: 40px; height: 4px; background: var(--muted); opacity: 0.5;
+      border-radius: 2px; margin: -6px auto 14px; }
+    .modal-x { position: absolute; top: 12px; right: 14px; background: transparent;
+      border: 0; color: var(--muted); font-size: 22px; cursor: pointer; padding: 4px 10px; }
+    .modal h3 { margin: 0 0 4px; font-size: 22px; font-weight: 700; }
+    .modal .sub { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+    .range-chips { display: flex; gap: 6px; margin-bottom: 12px; }
+    .range-chips button { background: transparent; border: 1px solid var(--line);
+      color: var(--muted); padding: 4px 10px; border-radius: 999px;
+      font-size: 11px; letter-spacing: 0.04em; cursor: pointer; }
+    .range-chips button.active { background: var(--accent); border-color: var(--accent); color: white; }
+    .delta-row { display: flex; gap: 16px; align-items: baseline; margin: 10px 0 14px;
+      padding: 10px 12px; background: var(--panel-2); border-radius: 10px; }
+    .delta-row .delta { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .delta-row .delta-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .chart-svg { width: 100%; height: 180px; display: block; margin-bottom: 12px;
+      background: var(--panel-2); border-radius: 10px; }
+    .chart-tooltip { position: absolute; background: var(--bg); color: var(--text);
+      padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line);
+      font-size: 12px; font-variant-numeric: tabular-nums; pointer-events: none;
+      transform: translate(-50%, -100%); z-index: 110; opacity: 0; transition: opacity 120ms; }
+    .chart-tooltip.show { opacity: 1; }
+    .modal .meta-row { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px;
+      color: var(--muted); margin-top: 8px; }
+    .modal .meta-row span strong { color: var(--text); font-weight: 600; }
+
+    /* TILE — clickable metric */
+    .tile { cursor: pointer; transition: background 120ms, transform 80ms; border-radius: 6px;
+      padding: 4px 6px; margin: -4px -6px; }
+    .tile:hover { background: rgba(56,189,248,0.06); }
+    .tile:active { transform: scale(0.98); }
+    .tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* QUICK LOG */
+    .quick-log { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+    .ql-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .ql-chip { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line);
+      background: var(--panel-2); color: var(--text); font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: background 120ms, transform 80ms; }
+    .ql-chip:hover { background: rgba(56,189,248,0.12); border-color: var(--accent); color: var(--accent); }
+    .ql-chip:active { transform: scale(0.95); }
+    .ql-chip.fired { background: var(--green); color: white; border-color: var(--green);
+      animation: ql-flash 250ms ease; }
+    @keyframes ql-flash { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+    /* WORKOUT LOGGER */
+    .ex-row { cursor: pointer; }
+    .ex-row:hover { background: rgba(56,189,248,0.05); }
+    .ex-row.active { background: rgba(56,189,248,0.10); }
+    .set-logger { margin-top: 8px; padding: 12px; background: var(--panel-2);
+      border-radius: 10px; border: 1px solid var(--line); }
+    .set-logger .head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+    .set-logger .target { font-size: 12px; color: var(--muted); }
+    .set-row { display: grid; grid-template-columns: 24px 1fr 1fr 80px; gap: 8px;
+      align-items: center; padding: 4px 0; }
+    .set-row .idx { color: var(--muted); font-size: 12px; text-align: center; }
+    .set-row input { width: 100%; padding: 6px 8px; border-radius: 6px;
+      border: 1px solid var(--line); background: var(--panel); color: var(--text);
+      font: inherit; font-variant-numeric: tabular-nums; text-align: center; }
+    .set-row input:focus { outline: none; border-color: var(--accent); }
+    .set-row .check { background: transparent; border: 1px solid var(--line);
+      color: var(--muted); border-radius: 6px; padding: 4px 8px; cursor: pointer; }
+    .set-row.done .check { background: var(--green); color: white; border-color: var(--green); }
+    .set-row.done input { opacity: 0.6; }
+    .session-progress { display: flex; gap: 4px; margin-top: 12px; }
+    .session-progress .pip { flex: 1; height: 6px; border-radius: 3px; background: var(--line); }
+    .session-progress .pip.done { background: var(--green); }
+
+    /* HEADER LIVE-DOT + REFRESH */
+    .hdr-right { display: flex; align-items: center; gap: 8px; }
+    .live-dot { width: 8px; height: 8px; border-radius: 50%;
+      background: var(--green); box-shadow: 0 0 0 0 rgba(34,197,94,0.5);
+      transition: background 150ms; }
+    .live-dot.loading { background: var(--accent);
+      animation: live-pulse 1.2s ease-in-out infinite; }
+    .live-dot.error { background: var(--red); animation: none; }
+    @keyframes live-pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(56,189,248,0.6); }
+      50%     { box-shadow: 0 0 0 8px rgba(56,189,248,0); }
+    }
+    .hdr-btn { background: transparent; border: 1px solid var(--line);
+      color: var(--muted); width: 32px; height: 32px; border-radius: 8px;
+      cursor: pointer; font-size: 14px; transition: all 180ms; }
+    .hdr-btn:hover { color: var(--accent); border-color: var(--accent); transform: rotate(45deg); }
+    .hdr-btn:active { transform: rotate(180deg) scale(0.92); }
+
+    /* TAB FADE */
+    section[data-tab] { transition: opacity 180ms ease; }
+    section[data-tab].fading { opacity: 0; }
   </style>
 </head>
 <body>
@@ -135,7 +243,11 @@
       <div class="dot x" id="status-dot" title="Composite status"></div>
       <h1>Protocol Command Center</h1>
     </div>
-    <div class="stamp" id="stamp">loading…</div>
+    <div class="hdr-right">
+      <span class="live-dot" id="live-dot" title="Loading"></span>
+      <span class="stamp" id="stamp">loading…</span>
+      <button class="hdr-btn" id="btn-refresh" title="Refresh data">&#8635;</button>
+    </div>
   </header>
 
   <div id="banners"></div>
@@ -166,6 +278,14 @@
         <div><div class="k">Eaten today (P)</div><div class="v" id="m-eaten-p">—</div></div>
         <div><div class="k">7d avg P</div><div class="v" id="m-avg-p">—</div></div>
       </div>
+      <div class="quick-log">
+        <div class="ql-label">Quick log:</div>
+        <button class="ql-chip" data-protein="30">+30g P</button>
+        <button class="ql-chip" data-protein="45">+45g P</button>
+        <button class="ql-chip" data-protein="60">+60g P</button>
+        <button class="ql-chip" id="ql-custom">Custom…</button>
+        <span class="small" id="ql-status"></span>
+      </div>
     </div>
 
     <h2>Today's Training</h2>
@@ -184,7 +304,12 @@
           <thead><tr><th>Exercise</th><th>Sets x Reps</th><th>Last Wk</th><th>Suggest</th></tr></thead>
           <tbody></tbody>
         </table>
+        <div id="set-logger-host"></div>
         <div class="train-foot small" id="train-foot">—</div>
+        <div class="actions" style="margin-top:14px">
+          <button class="btn primary" id="btn-save-session">Save Session</button>
+          <span class="small" id="session-status"></span>
+        </div>
       </div>
     </details>
 
@@ -274,14 +399,17 @@
   </section>
 
   <section data-tab="trends" class="hidden">
-    <h2>Weight (14d)</h2>
-    <div class="card"><div class="sparkrow" id="spark-weight"></div><div class="small" id="weight-stats">—</div></div>
+    <h2>Weight (30d)</h2>
+    <div class="card"><div id="chart-weight"></div><div class="small" id="weight-stats">—</div></div>
 
-    <h2>Sleep (14d)</h2>
-    <div class="card"><div class="sparkrow" id="spark-sleep"></div><div class="small" id="sleep-stats">—</div></div>
+    <h2>Sleep (7d)</h2>
+    <div class="card"><div id="chart-sleep"></div><div class="small" id="sleep-stats">—</div></div>
 
-    <h2>HRV (14d vs 30d baseline)</h2>
-    <div class="card"><div class="sparkrow" id="spark-hrv"></div><div class="small" id="hrv-stats">—</div></div>
+    <h2>HRV (7d vs 30d baseline)</h2>
+    <div class="card"><div id="chart-hrv"></div><div class="small" id="hrv-stats">—</div></div>
+
+    <h2>Steps (7d)</h2>
+    <div class="card"><div id="chart-steps"></div><div class="small" id="steps-stats">—</div></div>
 
     <h2>Workouts (28d heatmap)</h2>
     <div class="card" id="wo-heatmap"><div class="small">—</div></div>
@@ -372,6 +500,11 @@
     <button data-go="trends">Trends</button>
     <button data-go="protocol">Protocol</button>
   </nav>
+
+  <!-- Modal host (drill-down sheet) -->
+  <div class="modal-backdrop" id="modal-backdrop"></div>
+  <div id="modal-host"></div>
+
 </div>
 
 <script>
@@ -415,7 +548,10 @@ function el(tag, attrs, ...kids) {
   if (attrs) for (const [k,v] of Object.entries(attrs)) {
     if (k === 'class') e.className = v;
     else if (k === 'style') e.style.cssText = v;
-    else if (k.startsWith('on') && typeof v === 'function') e.addEventListener(k.slice(2), v);
+    else if (k === 'data') {
+      if (v && typeof v === 'object') for (const [dk, dv] of Object.entries(v)) e.dataset[dk] = dv;
+    }
+    else if (k.startsWith('on') && typeof v === 'function') e.addEventListener(k.slice(2).toLowerCase(), v);
     else e.setAttribute(k, v);
   }
   for (const c of kids) {
@@ -431,13 +567,22 @@ let SCANS  = [];
 
 $$('nav button').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.go)));
 function switchTab(name) {
-  $$('section[data-tab]').forEach(s => s.classList.toggle('hidden', s.dataset.tab !== name));
-  $$('nav button').forEach(b => b.classList.toggle('active', b.dataset.go === name));
-  window.scrollTo({ top: 0, behavior: 'instant' });
+  $$('section[data-tab]:not(.hidden)').forEach(s => s.classList.add('fading'));
+  setTimeout(() => {
+    $$('section[data-tab]').forEach(s => {
+      s.classList.toggle('hidden', s.dataset.tab !== name);
+      s.classList.remove('fading');
+    });
+    $$('nav button').forEach(b => b.classList.toggle('active', b.dataset.go === name));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (name === 'trends') renderTrends();
+  }, 160);
 }
 
 async function load() {
   clear($('#banners'));
+  const liveDot = $('#live-dot');
+  if (liveDot) liveDot.className = 'live-dot loading';
   try {
     const r = await fetch(IRON_URL, { cache: 'no-cache' });
     if (r.ok) IRON_PLAN = await r.json();
@@ -448,13 +593,21 @@ async function load() {
     HEALTH = await r.json();
   } catch (e) {
     showBanner('r', 'Health data unreachable: ' + e.message);
+    if (liveDot) liveDot.className = 'live-dot error';
     return;
   }
   try {
     const r = await fetch(SCANS_URL, { cache: 'no-cache' });
     if (r.ok) SCANS = await r.json();
   } catch (e) { SCANS = []; }
-  render();
+  try {
+    render();
+    if (liveDot) liveDot.className = 'live-dot';
+  } catch (e) {
+    showBanner('r', 'Render failed: ' + e.message);
+    if (liveDot) liveDot.className = 'live-dot error';
+    throw e;
+  }
 }
 
 function showBanner(sev, text) {
@@ -564,14 +717,366 @@ function render() {
   renderTrends();
   renderGate();
   renderRecommendations();
+  wireMetricTiles();
 }
+
+/* ============================================================
+   METRIC REGISTRY + DRILL-DOWN MODAL
+   ============================================================ */
+
+const METRIC_REGISTRY = {
+  'm-kcal':   { title: 'Calories Today',     unit: ' kcal', source: 'macros.calories',
+                value: () => (HEALTH && HEALTH.macros && HEALTH.macros.calories && HEALTH.macros.calories.current),
+                target: () => (HEALTH && HEALTH.macros && HEALTH.macros.calories && HEALTH.macros.calories.target),
+                series: () => seriesFromTrends(null) },
+  'm-p':      { title: 'Protein Today',      unit: 'g', source: 'macros.protein',
+                value: () => (HEALTH && HEALTH.macros && HEALTH.macros.protein && HEALTH.macros.protein.current),
+                target: () => (todaysMacros() || {}).protein_g,
+                series: () => [] },
+  'm-c':      { title: 'Carbs Today',        unit: 'g', source: 'macros.carbs',
+                value: () => (HEALTH && HEALTH.macros && HEALTH.macros.carbs && HEALTH.macros.carbs.current),
+                target: () => (todaysMacros() || {}).carb_g_max,
+                series: () => [] },
+  'm-f':      { title: 'Fat Today',          unit: 'g', source: 'macros.fat',
+                value: () => (HEALTH && HEALTH.macros && HEALTH.macros.fat && HEALTH.macros.fat.current),
+                target: () => (todaysMacros() || {}).fat_g_max,
+                series: () => [] },
+  'm-eaten-p':{ title: 'Protein Eaten',      unit: 'g', source: 'macros.protein.current',
+                value: () => (HEALTH && HEALTH.macros && HEALTH.macros.protein && HEALTH.macros.protein.current),
+                target: () => (todaysMacros() || {}).protein_g,
+                series: () => [] },
+  'm-avg-p':  { title: '7d Avg Protein',     unit: 'g', source: 'macros.protein.avg_7d',
+                value: () => (HEALTH && HEALTH.macros && HEALTH.macros.protein && HEALTH.macros.protein.avg_7d),
+                target: () => 220,
+                series: () => [] },
+  'r-sleep':  { title: 'Sleep (hours)',      unit: 'h', source: 'vital_signs.sleep_avg',
+                value: () => (HEALTH && HEALTH.vital_signs && HEALTH.vital_signs.sleep_avg && HEALTH.vital_signs.sleep_avg.value),
+                target: () => 7,
+                series: () => seriesFromTrends('sleep') },
+  'r-deep':   { title: 'Deep Sleep',         unit: 'h', source: 'vital_signs.deep_sleep_avg',
+                value: () => (HEALTH && HEALTH.vital_signs && HEALTH.vital_signs.deep_sleep_avg && HEALTH.vital_signs.deep_sleep_avg.value),
+                target: () => 1.5,
+                series: () => [] },
+  'r-hrv':    { title: 'HRV',                unit: 'ms', source: 'vital_signs.hrv',
+                value: () => (HEALTH && HEALTH.vital_signs && HEALTH.vital_signs.hrv && HEALTH.vital_signs.hrv.value),
+                target: () => null,
+                series: () => seriesFromTrends('hrv') },
+  'r-rhr':    { title: 'Resting HR',         unit: ' bpm', source: 'vital_signs.resting_heart_rate',
+                value: () => (HEALTH && HEALTH.vital_signs && HEALTH.vital_signs.resting_heart_rate && HEALTH.vital_signs.resting_heart_rate.value),
+                target: () => null,
+                series: () => [] },
+  'r-steps':  { title: 'Steps',              unit: '', source: 'vital_signs.steps_avg',
+                value: () => (HEALTH && HEALTH.vital_signs && HEALTH.vital_signs.steps_avg && HEALTH.vital_signs.steps_avg.value),
+                target: () => 10000,
+                series: () => seriesFromTrends('steps') },
+  'r-spo2':   { title: 'SpO2',               unit: '%', source: 'vital_signs.spo2',
+                value: () => (HEALTH && HEALTH.vital_signs && HEALTH.vital_signs.spo2 && HEALTH.vital_signs.spo2.value),
+                target: () => 95,
+                series: () => [] },
+  'd-weight': { title: 'Scan Weight',        unit: ' lbs', source: 'scans[*].weight',
+                value: () => (SCANS.length ? SCANS[SCANS.length-1].weight : null),
+                target: () => null,
+                series: () => SCANS.map(s => s.weight).filter(x => typeof x === 'number') },
+  'd-bf':     { title: 'Scan BF%',           unit: '%', source: 'scans[*].bf_pct',
+                value: () => (SCANS.length ? SCANS[SCANS.length-1].bf_pct : null),
+                target: () => null,
+                series: () => SCANS.map(s => s.bf_pct).filter(x => typeof x === 'number') },
+  'd-lm':     { title: 'Scan Lean Mass',     unit: ' lbs', source: 'scans[*].lean_mass',
+                value: () => (SCANS.length ? SCANS[SCANS.length-1].lean_mass : null),
+                target: () => null,
+                series: () => SCANS.map(s => s.lean_mass).filter(x => typeof x === 'number') },
+};
+
+function seriesFromTrends(key) {
+  if (!HEALTH || !HEALTH.trends || !key) return [];
+  const t = HEALTH.trends[key];
+  if (!t) return [];
+  if (Array.isArray(t.values)) return t.values.slice();
+  if (Array.isArray(t)) return t.map(p => (p && (p.value != null ? p.value : p.lbs)) || null);
+  return [];
+}
+
+function seriesLabels(key) {
+  if (!HEALTH || !HEALTH.trends || !key) return [];
+  const t = HEALTH.trends[key];
+  if (t && Array.isArray(t.labels)) return t.labels.slice();
+  return [];
+}
+
+function wireMetricTiles() {
+  for (const id of Object.keys(METRIC_REGISTRY)) {
+    const elt = document.getElementById(id);
+    if (!elt) continue;
+    if (elt.classList.contains('tile')) continue;
+    elt.classList.add('tile');
+    elt.tabIndex = 0;
+    elt.setAttribute('role', 'button');
+    elt.addEventListener('click', () => openMetricModal(id));
+    elt.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openMetricModal(id); }
+    });
+  }
+}
+
+let _modalRange = 30; // 7 / 30 / 90
+
+function openMetricModal(id) {
+  const def = METRIC_REGISTRY[id];
+  if (!def) return;
+  _modalRange = 30;
+  buildModal(id, def);
+}
+
+function buildModal(id, def) {
+  const host = $('#modal-host');
+  const backdrop = $('#modal-backdrop');
+  clear(host);
+
+  const series = (def.series && def.series()) || [];
+  const value  = def.value ? def.value() : null;
+  const target = def.target ? def.target() : null;
+
+  const modal = el('div', { class: 'modal', id: 'modal-' + id },
+    el('div', { class: 'modal-handle' }),
+    el('button', { class: 'modal-x', 'aria-label': 'Close', onClick: closeModal }, '\u00d7'),
+    el('h3', null, def.title),
+    el('div', { class: 'sub' }, def.source ? ('source: ' + def.source) : ''),
+  );
+
+  // Range chips
+  const chips = el('div', { class: 'range-chips' });
+  for (const r of [7, 30, 90]) {
+    const btn = el('button', {
+      class: r === _modalRange ? 'active' : '',
+      'data-range': r,
+      onClick: () => { _modalRange = r; buildModal(id, def); }
+    }, r + 'd');
+    chips.appendChild(btn);
+  }
+  modal.appendChild(chips);
+
+  // Big value + delta row
+  const sliced = sliceSeries(series, _modalRange);
+  const last = (typeof value === 'number') ? value
+              : (sliced.length ? sliced[sliced.length-1] : null);
+  const wowDelta = computeWowDelta(sliced);
+  const arrow = wowDelta == null ? '\u2192'
+              : wowDelta > 0 ? '\u2191'
+              : wowDelta < 0 ? '\u2193' : '\u2192';
+  const arrowClass = wowDelta == null ? 'flat' : wowDelta > 0 ? 'up' : wowDelta < 0 ? 'down' : 'flat';
+
+  const deltaRow = el('div', { class: 'delta-row' },
+    el('div', null,
+      el('div', { class: 'delta-label' }, 'Current'),
+      el('div', { class: 'delta' }, last == null ? '—' : (formatVal(last) + (def.unit || '')))
+    ),
+    el('div', null,
+      el('div', { class: 'delta-label' }, 'WoW Δ'),
+      el('div', { class: 'delta ' + arrowClass },
+        arrow + ' ' + (wowDelta == null ? '—' : (formatVal(Math.abs(wowDelta)) + (def.unit || ''))))
+    ),
+    target != null ? el('div', null,
+      el('div', { class: 'delta-label' }, 'Target'),
+      el('div', { class: 'delta' }, formatVal(target) + (def.unit || ''))
+    ) : null,
+  );
+  modal.appendChild(deltaRow);
+
+  // Chart host
+  const chartHost = el('div', { class: 'chart-host', style: 'position:relative;' });
+  modal.appendChild(chartHost);
+
+  // Meta row
+  const meta = el('div', { class: 'meta-row' },
+    el('span', null, el('strong', null, sliced.length), ' points'),
+    sliced.length ? el('span', null, 'min ', el('strong', null, formatVal(Math.min(...sliced.filter(x=>typeof x==='number'))))) : null,
+    sliced.length ? el('span', null, 'max ', el('strong', null, formatVal(Math.max(...sliced.filter(x=>typeof x==='number'))))) : null,
+  );
+  modal.appendChild(meta);
+
+  host.appendChild(modal);
+
+  // Render the chart after insertion (clientWidth needs DOM)
+  requestAnimationFrame(() => {
+    drawLineChart(chartHost, sliced, { unit: def.unit || '' });
+    backdrop.classList.add('open');
+    modal.classList.add('open');
+  });
+}
+
+function sliceSeries(series, n) {
+  if (!Array.isArray(series)) return [];
+  const cleaned = series.map(v => (typeof v === 'number' && !isNaN(v)) ? v : null);
+  return cleaned.slice(-n);
+}
+
+function computeWowDelta(series) {
+  const valid = series.filter(v => typeof v === 'number' && !isNaN(v));
+  if (valid.length < 2) return null;
+  const last = valid[valid.length - 1];
+  // Look back 7 indices if we have them, else first point
+  const lookback = Math.min(valid.length - 1, 7);
+  const prior = valid[valid.length - 1 - lookback];
+  return last - prior;
+}
+
+function formatVal(n) {
+  if (typeof n !== 'number' || isNaN(n)) return '—';
+  if (Math.abs(n) >= 1000) return Math.round(n).toLocaleString();
+  if (Math.abs(n) >= 100)  return Math.round(n).toString();
+  return n.toFixed(1);
+}
+
+function closeModal() {
+  const host = $('#modal-host');
+  const backdrop = $('#modal-backdrop');
+  const modal = host.querySelector('.modal');
+  if (modal) modal.classList.remove('open');
+  backdrop.classList.remove('open');
+  setTimeout(() => clear(host), 240);
+}
+
+document.getElementById('modal-backdrop').addEventListener('click', closeModal);
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+
+/* ============================================================
+   SVG LINE CHART
+   ============================================================ */
+
+function drawLineChart(host, series, opts) {
+  opts = opts || {};
+  clear(host);
+  const valid = (series || []).filter(v => typeof v === 'number' && !isNaN(v));
+  if (valid.length < 2) {
+    host.appendChild(el('div', { class: 'small', style: 'padding:18px;text-align:center;' }, 'Need ≥ 2 data points'));
+    return;
+  }
+  const w = host.clientWidth || 600;
+  const h = opts.height || 180;
+  const pad = { l: 36, r: 12, t: 12, b: 22 };
+  const min = Math.min(...valid);
+  const max = Math.max(...valid);
+  const range = (max - min) || 1;
+  const xStep = (w - pad.l - pad.r) / Math.max(1, series.length - 1);
+  const ySpan = h - pad.t - pad.b;
+
+  const SVG = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(SVG, 'svg');
+  svg.setAttribute('class', 'chart-svg');
+  svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+  svg.setAttribute('preserveAspectRatio', 'none');
+
+  // Gridlines
+  for (let i = 0; i <= 3; i++) {
+    const y = pad.t + (i * ySpan / 3);
+    const ln = document.createElementNS(SVG, 'line');
+    ln.setAttribute('x1', pad.l); ln.setAttribute('x2', w - pad.r);
+    ln.setAttribute('y1', y); ln.setAttribute('y2', y);
+    ln.setAttribute('stroke', 'rgba(148,163,184,0.15)');
+    ln.setAttribute('stroke-width', '1');
+    svg.appendChild(ln);
+  }
+
+  // Build points
+  const points = [];
+  for (let i = 0; i < series.length; i++) {
+    const v = series[i];
+    if (typeof v !== 'number' || isNaN(v)) continue;
+    const x = pad.l + i * xStep;
+    const y = pad.t + ySpan - ((v - min) / range) * ySpan;
+    points.push({ x: x, y: y, v: v, i: i });
+  }
+
+  // Area fill
+  if (points.length) {
+    const path = document.createElementNS(SVG, 'path');
+    let d = 'M ' + points[0].x + ' ' + (h - pad.b) + ' L ' + points[0].x + ' ' + points[0].y;
+    for (let i = 1; i < points.length; i++) d += ' L ' + points[i].x + ' ' + points[i].y;
+    d += ' L ' + points[points.length - 1].x + ' ' + (h - pad.b) + ' Z';
+    path.setAttribute('d', d);
+    path.setAttribute('fill', 'rgba(56,189,248,0.15)');
+    svg.appendChild(path);
+  }
+
+  // Line
+  if (points.length > 1) {
+    const path = document.createElementNS(SVG, 'path');
+    let d = 'M ' + points[0].x + ' ' + points[0].y;
+    for (let i = 1; i < points.length; i++) d += ' L ' + points[i].x + ' ' + points[i].y;
+    path.setAttribute('d', d);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', '#38bdf8');
+    path.setAttribute('stroke-width', '2');
+    path.setAttribute('stroke-linejoin', 'round');
+    svg.appendChild(path);
+  }
+
+  // Dots
+  for (const p of points) {
+    const c = document.createElementNS(SVG, 'circle');
+    c.setAttribute('cx', p.x); c.setAttribute('cy', p.y);
+    c.setAttribute('r', 3); c.setAttribute('fill', '#38bdf8');
+    svg.appendChild(c);
+  }
+
+  // Y-axis labels (top/bottom)
+  const labels = [[0, max], [3, min]];
+  for (const lab of labels) {
+    const i = lab[0], val = lab[1];
+    const y = pad.t + (i * ySpan / 3);
+    const t = document.createElementNS(SVG, 'text');
+    t.setAttribute('x', pad.l - 6); t.setAttribute('y', y + 3);
+    t.setAttribute('fill', '#94a3b8');
+    t.setAttribute('font-size', '10');
+    t.setAttribute('text-anchor', 'end');
+    t.textContent = (typeof val === 'number' && val > 100) ? Math.round(val) : Number(val).toFixed(1);
+    svg.appendChild(t);
+  }
+
+  // Tooltip
+  const tooltip = el('div', { class: 'chart-tooltip' });
+  host.style.position = 'relative';
+  host.appendChild(tooltip);
+
+  svg.addEventListener('mousemove', function (e) {
+    const rect = svg.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * w;
+    let nearest = null, best = Infinity;
+    for (const p of points) {
+      const d = Math.abs(p.x - x);
+      if (d < best) { best = d; nearest = p; }
+    }
+    if (nearest) {
+      const formatted = (typeof nearest.v === 'number' && nearest.v > 100)
+        ? Math.round(nearest.v).toString()
+        : Number(nearest.v).toFixed(1);
+      tooltip.textContent = formatted + (opts.unit || '');
+      tooltip.style.left = ((nearest.x / w) * rect.width) + 'px';
+      tooltip.style.top  = ((nearest.y / h) * rect.height - 6) + 'px';
+      tooltip.classList.add('show');
+    }
+  });
+  svg.addEventListener('mouseleave', () => tooltip.classList.remove('show'));
+  host.appendChild(svg);
+}
+
+/* ============================================================
+   TRAINING DRAWER + WORKOUT LOGGER
+   ============================================================ */
+
+let SESSION_STATE = { exerciseIdx: null, sets: [] };
 
 function renderTrainingDrawer() {
   const sid = todaysSessionId();
   const dk = todayDayKey();
   const session = (IRON_PLAN && sid) ? IRON_PLAN.sessions[sid] : null;
   const tbody = $('#train-exercises tbody');
+  const loggerHost = $('#set-logger-host');
   if (tbody) clear(tbody);
+  if (loggerHost) clear(loggerHost);
+  SESSION_STATE = { exerciseIdx: null, sets: [], sessionId: sid };
   if (!session) {
     if (!IRON_PLAN) {
       $('#train-name').textContent = 'Plan unavailable';
@@ -598,32 +1103,197 @@ function renderTrainingDrawer() {
   $('#train-badge').textContent = 'training';
 
   const wk = currentWeekNumber();
-  for (const ex of (session.exercises || [])) {
+  const exercises = session.exercises || [];
+  exercises.forEach((ex, idx) => {
     const lastWk = (ex.history || []).filter(h => h.week === wk - 1).slice(-1)[0]
                   || (ex.history || []).slice(-1)[0]
                   || null;
     const lastTxt = lastWk ? (lastWk.weight + ' x ' + lastWk.reps) : '—';
     const suggestion = computeSuggestion(ex, lastWk);
-    const tr = el('tr', { class: 'tier-' + ex.tier },
+    const tr = el('tr', { class: 'tier-' + ex.tier + ' ex-row', 'data-idx': idx,
+                          onClick: () => openSetLogger(idx, ex, lastWk, suggestion) },
       el('td', null, ex.name),
       el('td', null, ex.sets + ' x ' + ex.reps),
       el('td', null, lastTxt),
       el('td', null, el('span', { class: suggestion.cls }, suggestion.text))
     );
     tbody.appendChild(tr);
-  }
+  });
   $('#train-foot').textContent = IRON_PLAN.progressive_overload_rule;
 }
 
 function computeSuggestion(ex, lastWk) {
-  if (!lastWk || typeof lastWk.weight !== 'number') return { text: '—', cls: 'suggest flat' };
+  if (!lastWk || typeof lastWk.weight !== 'number') return { text: '—', cls: 'suggest flat', weight: null, reps: null };
   const weight = lastWk.weight;
-  if (ex.tier === 'heavy') return { text: (weight + 5) + ' x 5', cls: 'suggest' };
+  if (ex.tier === 'heavy') return { text: (weight + 5) + ' x 5', cls: 'suggest', weight: weight + 5, reps: 5 };
   const repMatch = String(ex.reps).match(/(\d+)\s*(?:\/leg)?\s*$/);
   const repMax = repMatch ? parseInt(repMatch[1], 10) : 8;
   const lastReps = typeof lastWk.reps === 'number' ? lastWk.reps : 0;
-  if (lastReps >= repMax) return { text: (weight + 5) + ' x ' + Math.max(repMax - 2, 8), cls: 'suggest' };
-  return { text: weight + ' x ' + Math.min(lastReps + 1, repMax), cls: 'suggest' };
+  if (lastReps >= repMax) return { text: (weight + 5) + ' x ' + Math.max(repMax - 2, 8), cls: 'suggest',
+                                    weight: weight + 5, reps: Math.max(repMax - 2, 8) };
+  return { text: weight + ' x ' + Math.min(lastReps + 1, repMax), cls: 'suggest',
+           weight: weight, reps: Math.min(lastReps + 1, repMax) };
+}
+
+function openSetLogger(idx, ex, lastWk, suggestion) {
+  // Toggle off if same row clicked
+  if (SESSION_STATE.exerciseIdx === idx) {
+    SESSION_STATE.exerciseIdx = null;
+    clear($('#set-logger-host'));
+    $$('#train-exercises tbody tr').forEach(r => r.classList.remove('active'));
+    return;
+  }
+  SESSION_STATE.exerciseIdx = idx;
+  $$('#train-exercises tbody tr').forEach(r => r.classList.toggle('active', String(r.dataset.idx) === String(idx)));
+
+  const sets = parseInt(ex.sets, 10) || 3;
+  const setRows = [];
+  const sessionSets = [];
+  for (let i = 1; i <= sets; i++) {
+    const sObj = {
+      idx: i,
+      weight: typeof suggestion.weight === 'number' ? suggestion.weight
+              : (lastWk && typeof lastWk.weight === 'number' ? lastWk.weight : ''),
+      reps: typeof suggestion.reps === 'number' ? suggestion.reps
+            : (lastWk && typeof lastWk.reps === 'number' ? lastWk.reps : ''),
+      done: false,
+    };
+    sessionSets.push(sObj);
+    const wInput = el('input', { type: 'number', placeholder: 'weight', step: '2.5',
+                                  class: 'set-w', value: sObj.weight === '' ? '' : String(sObj.weight),
+                                  inputmode: 'decimal',
+                                  onInput: (e) => { sObj.weight = parseFloat(e.target.value); } });
+    const rInput = el('input', { type: 'number', placeholder: 'reps',
+                                  class: 'set-r', value: sObj.reps === '' ? '' : String(sObj.reps),
+                                  inputmode: 'numeric',
+                                  onInput: (e) => { sObj.reps = parseFloat(e.target.value); } });
+    const checkBtn = el('button', { class: 'check', 'aria-label': 'Mark complete' }, '\u2713');
+    const row = el('div', { class: 'set-row', 'data-i': i },
+      el('div', { class: 'idx' }, String(i)),
+      wInput, rInput, checkBtn
+    );
+    checkBtn.addEventListener('click', () => {
+      row.classList.toggle('done');
+      sObj.done = row.classList.contains('done');
+      updateSessionProgress();
+    });
+    setRows.push(row);
+  }
+  SESSION_STATE.sets = sessionSets;
+  SESSION_STATE.exerciseName = ex.name;
+  SESSION_STATE.exerciseTier = ex.tier;
+
+  const progress = el('div', { class: 'session-progress', id: 'session-progress' });
+  for (let i = 0; i < sets; i++) progress.appendChild(el('div', { class: 'pip' }));
+
+  const wrap = el('div', { class: 'set-logger' },
+    el('div', { class: 'head' },
+      el('strong', null, ex.name),
+      el('span', { class: 'target' }, 'Target: ' + ex.sets + ' \u00d7 ' + ex.reps + ' (' + ex.tier + ')')
+    ),
+    ...setRows,
+    progress
+  );
+  const host = $('#set-logger-host');
+  clear(host);
+  host.appendChild(wrap);
+}
+
+function updateSessionProgress() {
+  const pg = $('#session-progress');
+  if (!pg) return;
+  const pips = Array.from(pg.querySelectorAll('.pip'));
+  for (let i = 0; i < pips.length; i++) {
+    const set = SESSION_STATE.sets[i];
+    pips[i].classList.toggle('done', !!(set && set.done));
+  }
+}
+
+document.getElementById('btn-save-session').addEventListener('click', async () => {
+  const status = $('#session-status');
+  if (!SESSION_STATE.sets || !SESSION_STATE.sets.length) {
+    status.textContent = 'No active exercise — tap a row to log sets.';
+    status.className = 'small stale';
+    return;
+  }
+  const payload = {
+    session_id: SESSION_STATE.sessionId,
+    exercise: SESSION_STATE.exerciseName,
+    tier: SESSION_STATE.exerciseTier,
+    week: currentWeekNumber(),
+    sets: SESSION_STATE.sets.map(s => ({
+      set: s.idx,
+      weight: typeof s.weight === 'number' && !isNaN(s.weight) ? s.weight : null,
+      reps:   typeof s.reps   === 'number' && !isNaN(s.reps)   ? s.reps   : null,
+      done:   !!s.done,
+    })),
+  };
+  status.textContent = 'saving…';
+  status.className = 'small';
+  try {
+    const r = await fetch('/api/log_workout', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    status.textContent = 'saved · session #' + (j.session_id || '?');
+    status.className = 'small ok';
+  } catch (e) {
+    status.textContent = 'save failed: ' + e.message;
+    status.className = 'small stale';
+  }
+});
+
+/* ============================================================
+   QUICK-LOG PROTEIN
+   ============================================================ */
+
+async function logProtein(grams) {
+  const status = $('#ql-status');
+  if (status) { status.textContent = 'logging ' + grams + 'g…'; status.className = 'small'; }
+  try {
+    const r = await fetch('/api/log_protein', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ grams: grams, ts: new Date().toISOString() }),
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    if (status) { status.textContent = 'logged · ' + (j.count || '?') + ' total entries'; status.className = 'small ok'; }
+  } catch (e) {
+    if (status) { status.textContent = 'log failed: ' + e.message; status.className = 'small stale'; }
+  }
+  await load();
+}
+
+document.querySelectorAll('.ql-chip[data-protein]').forEach(b => {
+  b.addEventListener('click', async () => {
+    b.classList.add('fired');
+    setTimeout(() => b.classList.remove('fired'), 400);
+    await logProtein(parseInt(b.dataset.protein, 10));
+  });
+});
+document.getElementById('ql-custom').addEventListener('click', () => {
+  const g = prompt('Protein logged (grams):');
+  const n = parseFloat(g);
+  if (!isNaN(n) && n > 0) logProtein(n);
+});
+
+/* ============================================================
+   RECOMMENDATIONS — actionable + dismissable
+   ============================================================ */
+
+function recoStorageKey() { return 'pcc_reco_acks_' + new Date().toISOString().slice(0,10); }
+function loadRecoState() {
+  try { return JSON.parse(localStorage.getItem(recoStorageKey()) || '{}'); }
+  catch (e) { return {}; }
+}
+function saveRecoState(s) {
+  try { localStorage.setItem(recoStorageKey(), JSON.stringify(s)); } catch (e) {}
+}
+
+function recoId(r) {
+  return (r.title || '').slice(0, 64);
 }
 
 function renderRecommendations() {
@@ -631,15 +1301,45 @@ function renderRecommendations() {
   if (!list) return;
   clear(list);
   const recos = computeRecommendations();
-  if (!recos.length) {
+  const state = loadRecoState();
+
+  const visible = recos.filter(r => {
+    const id = recoId(r);
+    const entry = state[id];
+    if (!entry) return true;
+    if (entry.action === 'ack') return false;
+    if (entry.action === 'defer' && entry.until && Date.now() < entry.until) return false;
+    return true;
+  });
+
+  if (!visible.length) {
     list.appendChild(el('div', { class: 'small' }, 'On track — nothing to flag.'));
     return;
   }
-  recos.forEach(r => {
-    list.appendChild(el('div', { class: 'reco ' + (r.sev || 'a') },
+  visible.forEach(r => {
+    const id = recoId(r);
+    const card = el('div', { class: 'reco ' + (r.sev || 'a'), 'data-id': id },
       el('div', { class: 'reco-title' }, r.title),
       el('div', { class: 'small' }, r.body)
-    ));
+    );
+    const actions = el('div', { class: 'reco-actions' },
+      el('button', { class: 'reco-act ack', onClick: () => {
+        const s = loadRecoState();
+        s[id] = { action: 'ack', ts: Date.now() };
+        saveRecoState(s);
+        card.classList.add('dismissed');
+        setTimeout(renderRecommendations, 200);
+      }}, 'Acknowledge'),
+      el('button', { class: 'reco-act defer', onClick: () => {
+        const s = loadRecoState();
+        s[id] = { action: 'defer', until: Date.now() + 86400000, ts: Date.now() };
+        saveRecoState(s);
+        card.classList.add('dismissed');
+        setTimeout(renderRecommendations, 200);
+      }}, 'Defer 1d'),
+    );
+    card.appendChild(actions);
+    list.appendChild(card);
   });
 }
 
@@ -800,13 +1500,36 @@ function renderGate() {
 }
 
 function renderTrends() {
+  if (!HEALTH) return;
   const v = HEALTH.vital_signs || {};
-  drawWeightTrend();
-  $('#weight-stats').textContent = 'latest ' + fmt(v.weight && v.weight.value, 1) + ' lbs · trend ' + ((v.weight && v.weight.trend) || '—');
-  drawSpark('spark-sleep', [v.sleep_avg && v.sleep_avg.value]);
-  $('#sleep-stats').textContent = '7d avg ' + fmt(v.sleep_avg && v.sleep_avg.value, 1) + 'h';
-  drawSpark('spark-hrv', [v.hrv && v.hrv.value]);
-  $('#hrv-stats').textContent = 'latest ' + fmt(v.hrv && v.hrv.value, 0) + ' ms · trend ' + ((v.hrv && v.hrv.trend) || '—');
+  const wHost = $('#chart-weight');
+  const sHost = $('#chart-sleep');
+  const hHost = $('#chart-hrv');
+  const stHost = $('#chart-steps');
+  if (wHost) {
+    const ws = seriesFromTrends('weight');
+    if (ws.length >= 2) drawLineChart(wHost, ws, { unit: ' lbs' });
+    else drawSparkFallback(wHost, ws.length ? ws : [v.weight && v.weight.value]);
+    $('#weight-stats').textContent = 'latest ' + fmt(v.weight && v.weight.value, 1) + ' lbs · trend ' + ((v.weight && v.weight.trend) || '—');
+  }
+  if (sHost) {
+    const ss = seriesFromTrends('sleep');
+    if (ss.length >= 2) drawLineChart(sHost, ss, { unit: 'h' });
+    else drawSparkFallback(sHost, ss.length ? ss : [v.sleep_avg && v.sleep_avg.value]);
+    $('#sleep-stats').textContent = '7d avg ' + fmt(v.sleep_avg && v.sleep_avg.value, 1) + 'h';
+  }
+  if (hHost) {
+    const hs = seriesFromTrends('hrv');
+    if (hs.length >= 2) drawLineChart(hHost, hs, { unit: 'ms' });
+    else drawSparkFallback(hHost, hs.length ? hs : [v.hrv && v.hrv.value]);
+    $('#hrv-stats').textContent = 'latest ' + fmt(v.hrv && v.hrv.value, 0) + ' ms · trend ' + ((v.hrv && v.hrv.trend) || '—');
+  }
+  if (stHost) {
+    const sts = seriesFromTrends('steps');
+    if (sts.length >= 2) drawLineChart(stHost, sts, { unit: '' });
+    else drawSparkFallback(stHost, sts.length ? sts : [v.steps_avg && v.steps_avg.value]);
+    if ($('#steps-stats')) $('#steps-stats').textContent = 'avg ' + round(v.steps_avg && v.steps_avg.value);
+  }
 
   const wo = HEALTH.workouts || [];
   const days = 28;
@@ -845,38 +1568,27 @@ function renderTrends() {
   }
 }
 
-function drawWeightTrend() {
-  const v = HEALTH && HEALTH.vital_signs && HEALTH.vital_signs.weight;
-  const t = HEALTH && HEALTH.trends;
-  let series = null;
-  if (t) {
-    const cand = t.weight_30d || t.weight_14d || t.weight;
-    if (Array.isArray(cand)) {
-      series = cand.map(p => (p && (p.value != null ? p.value : p.lbs))).map(x => (x == null ? null : x));
-    } else if (cand && Array.isArray(cand.values)) {
-      series = cand.values.map(x => (x == null ? null : x));
-    }
-  }
-  if (series && series.some(x => x != null)) {
-    drawSpark('spark-weight', series);
-  } else {
-    drawSpark('spark-weight', [v && v.value]);
-  }
-}
-
-function drawSpark(id, series) {
-  const host = document.getElementById(id);
+function drawSparkFallback(host, series) {
   clear(host);
-  if (!series || !series.length || series.every(x => x == null)) return;
+  if (!series || !series.length || series.every(x => x == null)) {
+    host.appendChild(el('div', { class: 'small', style: 'padding:12px;' }, '—'));
+    return;
+  }
+  const row = el('div', { class: 'sparkrow' });
   const vals = series.filter(x => x != null);
   const min = Math.min(...vals), max = Math.max(...vals);
   series.forEach(v => {
     const span = document.createElement('span');
     const h = (max === min) ? 14 : Math.max(2, Math.round(28 * (v - min) / (max - min)));
     span.style.height = h + 'px';
-    host.appendChild(span);
+    row.appendChild(span);
   });
+  host.appendChild(row);
 }
+
+/* ============================================================
+   SCAN FORM HANDLERS (preserved)
+   ============================================================ */
 
 $('#btn-save-scan').addEventListener('click', async () => {
   const num = (id) => { const x = parseFloat($(id).value); return isNaN(x) ? null : x; };
@@ -930,6 +1642,8 @@ $('#btn-advance').addEventListener('click', async () => {
   const r = await fetch(API_BASE + '/api/protocol/advance_phase', { method:'POST' });
   if (r.ok) { await load(); }
 });
+
+document.getElementById('btn-refresh').addEventListener('click', () => load());
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/pcc-sw.js').catch(()=>{});

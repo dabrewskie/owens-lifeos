@@ -741,6 +741,48 @@ class PCCHandler(BaseHTTPRequestHandler):
             except Exception as e:  # noqa: BLE001
                 return self._send_json({"ok": False, "error": str(e)}, status=500)
 
+        if self.path == "/api/log_protein":
+            try:
+                body = json.loads(body_raw.decode("utf-8") or "{}")
+                grams = float(body.get("grams", 0) or 0)
+                ts = body.get("ts") or datetime.now(timezone.utc).isoformat()
+                log_path = DATA_DIR / "protein_log.json"
+                entries = []
+                if log_path.exists():
+                    try:
+                        entries = json.loads(log_path.read_text())
+                        if not isinstance(entries, list):
+                            entries = []
+                    except Exception:
+                        entries = []
+                entries.append({"grams": grams, "ts": ts})
+                log_path.parent.mkdir(parents=True, exist_ok=True)
+                log_path.write_text(json.dumps(entries, indent=2))
+                return self._send_json({"ok": True, "logged_g": grams, "count": len(entries)})
+            except Exception as e:  # noqa: BLE001
+                return self._send_json({"ok": False, "error": str(e)}, status=500)
+
+        if self.path == "/api/log_workout":
+            try:
+                body = json.loads(body_raw.decode("utf-8") or "{}")
+                log_path = DATA_DIR / "workout_log.json"
+                entries = []
+                if log_path.exists():
+                    try:
+                        entries = json.loads(log_path.read_text())
+                        if not isinstance(entries, list):
+                            entries = []
+                    except Exception:
+                        entries = []
+                record = dict(body)
+                record["ts"] = datetime.now(timezone.utc).isoformat()
+                entries.append(record)
+                log_path.parent.mkdir(parents=True, exist_ok=True)
+                log_path.write_text(json.dumps(entries, indent=2))
+                return self._send_json({"ok": True, "session_id": len(entries)})
+            except Exception as e:  # noqa: BLE001
+                return self._send_json({"ok": False, "error": str(e)}, status=500)
+
         # Legacy routes (JSON body required)
         try:
             payload = json.loads(body_raw.decode("utf-8") or "{}")
