@@ -682,6 +682,25 @@ class PCCHandler(BaseHTTPRequestHandler):
             return self._send_json({"scans": load_scans()})
         if path == "/healthz":
             return self._send_json({"ok": True, "ts": datetime.now(timezone.utc).isoformat()})
+        if path.startswith("/fonts/") and path.endswith(".woff2"):
+            font_path = (DASH_DIR / "fonts" / path[len("/fonts/"):]).resolve()
+            try:
+                font_path.relative_to((DASH_DIR / "fonts").resolve())
+            except ValueError:
+                self.send_error(403)
+                return
+            if not font_path.exists():
+                self.send_error(404)
+                return
+            body = font_path.read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", "font/woff2")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "public, max-age=31536000, immutable")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(body)
+            return
         candidate = (DASH_DIR / path.lstrip("/")).resolve()
         try:
             candidate.relative_to(DASH_DIR.resolve())
