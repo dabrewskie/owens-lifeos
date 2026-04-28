@@ -2,999 +2,717 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
-  <meta name="theme-color" content="#0a0e1a" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="PCC" />
-  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%230a0e1a'/><text x='50%25' y='62%25' font-family='-apple-system' font-size='80' font-weight='800' fill='%23e6e9f2' text-anchor='middle'>PCC</text></svg>" />
+  <link rel="manifest" href="/pcc-manifest.json" />
+  <link rel="apple-touch-icon" href="/pcc-icon-192.png" />
   <title>PCC — Protocol Command Center</title>
   <style>
     :root {
-      --bg: #0a0e1a;
-      --panel: #131826;
-      --panel-2: #1a2030;
-      --border: #232a3d;
-      --text: #e6e9f2;
-      --muted: #8089a0;
-      --green: #34d399;
-      --yellow: #fbbf24;
-      --red: #f87171;
-      --blue: #60a5fa;
-      --indigo: #818cf8;
-      --violet: #a78bfa;
+      --bg: #0a0f1a;
+      --panel: #0f172a;
+      --panel-2: #111c33;
+      --line: #1e293b;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --green: #22c55e;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.35);
+      --safe-top: env(safe-area-inset-top);
+      --safe-bot: env(safe-area-inset-bottom);
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body {
-      margin: 0; padding: 0;
-      min-height: 100vh;
-      background: var(--bg); color: var(--text);
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
-      -webkit-font-smoothing: antialiased;
-    }
-    body {
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-    .pad { padding: 12px; }
-    .col { display: flex; flex-direction: column; gap: 12px; }
-    .row { display: flex; gap: 8px; align-items: center; }
-    .between { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .panel {
-      background: var(--panel); border: 1px solid var(--border);
-      border-radius: 14px; padding: 14px;
-    }
-    .panel.tight { padding: 10px 12px; }
-    .badge { padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.4px; }
-    .badge.live { background: rgba(52,211,153,0.18); color: var(--green); }
-    .badge.mock { background: rgba(251,191,36,0.18); color: var(--yellow); }
-    .badge.phase { background: rgba(96,165,250,0.18); color: var(--blue); }
-    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-    .dot.green { background: var(--green); }
-    .dot.yellow { background: var(--yellow); }
-    .dot.red { background: var(--red); }
-    .dot.gray { background: #4b5563; }
-    .muted { color: var(--muted); }
-    .tabs {
-      display: flex; gap: 0; background: var(--panel);
-      border-bottom: 1px solid var(--border);
-      overflow-x: auto; -webkit-overflow-scrolling: touch;
-      position: sticky; top: 0; z-index: 5;
-    }
-    .tab {
-      padding: 14px 16px; font-size: 13px; font-weight: 600;
-      color: var(--muted); white-space: nowrap;
-      border-bottom: 2px solid transparent; cursor: pointer;
-      background: transparent;
-    }
-    .tab.active { color: var(--text); border-bottom-color: var(--blue); }
-    .stat-num { font-size: 24px; font-weight: 700; line-height: 1.1; }
-    .stat-num.sm { font-size: 18px; }
-    .stat-target { color: var(--muted); font-size: 12px; }
-    .label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; }
-    .bar {
-      height: 6px; background: rgba(255,255,255,0.06);
-      border-radius: 3px; overflow: hidden;
-    }
-    .bar > span {
-      display: block; height: 100%; background: var(--blue);
-      transition: width .3s ease;
-    }
-    .bar.green > span { background: var(--green); }
-    .bar.yellow > span { background: var(--yellow); }
-    .bar.red > span { background: var(--red); }
-    .bar.violet > span { background: var(--violet); }
+      -webkit-font-smoothing: antialiased; min-height: 100dvh; }
+    a { color: var(--accent); text-decoration: none; }
     button { font: inherit; }
-    .btn {
-      background: var(--blue); color: white; border: 0;
-      padding: 12px 16px; border-radius: 10px;
-      font-weight: 700; cursor: pointer;
-    }
-    .btn:active { transform: translateY(1px); }
-    .btn:disabled { background: var(--panel-2); color: var(--muted); cursor: not-allowed; }
-    .btn-ghost {
-      background: transparent; color: var(--text);
-      border: 1px solid var(--border);
-      padding: 10px 12px; border-radius: 10px; font-weight: 600; cursor: pointer;
-    }
-    .btn-success { background: var(--green); color: #0a0e1a; }
-    input, textarea, select {
-      background: var(--panel-2); color: var(--text);
-      border: 1px solid var(--border); border-radius: 8px;
-      padding: 10px 12px; font: inherit; width: 100%;
-    }
-    input:focus, textarea:focus, select:focus { outline: 2px solid var(--blue); border-color: var(--blue); }
-    .grid { display: grid; gap: 12px; }
-    .grid-2 { grid-template-columns: 1fr 1fr; }
-    .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
-    .grid-4 { grid-template-columns: repeat(2, 1fr); }
-    @media (min-width: 720px) {
-      .grid-4 { grid-template-columns: repeat(4, 1fr); }
-    }
-    .scrollx { overflow-x: auto; }
-    .table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .table th, .table td {
-      padding: 8px 10px; border-bottom: 1px solid var(--border);
-      text-align: left; white-space: nowrap;
-    }
-    .table th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .table tr.today { background: rgba(96,165,250,0.06); }
-    .photo-slot {
-      aspect-ratio: 3 / 4; border: 1px dashed var(--border);
-      border-radius: 10px; background: var(--panel-2);
-      display: flex; align-items: center; justify-content: center;
-      color: var(--muted); font-size: 12px; overflow: hidden; position: relative;
-    }
-    .photo-slot img { width: 100%; height: 100%; object-fit: cover; }
-    .photo-slot input[type=file] {
-      position: absolute; inset: 0; opacity: 0; cursor: pointer;
-    }
-    .pill {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 4px 10px; border-radius: 999px;
-      background: var(--panel-2); border: 1px solid var(--border);
-      font-size: 12px;
-    }
-    .insight-box {
-      background: rgba(129,140,248,0.08);
-      border: 1px solid rgba(129,140,248,0.3);
-      border-radius: 12px; padding: 14px;
-      white-space: pre-wrap; line-height: 1.5;
-    }
-    .header {
-      padding: 14px 14px 10px; background: var(--bg);
-      position: sticky; top: 0; z-index: 6;
-      border-bottom: 1px solid var(--border);
-    }
-    @media (min-width: 720px) {
-      .container { max-width: 920px; margin: 0 auto; }
-    }
+    .pad { padding: calc(12px + var(--safe-top)) 16px calc(96px + var(--safe-bot)); max-width: 720px; margin: 0 auto; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 0 3px rgba(255,255,255,0.04); }
+    .dot.g { background: var(--green); }
+    .dot.a { background: var(--amber); }
+    .dot.r { background: var(--red); }
+    .dot.x { background: var(--muted); }
+    h1 { font-size: 18px; margin: 0; letter-spacing: 0.3px; }
+    h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1.2px;
+      color: var(--muted); margin: 22px 0 10px; }
+    .stamp { font-size: 11px; color: var(--muted); }
+    .card { background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--line); border-radius: 16px; padding: 14px;
+      box-shadow: var(--shadow); margin-bottom: 10px; }
+    .row { display: flex; gap: 10px; }
+    .row > .card { flex: 1; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .kv { display: flex; align-items: baseline; justify-content: space-between; }
+    .k { color: var(--muted); font-size: 12px; }
+    .v { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 16px; }
+    .v.lg { font-size: 26px; }
+    .small { font-size: 11px; color: var(--muted); }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 999px;
+      font-size: 11px; border: 1px solid var(--line); color: var(--muted); }
+    .pill.g { color: var(--green); border-color: rgba(34,197,94,0.4); }
+    .pill.a { color: var(--amber); border-color: rgba(245,158,11,0.4); }
+    .pill.r { color: var(--red);   border-color: rgba(239,68,68,0.4); }
+    .banner { padding: 10px 12px; border-radius: 12px;
+      background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245,158,11,0.35);
+      color: #fde68a; font-size: 13px; margin-bottom: 10px; }
+    .banner.r { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.4); color: #fecaca; }
+    .banner.g { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.3); color: #bbf7d0; }
+    nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,15,26,0.94);
+      backdrop-filter: blur(14px); border-top: 1px solid var(--line);
+      padding: 8px 8px calc(8px + var(--safe-bot)); display: grid;
+      grid-template-columns: repeat(4, 1fr); gap: 4px; z-index: 50; }
+    nav button { background: transparent; border: none; color: var(--muted);
+      padding: 10px 6px; border-radius: 10px; font-size: 11px; letter-spacing: 0.6px;
+      text-transform: uppercase; }
+    nav button.active { background: rgba(56,189,248,0.12); color: var(--accent); }
+    .hidden { display: none !important; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 8px 6px; text-align: right; border-bottom: 1px solid var(--line); }
+    th:first-child, td:first-child { text-align: left; color: var(--muted); }
+    .scan-form input, .scan-form button {
+      width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+      background: var(--panel); color: var(--text); font: inherit; }
+    .scan-form label { display: block; font-size: 12px; color: var(--muted); margin: 8px 0 4px; }
+    .scan-form .sub { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn { padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line);
+      background: linear-gradient(180deg, #1e293b, #0f172a); color: var(--text);
+      font-weight: 600; }
+    .btn.primary { background: linear-gradient(180deg, #0ea5e9, #0369a1);
+      border-color: transparent; color: white; }
+    .btn.danger { background: rgba(239,68,68,0.12); color: #fecaca; border-color: rgba(239,68,68,0.4); }
+    .triglist .ti { display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 0; border-bottom: 1px dashed var(--line); }
+    .triglist .ti:last-child { border-bottom: none; }
+    .delta.up   { color: var(--green); }
+    .delta.down { color: var(--red); }
+    .delta.flat { color: var(--muted); }
+    .sparkrow { display: flex; gap: 2px; align-items: flex-end; height: 28px; margin-top: 6px; }
+    .sparkrow span { display: inline-block; width: 6px; background: var(--accent); border-radius: 2px; }
+    .footer-note { color: var(--muted); font-size: 11px; margin-top: 14px; text-align: center; }
+    .stale { color: var(--amber); }
+    .ok    { color: var(--green); }
   </style>
-
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
-  <div id="root"></div>
+<div class="pad" id="root">
 
-  <script type="text/babel" data-presets="env,react">
-    const { useState, useEffect, useMemo, useCallback, useRef } = React;
-    const RC = window.Recharts || {};
-    const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } = RC;
+  <header>
+    <div class="brand">
+      <div class="dot x" id="status-dot" title="Composite status"></div>
+      <h1>Protocol Command Center</h1>
+    </div>
+    <div class="stamp" id="stamp">loading…</div>
+  </header>
 
-    // === PROTOCOL DATA ===
-    const PHASES = {
-      A: {
-        name: "Foundation Recomp",
-        bf_range: "19.5% → 16%",
-        avg_kcal: 2470,
-        rate: "0.5–0.7 lb/wk",
-        diet_break: "Every 6 wk @ 2,800 kcal × 5–7 days",
-        days: [
-          { type: "HIGH",       days: ["Mon", "Thu"], cal: 2600, P: 220, C: 280, F: 70 },
-          { type: "MODERATE",   days: ["Tue", "Fri"], cal: 2450, P: 220, C: 230, F: 70 },
-          { type: "ACTIVE REC", days: ["Sat"],        cal: 2400, P: 220, C: 200, F: 75 },
-          { type: "REST",       days: ["Wed", "Sun"], cal: 2200, P: 220, C: 130, F: 80 },
-        ],
-      },
-      B: {
-        name: "Precision Cut",
-        bf_range: "16% → 13%",
-        avg_kcal: 2290,
-        rate: "0.4–0.5 lb/wk",
-        diet_break: "Every 4–5 wk × 5 days",
-        days: [
-          { type: "HIGH",       days: ["Mon", "Thu"], cal: 2400, P: 220, C: 240, F: 65 },
-          { type: "MODERATE",   days: ["Tue", "Fri"], cal: 2280, P: 220, C: 200, F: 65 },
-          { type: "ACTIVE REC", days: ["Sat"],        cal: 2220, P: 220, C: 170, F: 70 },
-          { type: "REST",       days: ["Wed", "Sun"], cal: 2050, P: 220, C: 110, F: 70 },
-        ],
-      },
-      C: {
-        name: "Single Digits",
-        bf_range: "13% → 10–12%",
-        avg_kcal: 2200,
-        rate: "0.25–0.4 lb/wk",
-        diet_break: "Every 3–4 wk × 5–7 days (MANDATORY)",
-        days: [
-          { type: "HIGH",       days: ["Mon", "Thu"], cal: 2300, P: 230, C: 220, F: 60 },
-          { type: "MODERATE",   days: ["Tue", "Fri"], cal: 2180, P: 230, C: 175, F: 60 },
-          { type: "ACTIVE REC", days: ["Sat"],        cal: 2120, P: 230, C: 145, F: 65 },
-          { type: "REST",       days: ["Wed", "Sun"], cal: 2000, P: 230, C: 95,  F: 65 },
-        ],
-      },
-    };
+  <div id="banners"></div>
 
-    const TRAINING_SPLIT = {
-      0: { name: "Sun", focus: "Rest", detail: "Full recovery — mobility / walk only" },
-      1: { name: "Mon", focus: "Upper Push", detail: "Bench, OHP, dips, lateral raise, triceps" },
-      2: { name: "Tue", focus: "Lower Strength", detail: "Squat, RDL, leg press, hamstring curl" },
-      3: { name: "Wed", focus: "Z2 / Mobility", detail: "Z2 cardio 30–45 min + mobility flow" },
-      4: { name: "Thu", focus: "Upper Pull", detail: "Row, pull-up, face pull, biceps" },
-      5: { name: "Fri", focus: "Lower Power", detail: "Deadlift, front squat, lunge, calf" },
-      6: { name: "Sat", focus: "Z2", detail: "Z2 cardio 45–60 min" },
-    };
+  <section data-tab="overview">
+    <div class="row">
+      <div class="card">
+        <div class="k">Today's Phase</div>
+        <div class="v lg" id="phase-name">Phase A</div>
+        <div class="small" id="phase-target">19.5 → 16% BF · 2,470 kcal avg</div>
+      </div>
+      <div class="card">
+        <div class="k">Day Type</div>
+        <div class="v lg" id="day-type">—</div>
+        <div class="small" id="day-context">—</div>
+      </div>
+    </div>
 
-    const TRIGGERS = [
-      { id: "lm_drop",   level: "RED",   label: "Lean mass drop",  rule: "ΔLM ≤ -2 lb across last 3 scans" },
-      { id: "weight_stall", level: "AMB", label: "Weight stall",   rule: "Weight flat ≥ 3 wk" },
-      { id: "sleep_low", level: "RED",   label: "Sleep deficit",   rule: "Total sleep < 6h on 3+ nights/wk" },
-      { id: "hrv_drop",  level: "AMB",   label: "HRV drop",        rule: "HRV down ≥ 15% from 7d baseline" },
-      { id: "hct_high",  level: "RED",   label: "Hct elevated",    rule: "Hematocrit ≥ 54% (TRT monitoring)" },
-      { id: "deep_low",  level: "AMB",   label: "Deep sleep low",  rule: "14d avg deep sleep < 0.5h" },
-    ];
+    <h2>Today's Fuel</h2>
+    <div class="card">
+      <div class="grid3">
+        <div><div class="k">kcal</div><div class="v lg" id="m-kcal">—</div></div>
+        <div><div class="k">Protein</div><div class="v lg" id="m-p">—</div></div>
+        <div><div class="k">Carbs</div><div class="v lg" id="m-c">—</div></div>
+      </div>
+      <div class="grid3" style="margin-top:8px">
+        <div><div class="k">Fat</div><div class="v" id="m-f">—</div></div>
+        <div><div class="k">Eaten today (P)</div><div class="v" id="m-eaten-p">—</div></div>
+        <div><div class="k">7d avg P</div><div class="v" id="m-avg-p">—</div></div>
+      </div>
+    </div>
 
-    const PHASE_GATES = {
-      A: { next: "B", rule: "BF ≤ 16.5% × 2 wk + LM ≥ 161",  weeks: 2, bf_max: 16.5, lm_min: 161 },
-      B: { next: "C", rule: "BF ≤ 13.2% × 2 wk + LM ≥ 161",  weeks: 2, bf_max: 13.2, lm_min: 161 },
-      C: { next: "M", rule: "BF ≤ 12% × 4 wk → maintenance", weeks: 4, bf_max: 12.0, lm_min: 0   },
-    };
-
-    // === HELPERS ===
-    const fmtPct = (cur, tgt) => tgt ? Math.min(100, Math.round((cur / tgt) * 100)) : 0;
-    const num = (v, d = 1) => (v == null || isNaN(v)) ? "—" : Number(v).toFixed(d).replace(/\.0$/, "");
-    const todayDow = () => new Date().getDay(); // 0=Sun ... 6=Sat
-    const dowName = (d) => ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d];
-    const dayTypeForToday = (phase) => {
-      const dow = dowName(todayDow());
-      const days = PHASES[phase].days;
-      return days.find(d => d.days.includes(dow)) || days[0];
-    };
-
-    // === FETCH ===
-    async function fetchHealth() {
-      try {
-        const r = await fetch("/api/health_data", { cache: "no-store" });
-        if (!r.ok) throw new Error("HTTP " + r.status);
-        return await r.json();
-      } catch (e) {
-        return null; // signal failure → mock fallback
-      }
-    }
-
-    async function fetchScans() {
-      try {
-        const r = await fetch("/api/scans", { cache: "no-store" });
-        if (!r.ok) throw new Error();
-        return (await r.json()).scans || [];
-      } catch {
-        return [];
-      }
-    }
-
-    // Local mock matches server _mock_payload shape
-    function mockHealth() {
-      const today = new Date();
-      const history = Array.from({ length: 30 }, (_, i) => {
-        const d = new Date(today); d.setDate(today.getDate() - (29 - i));
-        return {
-          date: d.toISOString().slice(0, 10),
-          dow: d.getDay(),
-          weight: 217 - i * 0.05,
-          sleep_total: 6.8 + (i % 5) * 0.1,
-          sleep_deep: 0.4 + (i % 3) * 0.1,
-          sleep_rem: 1.6 + (i % 4) * 0.1,
-          hrv: 36 + (i % 6),
-          rhr: 68 + (i % 4),
-          steps: 9000 + (i * 173) % 4000,
-          active_cal: 250 + (i * 11) % 200,
-          workout: null,
-        };
-      });
-      const last = history[history.length - 1];
-      return {
-        updated_at: new Date().toISOString(),
-        source: "mock",
-        latest: {
-          weight: last.weight, body_fat: 19.5,
-          sleep_total: last.sleep_total, sleep_deep: last.sleep_deep, sleep_rem: last.sleep_rem,
-          hrv: last.hrv, rhr: last.rhr, steps: last.steps, active_cal: last.active_cal,
-          workout_today: null,
-          macros_today: {
-            calories: { current: 0, target: 2000 },
-            protein:  { current: 0, target: 220 },
-            carbs:    { current: 0, target: 130 },
-            fat:      { current: 0, target: 80 },
-          },
-          recovery: { score: 70, status: "MODERATE", color: "yellow", recommendation: "Mock recovery." },
-        },
-        avg_30d: { hrv: 38, sleep_total: 6.9, sleep_deep: 0.5 },
-        history,
-      };
-    }
-
-    // === COMPONENTS ===
-    function StatusDot({ color }) {
-      const c = ({ green: "green", yellow: "yellow", red: "red" })[color] || "gray";
-      return <span className={`dot ${c}`} />;
-    }
-
-    function MacroBar({ label, cur, tgt, unit, hint }) {
-      const pct = fmtPct(cur, tgt);
-      const tone = cur > tgt * 1.1 ? "yellow" : (cur < tgt * 0.5 ? "red" : "green");
-      return (
-        <div className="col" style={{ gap: 6 }}>
-          <div className="between">
-            <span className="label">{label}</span>
-            <span className="muted" style={{ fontSize: 12 }}>{num(cur, 0)} / {num(tgt, 0)}{unit}</span>
-          </div>
-          <div className={`bar ${tone}`}><span style={{ width: pct + "%" }} /></div>
-          {hint && <div className="muted" style={{ fontSize: 11 }}>{hint}</div>}
+    <h2>Today's Training</h2>
+    <div class="card">
+      <div class="kv">
+        <div>
+          <div class="v lg" id="train-name">—</div>
+          <div class="small" id="train-context">—</div>
         </div>
-      );
-    }
+        <span class="pill" id="train-badge">scheduled</span>
+      </div>
+    </div>
 
-    function Header({ phase, setPhase, dayType, recoveryColor, source, gateMet, onAdvance }) {
-      const today = new Date();
-      const dayName = today.toLocaleDateString(undefined, { weekday: "long" });
-      return (
-        <div className="header">
-          <div className="container col" style={{ gap: 10 }}>
-            <div className="between">
-              <div className="row" style={{ gap: 10 }}>
-                <span className="badge phase">PHASE {phase}</span>
-                <span style={{ fontWeight: 700 }}>{dayName}</span>
-                <span className="pill"><StatusDot color={recoveryColor} /> {dayType.type}</span>
-              </div>
-              <div className="row" style={{ gap: 8 }}>
-                <span className={`badge ${source === "live" ? "live" : "mock"}`}>{(source || "mock").toUpperCase()}</span>
-                <select
-                  value={phase}
-                  onChange={(e) => setPhase(e.target.value)}
-                  style={{ width: "auto", padding: "6px 8px", fontSize: 12 }}
-                  aria-label="Override phase"
-                >
-                  <option value="A">A</option>
-                  <option value="B">B</option>
-                  <option value="C">C</option>
-                </select>
-              </div>
-            </div>
-            {gateMet && (
-              <button className="btn btn-success" onClick={onAdvance}>
-                ▲ Advance to Phase {PHASE_GATES[phase].next} — gate met
-              </button>
-            )}
-          </div>
+    <h2>Last Night Recovery</h2>
+    <div class="card">
+      <div class="grid3">
+        <div><div class="k">Sleep</div><div class="v lg" id="r-sleep">—</div><div class="small" id="r-sleep-t">—</div></div>
+        <div><div class="k">Deep</div><div class="v lg" id="r-deep">—</div><div class="small" id="r-deep-t">target ≥ 1.5h</div></div>
+        <div><div class="k">HRV</div><div class="v lg" id="r-hrv">—</div><div class="small" id="r-hrv-t">vs 30d</div></div>
+      </div>
+      <div class="grid3" style="margin-top:8px">
+        <div><div class="k">RHR</div><div class="v" id="r-rhr">—</div></div>
+        <div><div class="k">Steps (avg)</div><div class="v" id="r-steps">—</div></div>
+        <div><div class="k">SpO₂</div><div class="v" id="r-spo2">—</div></div>
+      </div>
+    </div>
+
+    <h2>Latest Scan Δ</h2>
+    <div class="card" id="scan-delta-card">
+      <div class="small" id="scan-delta-empty">No scans yet — log first Wednesday scan to populate.</div>
+      <div class="hidden" id="scan-delta-body">
+        <div class="grid3">
+          <div><div class="k">Weight</div><div class="v lg" id="d-weight">—</div></div>
+          <div><div class="k">BF%</div><div class="v lg" id="d-bf">—</div></div>
+          <div><div class="k">Lean Mass</div><div class="v lg" id="d-lm">—</div></div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-tab="wednesday" class="hidden">
+    <div class="banner" id="wed-banner">Wednesday is scan day. Log Hume scan + photos when possible.</div>
+
+    <h2>Hume Scan</h2>
+    <div class="card scan-form">
+      <div class="sub">
+        <div><label>Weight (lbs)</label><input id="s-weight" type="number" step="0.1" inputmode="decimal" /></div>
+        <div><label>BF %</label><input id="s-bf" type="number" step="0.1" inputmode="decimal" /></div>
+        <div><label>Fat Mass (lbs)</label><input id="s-fat" type="number" step="0.1" inputmode="decimal" /></div>
+        <div><label>Lean Mass (lbs)</label><input id="s-lm" type="number" step="0.1" inputmode="decimal" /></div>
+        <div><label>Skeletal Muscle (lbs)</label><input id="s-sm" type="number" step="0.1" inputmode="decimal" /></div>
+        <div><label>Body Water %</label><input id="s-bw" type="number" step="0.1" inputmode="decimal" /></div>
+        <div><label>Visceral Fat</label><input id="s-vf" type="number" step="1" inputmode="numeric" /></div>
+        <div><label>Hct % (optional)</label><input id="s-hct" type="number" step="0.1" inputmode="decimal" /></div>
+      </div>
+      <label style="margin-top:14px">Notes</label>
+      <input id="s-notes" type="text" placeholder="Anything to flag this week…" />
+
+      <h2 style="margin-top:18px">Progress Photos</h2>
+      <div class="sub">
+        <div><label>Front</label><input id="p-front" type="file" accept="image/*" capture="user" /></div>
+        <div><label>Side</label><input id="p-side" type="file" accept="image/*" capture="user" /></div>
+        <div><label>Back</label><input id="p-back" type="file" accept="image/*" capture="user" /></div>
+      </div>
+
+      <div class="actions" style="margin-top:14px">
+        <button class="btn primary" id="btn-save-scan">Save Scan</button>
+        <button class="btn" id="btn-save-photos">Upload Photos</button>
+      </div>
+      <div class="small" id="save-status" style="margin-top:8px"></div>
+    </div>
+
+    <h2>Week-over-Week Δ</h2>
+    <div class="card">
+      <table id="wow-table">
+        <thead><tr><th>Metric</th><th>This wk</th><th>Last wk</th><th>Δ</th></tr></thead>
+        <tbody id="wow-body"><tr><td colspan="4" class="small">Need ≥ 2 scans for week-over-week.</td></tr></tbody>
+      </table>
+    </div>
+
+    <h2>Trigger Status</h2>
+    <div class="card triglist" id="trigger-list"></div>
+
+    <h2>Phase Gate Progress</h2>
+    <div class="card">
+      <div class="kv"><div class="k" id="gate-name">A → B</div><div class="v" id="gate-progress">—</div></div>
+      <div class="small" id="gate-detail">Hold BF ≤ 16.5% × 2 weeks AND LM ≥ 161 lbs.</div>
+      <div class="actions" style="margin-top:10px">
+        <button class="btn" id="btn-advance" disabled>Advance Phase</button>
+      </div>
+    </div>
+  </section>
+
+  <section data-tab="trends" class="hidden">
+    <h2>Weight (14d)</h2>
+    <div class="card"><div class="sparkrow" id="spark-weight"></div><div class="small" id="weight-stats">—</div></div>
+
+    <h2>Sleep (14d)</h2>
+    <div class="card"><div class="sparkrow" id="spark-sleep"></div><div class="small" id="sleep-stats">—</div></div>
+
+    <h2>HRV (14d vs 30d baseline)</h2>
+    <div class="card"><div class="sparkrow" id="spark-hrv"></div><div class="small" id="hrv-stats">—</div></div>
+
+    <h2>Workouts (28d heatmap)</h2>
+    <div class="card" id="wo-heatmap"><div class="small">—</div></div>
+
+    <h2>Body Composition (scan-only)</h2>
+    <div class="card">
+      <div class="small" id="bc-empty">No scans yet — track lean mass + BF here once Wednesdays log.</div>
+      <table class="hidden" id="bc-table">
+        <thead><tr><th>Date</th><th>Weight</th><th>BF%</th><th>Lean</th></tr></thead>
+        <tbody id="bc-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section data-tab="protocol" class="hidden">
+    <h2>Macro Phases</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>Phase</th><th>BF goal</th><th>Avg kcal</th><th>Rate</th></tr></thead>
+        <tbody>
+          <tr><td>A</td><td>19.5 → 16%</td><td>2,470</td><td>0.5–0.7 lb/wk</td></tr>
+          <tr><td>B</td><td>16 → 13%</td><td>2,290</td><td>0.4–0.5 lb/wk</td></tr>
+          <tr><td>C</td><td>13 → 10–12%</td><td>2,200</td><td>0.25–0.4 lb/wk</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Day-Type Macros</h2>
+    <div class="card">
+      <div class="small">Format: kcal · P · C · F</div>
+      <table>
+        <thead><tr><th>Day</th><th>Phase A</th><th>Phase B</th><th>Phase C</th></tr></thead>
+        <tbody>
+          <tr><td>High / Refeed</td><td>2600·220·280·70</td><td>2600·230·320·60</td><td>2500·240·320·55</td></tr>
+          <tr><td>Moderate</td><td>2450·220·230·70</td><td>2300·230·200·65</td><td>2200·240·180·60</td></tr>
+          <tr><td>Active Recovery</td><td>2400·220·200·75</td><td>2200·230·170·65</td><td>2100·240·140·65</td></tr>
+          <tr><td>Rest</td><td>2200·220·130·80</td><td>2000·230·100·75</td><td>1900·240·80·70</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Training Week</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>Day</th><th>Session</th></tr></thead>
+        <tbody>
+          <tr><td>Mon</td><td>Upper Push</td></tr>
+          <tr><td>Tue</td><td>Lower Strength</td></tr>
+          <tr><td>Wed</td><td>Z2 / Mobility</td></tr>
+          <tr><td>Thu</td><td>Upper Pull</td></tr>
+          <tr><td>Fri</td><td>Lower Power</td></tr>
+          <tr><td>Sat</td><td>Z2</td></tr>
+          <tr><td>Sun</td><td>Rest</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Triggers</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>Trigger</th><th>Threshold</th><th>Severity</th></tr></thead>
+        <tbody>
+          <tr><td>Lean mass drop</td><td>Δ ≤ −2 lb / 3 scans</td><td><span class="pill r">RED</span></td></tr>
+          <tr><td>Weight stall</td><td>Flat ≥ 3 weeks</td><td><span class="pill a">AMBER</span></td></tr>
+          <tr><td>Sleep low</td><td>&lt; 6h × 3 nights</td><td><span class="pill r">RED</span></td></tr>
+          <tr><td>HRV drop</td><td>−15% vs 30d</td><td><span class="pill a">AMBER</span></td></tr>
+          <tr><td>Hematocrit high</td><td>≥ 54%</td><td><span class="pill r">RED</span></td></tr>
+          <tr><td>Deep sleep low</td><td>14d avg &lt; 0.5h</td><td><span class="pill a">AMBER</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Phase Gates</h2>
+    <div class="card">
+      <ul style="padding-left: 18px; line-height: 1.6;">
+        <li><strong>A → B:</strong> BF ≤ 16.5% × 2 weeks AND LM ≥ 161 lbs</li>
+        <li><strong>B → C:</strong> BF ≤ 13.2% × 2 weeks AND LM ≥ 161 lbs</li>
+        <li><strong>C → Maintenance:</strong> BF ≤ 12% × 4 weeks AND LM stable</li>
+      </ul>
+    </div>
+
+    <div class="footer-note">Ambient by default. Active by exception.</div>
+  </section>
+
+  <nav>
+    <button data-go="overview"  class="active">Overview</button>
+    <button data-go="wednesday">Wed</button>
+    <button data-go="trends">Trends</button>
+    <button data-go="protocol">Protocol</button>
+  </nav>
+</div>
+
+<script>
+const API_BASE = '';
+const HEALTH_URL = '/health/health_data.json';
+const SCANS_URL  = '/data/scans.json';
+const TRAINING_WEEK = ['Sun-Rest','Mon-UPush','Tue-LStr','Wed-Z2/Mob','Thu-UPull','Fri-LPow','Sat-Z2'];
+const TRAINING_LONG = {
+  'Sun-Rest':'Rest','Mon-UPush':'Upper Push','Tue-LStr':'Lower Strength',
+  'Wed-Z2/Mob':'Z2 / Mobility','Thu-UPull':'Upper Pull','Fri-LPow':'Lower Power','Sat-Z2':'Z2'
+};
+const PHASE_DEFS = {
+  A: { range:'19.5 → 16% BF', kcal:2470, gate:'BF ≤ 16.5% × 2wk + LM ≥ 161' },
+  B: { range:'16 → 13% BF',   kcal:2290, gate:'BF ≤ 13.2% × 2wk + LM ≥ 161' },
+  C: { range:'13 → 10-12% BF',kcal:2200, gate:'BF ≤ 12% × 4wk + LM stable' }
+};
+const MACROS = {
+  A: { high:[2600,220,280,70], mod:[2450,220,230,70], actrec:[2400,220,200,75], rest:[2200,220,130,80] },
+  B: { high:[2600,230,320,60], mod:[2300,230,200,65], actrec:[2200,230,170,65], rest:[2000,230,100,75] },
+  C: { high:[2500,240,320,55], mod:[2200,240,180,60], actrec:[2100,240,140,65], rest:[1900,240, 80,70] }
+};
+const DAY_TYPE = ['rest','high','mod','rest','high','mod','actrec'];
+
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+const fmt = (n, d=1) => (n===null||n===undefined||isNaN(n)) ? '—' : Number(n).toFixed(d);
+const round = (n) => (n===null||n===undefined||isNaN(n)) ? '—' : String(Math.round(n));
+
+function el(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  if (attrs) for (const [k,v] of Object.entries(attrs)) {
+    if (k === 'class') e.className = v;
+    else if (k === 'style') e.style.cssText = v;
+    else if (k.startsWith('on') && typeof v === 'function') e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  for (const c of kids) {
+    if (c == null) continue;
+    e.append(c instanceof Node ? c : document.createTextNode(String(c)));
+  }
+  return e;
+}
+function clear(node) { while (node.firstChild) node.removeChild(node.firstChild); }
+
+let HEALTH = null;
+let SCANS  = [];
+
+$$('nav button').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.go)));
+function switchTab(name) {
+  $$('section[data-tab]').forEach(s => s.classList.toggle('hidden', s.dataset.tab !== name));
+  $$('nav button').forEach(b => b.classList.toggle('active', b.dataset.go === name));
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+async function load() {
+  clear($('#banners'));
+  try {
+    const r = await fetch(HEALTH_URL, { cache: 'no-cache' });
+    if (!r.ok) throw new Error('health ' + r.status);
+    HEALTH = await r.json();
+  } catch (e) {
+    showBanner('r', 'Health data unreachable: ' + e.message);
+    return;
+  }
+  try {
+    const r = await fetch(SCANS_URL, { cache: 'no-cache' });
+    if (r.ok) SCANS = await r.json();
+  } catch (e) { SCANS = []; }
+  render();
+}
+
+function showBanner(sev, text) {
+  const div = el('div', { class: 'banner ' + (sev === 'r' ? 'r' : sev === 'g' ? 'g' : '') }, text);
+  $('#banners').appendChild(div);
+}
+
+function deltaNode(now, prev, decimals, unit) {
+  if (now == null || prev == null) return document.createTextNode('—');
+  const d = now - prev;
+  const cls = d > 0 ? 'up' : d < 0 ? 'down' : 'flat';
+  const sign = d > 0 ? '+' : '';
+  return el('span', { class: 'delta ' + cls },
+    fmt(now, decimals) + unit + ' ',
+    el('span', { class: 'small' }, '(' + sign + fmt(d, decimals) + ')'));
+}
+
+function render() {
+  if (!HEALTH) return;
+
+  const updated = HEALTH.meta && HEALTH.meta.last_updated;
+  if (updated) {
+    const ago = Math.round((Date.now() - new Date(updated).getTime()) / 60000);
+    const stamp = $('#stamp');
+    stamp.textContent = 'data ' + ago + ' min old';
+    stamp.className = 'stamp ' + (ago > 90 ? 'stale' : 'ok');
+  }
+
+  const phase = (HEALTH.protocol && HEALTH.protocol.phase) || 'A';
+  const def = PHASE_DEFS[phase] || PHASE_DEFS.A;
+  $('#phase-name').textContent = 'Phase ' + phase;
+  $('#phase-target').textContent = def.range + ' · ' + def.kcal + ' kcal avg';
+  const dow = new Date().getDay();
+  const dt = DAY_TYPE[dow];
+  const dayLabel = { high:'High / Refeed', mod:'Moderate', actrec:'Active Recovery', rest:'Rest' }[dt];
+  $('#day-type').textContent = dayLabel;
+  $('#day-context').textContent = TRAINING_LONG[TRAINING_WEEK[dow]] || '—';
+  const m = (MACROS[phase] || MACROS.A)[dt];
+  $('#m-kcal').textContent = m[0];
+  $('#m-p').textContent = m[1] + 'g';
+  $('#m-c').textContent = m[2] + 'g';
+  $('#m-f').textContent = m[3] + 'g';
+  const protein = (HEALTH.macros && HEALTH.macros.protein) || {};
+  $('#m-eaten-p').textContent = (protein.current != null ? protein.current : '—') + ' g';
+  $('#m-avg-p').textContent = fmt(protein.avg_7d, 0) + ' g';
+
+  const trainShort = TRAINING_WEEK[dow];
+  $('#train-name').textContent = TRAINING_LONG[trainShort] || trainShort;
+  $('#train-context').textContent = trainShort;
+  $('#train-badge').textContent = (dt === 'rest') ? 'rest day' : 'scheduled';
+
+  const v = HEALTH.vital_signs || {};
+  const sleep = v.sleep_avg || {};
+  const deep  = v.deep_sleep_avg || {};
+  const hrv   = v.hrv || {};
+  $('#r-sleep').textContent = fmt(sleep.value, 1) + 'h';
+  $('#r-sleep-t').textContent = '7d avg · trend ' + (sleep.trend || '—');
+  $('#r-deep').textContent = fmt(deep.value, 1) + 'h';
+  $('#r-deep-t').textContent = 'target ≥ ' + fmt(deep.target, 1) + 'h · ' + (deep.status || '');
+  $('#r-hrv').textContent = fmt(hrv.value, 0) + ' ms';
+  $('#r-hrv-t').textContent = 'trend ' + (hrv.trend || '—');
+  $('#r-rhr').textContent = fmt((v.resting_heart_rate || {}).value, 0) + ' bpm';
+  $('#r-steps').textContent = round((v.steps_avg || {}).value);
+  $('#r-spo2').textContent = fmt((v.spo2 || {}).value, 1) + '%';
+
+  $('#status-dot').className = 'dot ' + computeCompositeStatus();
+
+  if (SCANS.length >= 2) {
+    const a = SCANS[SCANS.length-1], b = SCANS[SCANS.length-2];
+    $('#scan-delta-empty').classList.add('hidden');
+    $('#scan-delta-body').classList.remove('hidden');
+    const dW = $('#d-weight'); clear(dW); dW.appendChild(deltaNode(a.weight, b.weight, 1, 'lbs'));
+    const dB = $('#d-bf');     clear(dB); dB.appendChild(deltaNode(a.bf_pct, b.bf_pct, 1, '%'));
+    const dL = $('#d-lm');     clear(dL); dL.appendChild(deltaNode(a.lean_mass, b.lean_mass, 1, 'lbs'));
+  }
+
+  const trigs = evaluateTriggers();
+  const tlist = $('#trigger-list');
+  clear(tlist);
+  trigs.forEach(t => {
+    const row = el('div', { class: 'ti' },
+      el('div', null, t.label),
+      el('div', null,
+        el('span', { class: 'pill ' + (t.firing ? t.sev : 'g') },
+           t.firing ? (t.sev === 'r' ? 'RED' : 'AMBER') : 'OK'),
+        el('span', { class: 'small', style: 'margin-left:8px' }, t.detail || '')
+      )
+    );
+    tlist.appendChild(row);
+  });
+
+  trigs.filter(t => t.firing && t.sev === 'r').forEach(t => showBanner('r', t.label + ': ' + t.detail));
+
+  renderWoW();
+  renderTrends();
+  renderGate();
+}
+
+function computeCompositeStatus() {
+  const v = HEALTH.vital_signs || {};
+  let red = 0, amber = 0;
+  if ((v.deep_sleep_avg || {}).status === 'red') red++;
+  if (v.sleep_avg && v.sleep_avg.value != null && v.sleep_avg.value < 6) amber++;
+  if (v.hrv && v.hrv.trend === 'down') amber++;
+  if (red > 0) return 'r';
+  if (amber > 0) return 'a';
+  return 'g';
+}
+
+function evaluateTriggers() {
+  const v = HEALTH.vital_signs || {};
+  const out = [];
+  const push = (id, label, sev, firing, detail) => out.push({id, label, sev, firing, detail});
+
+  if (SCANS.length >= 3) {
+    const last3 = SCANS.slice(-3).map(s => s.lean_mass).filter(x => x != null);
+    if (last3.length === 3) {
+      const drop = last3[0] - last3[2];
+      push('lm_drop', 'Lean mass drop', 'r', drop >= 2, 'Δ ' + fmt(-drop,1) + ' lbs over 3 scans');
+    } else push('lm_drop', 'Lean mass drop', 'r', false, 'insufficient lean mass data');
+  } else push('lm_drop', 'Lean mass drop', 'r', false, SCANS.length + '/3 scans');
+
+  push('wt_stall', 'Weight stall', 'a',
+       (v.weight && v.weight.trend === 'stable') && SCANS.length >= 3,
+       v.weight && v.weight.trend ? '7d trend: ' + v.weight.trend : '—');
+
+  push('sleep_low', 'Sleep < 6h × 3 nights', 'r',
+       v.sleep_avg && v.sleep_avg.value != null && v.sleep_avg.value < 6,
+       v.sleep_avg && v.sleep_avg.value != null ? '7d avg ' + fmt(v.sleep_avg.value,1) + 'h' : '—');
+
+  push('hrv_drop', 'HRV drop', 'a',
+       v.hrv && v.hrv.trend === 'down',
+       v.hrv && v.hrv.value != null ? fmt(v.hrv.value,0) + ' ms' : '—');
+
+  const lastHct = [...SCANS].reverse().find(s => s.hct != null);
+  const hctVal = lastHct ? lastHct.hct : null;
+  push('hct_high', 'Hematocrit ≥ 54%', 'r',
+       hctVal != null && hctVal >= 54,
+       hctVal != null ? fmt(hctVal,1) + '%' : 'no Hct logged');
+
+  push('deep_low', 'Deep sleep 14d < 0.5h', 'a',
+       v.deep_sleep_avg && v.deep_sleep_avg.value != null && v.deep_sleep_avg.value < 0.5,
+       v.deep_sleep_avg && v.deep_sleep_avg.value != null ? fmt(v.deep_sleep_avg.value,2) + 'h' : '—');
+
+  return out;
+}
+
+function renderWoW() {
+  const body = $('#wow-body');
+  if (SCANS.length < 2) return;
+  const a = SCANS[SCANS.length-1], b = SCANS[SCANS.length-2];
+  const rows = [
+    ['Weight', a.weight, b.weight, 'lbs'],
+    ['BF %', a.bf_pct, b.bf_pct, '%'],
+    ['Fat Mass', a.fat_mass, b.fat_mass, 'lbs'],
+    ['Lean Mass', a.lean_mass, b.lean_mass, 'lbs'],
+    ['Skel Muscle', a.skeletal_muscle, b.skeletal_muscle, 'lbs'],
+    ['Body Water', a.body_water_pct, b.body_water_pct, '%'],
+    ['Visceral Fat', a.visceral_fat, b.visceral_fat, ''],
+  ];
+  clear(body);
+  rows.forEach(([k, x, y, u]) => {
+    const d = (x != null && y != null) ? (x - y) : null;
+    const sign = (d != null && d > 0) ? '+' : '';
+    const cls  = d == null ? 'flat' : d > 0 ? 'up' : d < 0 ? 'down' : 'flat';
+    const tr = el('tr', null,
+      el('td', null, k),
+      el('td', null, fmt(x,1) + u),
+      el('td', null, fmt(y,1) + u),
+      el('td', null, el('span', { class: 'delta ' + cls }, d == null ? '—' : sign + fmt(d,1) + u))
+    );
+    body.appendChild(tr);
+  });
+}
+
+function renderGate() {
+  const phase = (HEALTH.protocol && HEALTH.protocol.phase) || 'A';
+  const def = PHASE_DEFS[phase];
+  const next = phase === 'A' ? 'B' : phase === 'B' ? 'C' : 'M';
+  $('#gate-name').textContent = phase + ' → ' + next;
+  $('#gate-detail').textContent = def.gate;
+  const thresholds = { A: 16.5, B: 13.2, C: 12.0 };
+  const target = thresholds[phase];
+  const recent = SCANS.slice(-2).filter(s => s.bf_pct != null);
+  const passing = recent.filter(s => s.bf_pct <= target).length;
+  $('#gate-progress').textContent = recent.length
+    ? passing + '/' + recent.length + ' scans ≤ ' + target + '%'
+    : 'awaiting scans';
+  $('#btn-advance').disabled = !(recent.length === 2 && passing === 2);
+}
+
+function renderTrends() {
+  const v = HEALTH.vital_signs || {};
+  drawSpark('spark-weight', [v.weight && v.weight.value]);
+  $('#weight-stats').textContent = 'latest ' + fmt(v.weight && v.weight.value, 1) + ' lbs · trend ' + ((v.weight && v.weight.trend) || '—');
+  drawSpark('spark-sleep', [v.sleep_avg && v.sleep_avg.value]);
+  $('#sleep-stats').textContent = '7d avg ' + fmt(v.sleep_avg && v.sleep_avg.value, 1) + 'h';
+  drawSpark('spark-hrv', [v.hrv && v.hrv.value]);
+  $('#hrv-stats').textContent = 'latest ' + fmt(v.hrv && v.hrv.value, 0) + ' ms · trend ' + ((v.hrv && v.hrv.trend) || '—');
+
+  const wo = HEALTH.workouts || [];
+  const days = 28;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const cells = Array(days).fill(0);
+  wo.forEach(w => {
+    if (!w || !w.date) return;
+    const d = new Date(w.date); d.setHours(0,0,0,0);
+    const idx = Math.floor((today - d) / 86400000);
+    if (idx >= 0 && idx < days) cells[idx]++;
+  });
+  const heat = $('#wo-heatmap');
+  clear(heat);
+  const grid = el('div', { style: 'display:grid;grid-template-columns:repeat(7,1fr);gap:4px;' });
+  cells.slice().reverse().forEach(c => {
+    const bg = c === 0 ? '#1e293b' : c === 1 ? '#0369a1' : '#0ea5e9';
+    const sq = el('div', { style: 'aspect-ratio:1;border-radius:4px;background:' + bg + ';', title: c + ' workouts' });
+    grid.appendChild(sq);
+  });
+  heat.appendChild(grid);
+
+  if (SCANS.length) {
+    $('#bc-empty').classList.add('hidden');
+    $('#bc-table').classList.remove('hidden');
+    const body = $('#bc-body');
+    clear(body);
+    SCANS.slice(-8).reverse().forEach(s => {
+      const tr = el('tr', null,
+        el('td', null, s.date),
+        el('td', null, fmt(s.weight,1)),
+        el('td', null, fmt(s.bf_pct,1)),
+        el('td', null, fmt(s.lean_mass,1))
       );
-    }
+      body.appendChild(tr);
+    });
+  }
+}
 
-    function Tabs({ tab, setTab }) {
-      const items = [
-        ["overview", "OVERVIEW"],
-        ["wed",      "WED"],
-        ["phase",    "PHASE"],
-        ["triggers", "TRIGGERS"],
-        ["trend",    "TREND"],
-      ];
-      return (
-        <div className="tabs">
-          <div className="container row" style={{ gap: 0, flex: 1 }}>
-            {items.map(([k, label]) => (
-              <button
-                key={k}
-                className={`tab ${tab === k ? "active" : ""}`}
-                onClick={() => setTab(k)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-      );
-    }
+function drawSpark(id, series) {
+  const host = document.getElementById(id);
+  clear(host);
+  if (!series || !series.length || series.every(x => x == null)) return;
+  const vals = series.filter(x => x != null);
+  const min = Math.min(...vals), max = Math.max(...vals);
+  series.forEach(v => {
+    const span = document.createElement('span');
+    const h = (max === min) ? 14 : Math.max(2, Math.round(28 * (v - min) / (max - min)));
+    span.style.height = h + 'px';
+    host.appendChild(span);
+  });
+}
 
-    function OverviewTab({ health, phase, dayType }) {
-      const m = health?.latest?.macros_today || {};
-      const rec = health?.latest?.recovery || {};
-      const wo  = health?.latest?.workout_today;
-      const split = TRAINING_SPLIT[todayDow()];
-      const last = health?.history?.[health.history.length - 1] || {};
-      const sleep = health?.latest || {};
-      const recent7 = (health?.history || []).slice(-7);
+$('#btn-save-scan').addEventListener('click', async () => {
+  const num = (id) => { const x = parseFloat($(id).value); return isNaN(x) ? null : x; };
+  const intt = (id) => { const x = parseInt($(id).value, 10); return isNaN(x) ? null : x; };
+  const payload = {
+    date: new Date().toISOString().slice(0,10),
+    weight:           num('#s-weight'),
+    bf_pct:           num('#s-bf'),
+    fat_mass:         num('#s-fat'),
+    lean_mass:        num('#s-lm'),
+    skeletal_muscle:  num('#s-sm'),
+    body_water_pct:   num('#s-bw'),
+    visceral_fat:     intt('#s-vf'),
+    hct:              num('#s-hct'),
+    notes:            $('#s-notes').value || ''
+  };
+  const status = $('#save-status');
+  status.textContent = 'saving…';
+  try {
+    const r = await fetch(API_BASE + '/api/protocol/save_scan', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    status.textContent = 'saved · refreshing…'; status.className = 'small ok';
+    await load(); switchTab('overview');
+  } catch (e) { status.textContent = 'save failed: ' + e.message; status.className = 'small stale'; }
+});
 
-      return (
-        <div className="container col pad">
-          <div className="panel">
-            <div className="between" style={{ marginBottom: 8 }}>
-              <span className="label">Today's Fuel</span>
-              <span className="muted" style={{ fontSize: 12 }}>{dayType.type} · target {dayType.cal} kcal</span>
-            </div>
-            <div className="grid grid-4">
-              <MacroBar label="Calories" cur={m.calories?.current || 0} tgt={dayType.cal} unit=" kcal" />
-              <MacroBar label="Protein"  cur={m.protein?.current || 0}  tgt={dayType.P}   unit="g" />
-              <MacroBar label="Carbs"    cur={m.carbs?.current || 0}    tgt={dayType.C}   unit="g" />
-              <MacroBar label="Fat"      cur={m.fat?.current || 0}      tgt={dayType.F}   unit="g" />
-            </div>
-          </div>
+$('#btn-save-photos').addEventListener('click', async () => {
+  const items = ['front','side','back'];
+  const status = $('#save-status');
+  status.textContent = 'uploading…';
+  for (const k of items) {
+    const f = document.getElementById('p-' + k).files[0];
+    if (!f) continue;
+    const fd = new FormData();
+    fd.append('view', k);
+    fd.append('date', new Date().toISOString().slice(0,10));
+    fd.append('photo', f);
+    try {
+      const r = await fetch(API_BASE + '/api/protocol/save_photo', { method:'POST', body: fd });
+      if (!r.ok) throw new Error(k + ' HTTP ' + r.status);
+    } catch (e) { status.textContent = 'upload failed: ' + e.message; status.className='small stale'; return; }
+  }
+  status.textContent = 'photos uploaded';
+  status.className = 'small ok';
+});
 
-          <div className="grid grid-2">
-            <div className="panel">
-              <span className="label">Training</span>
-              <div className="stat-num" style={{ marginTop: 6 }}>{split.focus}</div>
-              <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>{split.detail}</div>
-              {wo ? (
-                <div className="pill" style={{ marginTop: 10 }}>
-                  ✓ {wo.type} · {wo.duration_min} min today
-                </div>
-              ) : (
-                <div className="muted" style={{ fontSize: 12, marginTop: 10 }}>No session logged today.</div>
-              )}
-            </div>
+$('#btn-advance').addEventListener('click', async () => {
+  if (!confirm('Advance phase? This is logged.')) return;
+  const r = await fetch(API_BASE + '/api/protocol/advance_phase', { method:'POST' });
+  if (r.ok) { await load(); }
+});
 
-            <div className="panel">
-              <span className="label">Last Night</span>
-              <div className="row" style={{ gap: 12, marginTop: 6, flexWrap: "wrap" }}>
-                <div>
-                  <div className="muted" style={{ fontSize: 11 }}>Total</div>
-                  <div className="stat-num sm">{num(sleep.sleep_total, 1)}h</div>
-                </div>
-                <div>
-                  <div className="muted" style={{ fontSize: 11 }}>Deep</div>
-                  <div className="stat-num sm">{num(sleep.sleep_deep, 1)}h</div>
-                </div>
-                <div>
-                  <div className="muted" style={{ fontSize: 11 }}>REM</div>
-                  <div className="stat-num sm">{num(sleep.sleep_rem, 1)}h</div>
-                </div>
-                <div>
-                  <div className="muted" style={{ fontSize: 11 }}>HRV</div>
-                  <div className="stat-num sm">{num(sleep.hrv, 0)}</div>
-                </div>
-                <div>
-                  <div className="muted" style={{ fontSize: 11 }}>RHR</div>
-                  <div className="stat-num sm">{num(sleep.rhr, 0)}</div>
-                </div>
-              </div>
-            </div>
-          </div>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/pcc-sw.js').catch(()=>{});
+}
 
-          <div className="panel">
-            <div className="between">
-              <span className="label">Recovery</span>
-              <span className="row" style={{ gap: 6 }}>
-                <StatusDot color={rec.color} />
-                <span style={{ fontWeight: 700, fontSize: 14 }}>{rec.status || "—"}</span>
-                <span className="muted" style={{ fontSize: 12 }}>{rec.score != null ? `· ${rec.score}/100` : ""}</span>
-              </span>
-            </div>
-            {rec.recommendation && (
-              <div style={{ marginTop: 8, fontSize: 14, lineHeight: 1.5 }}>{rec.recommendation}</div>
-            )}
-          </div>
-
-          {recent7.length > 1 && LineChart && (
-            <>
-              <div className="panel">
-                <span className="label">Weight · last 7d</span>
-                <div style={{ height: 160, marginTop: 8 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={recent7}>
-                      <CartesianGrid stroke="#232a3d" strokeDasharray="3 3" />
-                      <XAxis dataKey="date" tick={{ fill: "#8089a0", fontSize: 11 }} tickFormatter={(d) => d.slice(5)} />
-                      <YAxis domain={['auto', 'auto']} tick={{ fill: "#8089a0", fontSize: 11 }} width={40} />
-                      <Tooltip contentStyle={{ background: "#131826", border: "1px solid #232a3d", borderRadius: 8 }} />
-                      <Line type="monotone" dataKey="weight" stroke="#60a5fa" strokeWidth={2} dot={{ r: 3 }} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-              <div className="panel">
-                <span className="label">HRV · last 7d</span>
-                <div style={{ height: 160, marginTop: 8 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={recent7}>
-                      <CartesianGrid stroke="#232a3d" strokeDasharray="3 3" />
-                      <XAxis dataKey="date" tick={{ fill: "#8089a0", fontSize: 11 }} tickFormatter={(d) => d.slice(5)} />
-                      <YAxis domain={['auto', 'auto']} tick={{ fill: "#8089a0", fontSize: 11 }} width={40} />
-                      <Tooltip contentStyle={{ background: "#131826", border: "1px solid #232a3d", borderRadius: 8 }} />
-                      <Line type="monotone" dataKey="hrv" stroke="#a78bfa" strokeWidth={2} dot={{ r: 3 }} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </>
-          )}
-
-          <div className="panel tight muted" style={{ fontSize: 11, textAlign: "center" }}>
-            updated {health?.updated_at ? new Date(health.updated_at).toLocaleString() : "—"}
-            {health?.source_file && <> · src {health.source_file.split("/").pop()}</>}
-          </div>
-        </div>
-      );
-    }
-
-    function ScanTab({ phase, scans, refreshScans, health }) {
-      const [form, setForm] = useState(() => {
-        const draft = localStorage.getItem("pcc_scan_draft");
-        if (draft) {
-          try { return JSON.parse(draft); } catch {}
-        }
-        return {
-          date: new Date().toISOString().slice(0, 10),
-          weight: "", body_fat: "", lean_mass: "", fat_mass: "",
-          notes: "",
-          photos: { front: null, side: null, back: null },
-        };
-      });
-      const [submitting, setSubmitting] = useState(false);
-      const [insight, setInsight] = useState(null);
-      const [insightLoading, setInsightLoading] = useState(false);
-      const [submitMsg, setSubmitMsg] = useState(null);
-
-      useEffect(() => {
-        // Persist draft (without photo bytes — keep only flags)
-        const lite = {
-          ...form,
-          photos: Object.fromEntries(
-            Object.entries(form.photos).map(([k, v]) => [k, v ? "set" : null])
-          ),
-        };
-        localStorage.setItem("pcc_scan_draft", JSON.stringify(lite));
-      }, [form]);
-
-      const update = (k, v) => setForm(f => ({ ...f, [k]: v }));
-
-      const onPhoto = (slot, file) => {
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-          setForm(f => ({ ...f, photos: { ...f.photos, [slot]: reader.result } }));
-        };
-        reader.readAsDataURL(file);
-      };
-
-      // auto-derive lean/fat mass when weight + bf% present
-      useEffect(() => {
-        const w = parseFloat(form.weight);
-        const bf = parseFloat(form.body_fat);
-        if (!isNaN(w) && !isNaN(bf) && bf > 0 && bf < 50) {
-          const fat = +(w * (bf / 100)).toFixed(1);
-          const lean = +(w - fat).toFixed(1);
-          if (form.lean_mass !== String(lean) || form.fat_mass !== String(fat)) {
-            setForm(f => ({ ...f, lean_mass: String(lean), fat_mass: String(fat) }));
-          }
-        }
-      }, [form.weight, form.body_fat]);
-
-      const submit = async () => {
-        setSubmitting(true); setSubmitMsg(null);
-        try {
-          const payload = {
-            date: form.date, phase,
-            weight:    form.weight    ? parseFloat(form.weight)    : null,
-            body_fat:  form.body_fat  ? parseFloat(form.body_fat)  : null,
-            lean_mass: form.lean_mass ? parseFloat(form.lean_mass) : null,
-            fat_mass:  form.fat_mass  ? parseFloat(form.fat_mass)  : null,
-            notes: form.notes,
-            photos: form.photos,
-          };
-          const r = await fetch("/api/save_scan", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          });
-          const j = await r.json();
-          if (!j.ok) throw new Error(j.error || "save failed");
-          setSubmitMsg({ ok: true, msg: `Scan saved · ${j.count} on file` });
-          localStorage.removeItem("pcc_scan_draft");
-          await refreshScans();
-
-          // fire insight
-          setInsightLoading(true);
-          try {
-            const ir = await fetch("/api/insight", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: "{}",
-            });
-            setInsight(await ir.json());
-          } catch (e) {
-            setInsight({ source: "fallback", text: "Insight call failed." });
-          } finally {
-            setInsightLoading(false);
-          }
-        } catch (e) {
-          setSubmitMsg({ ok: false, msg: String(e) });
-        } finally {
-          setSubmitting(false);
-        }
-      };
-
-      const isWed = todayDow() === 3;
-      const recent = (scans || []).slice(-5).reverse();
-
-      return (
-        <div className="container col pad">
-          {!isWed && (
-            <div className="panel tight" style={{ borderColor: "rgba(251,191,36,0.4)" }}>
-              <div className="row"><span className="dot yellow" /> <span className="muted" style={{ fontSize: 12 }}>
-                Today is {dowName(todayDow())} · scan day is Wednesday. You can still log if you scanned today.
-              </span></div>
-            </div>
-          )}
-
-          <div className="panel col">
-            <span className="label">Hume Scan · {form.date}</span>
-            <div className="grid grid-2">
-              <div className="col" style={{ gap: 6 }}>
-                <span className="muted" style={{ fontSize: 11 }}>Weight (lb)</span>
-                <input inputMode="decimal" value={form.weight} onChange={e => update("weight", e.target.value)} placeholder="216.7" />
-              </div>
-              <div className="col" style={{ gap: 6 }}>
-                <span className="muted" style={{ fontSize: 11 }}>Body Fat %</span>
-                <input inputMode="decimal" value={form.body_fat} onChange={e => update("body_fat", e.target.value)} placeholder="19.5" />
-              </div>
-              <div className="col" style={{ gap: 6 }}>
-                <span className="muted" style={{ fontSize: 11 }}>Lean Mass (lb)</span>
-                <input inputMode="decimal" value={form.lean_mass} onChange={e => update("lean_mass", e.target.value)} placeholder="auto" />
-              </div>
-              <div className="col" style={{ gap: 6 }}>
-                <span className="muted" style={{ fontSize: 11 }}>Fat Mass (lb)</span>
-                <input inputMode="decimal" value={form.fat_mass} onChange={e => update("fat_mass", e.target.value)} placeholder="auto" />
-              </div>
-            </div>
-            <div className="col" style={{ gap: 6 }}>
-              <span className="muted" style={{ fontSize: 11 }}>Notes</span>
-              <textarea rows={2} value={form.notes} onChange={e => update("notes", e.target.value)} placeholder="Sleep last night, hydration, anything off…" />
-            </div>
-          </div>
-
-          <div className="panel col">
-            <span className="label">Progress Photos</span>
-            <div className="grid grid-3">
-              {["front", "side", "back"].map(slot => (
-                <label key={slot} className="photo-slot">
-                  {form.photos[slot] && typeof form.photos[slot] === "string" && form.photos[slot].startsWith("data:")
-                    ? <img src={form.photos[slot]} alt={slot} />
-                    : <span>{slot}</span>}
-                  <input type="file" accept="image/*" capture="user" onChange={e => onPhoto(slot, e.target.files?.[0])} />
-                </label>
-              ))}
-            </div>
-            <div className="muted" style={{ fontSize: 11 }}>Photos are saved to ~/owens-lifeos/data/progress_photos/{form.date}/</div>
-          </div>
-
-          <button className="btn" disabled={submitting || !form.weight} onClick={submit}>
-            {submitting ? "Saving…" : "Submit scan + run weekly insight"}
-          </button>
-
-          {submitMsg && (
-            <div className={`panel tight`} style={{ borderColor: submitMsg.ok ? "rgba(52,211,153,0.4)" : "rgba(248,113,113,0.4)" }}>
-              <div className="row">
-                <span className={`dot ${submitMsg.ok ? "green" : "red"}`} />
-                <span style={{ fontSize: 13 }}>{submitMsg.msg}</span>
-              </div>
-            </div>
-          )}
-
-          {(insightLoading || insight) && (
-            <div className="insight-box">
-              <div className="label" style={{ marginBottom: 6 }}>OverwatchTDO Weekly Insight</div>
-              {insightLoading ? "Generating…" : insight?.text}
-              {insight?.source === "fallback" && (
-                <div className="muted" style={{ fontSize: 11, marginTop: 6 }}>Source: fallback (Claude CLI not reachable).</div>
-              )}
-            </div>
-          )}
-
-          {recent.length > 0 && (
-            <div className="panel">
-              <span className="label">Recent Scans</span>
-              <div className="scrollx" style={{ marginTop: 6 }}>
-                <table className="table">
-                  <thead>
-                    <tr><th>Date</th><th>Phase</th><th>Wt</th><th>BF%</th><th>LM</th><th>FM</th><th>Photos</th></tr>
-                  </thead>
-                  <tbody>
-                    {recent.map(s => (
-                      <tr key={s.date + s.ts}>
-                        <td>{s.date}</td>
-                        <td>{s.phase}</td>
-                        <td>{num(s.weight, 1)}</td>
-                        <td>{num(s.body_fat, 1)}</td>
-                        <td>{num(s.lean_mass, 1)}</td>
-                        <td>{num(s.fat_mass, 1)}</td>
-                        <td>{Object.keys(s.photos || {}).length}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    function PhaseTab({ phase, scans }) {
-      const data = PHASES[phase];
-      const gate = PHASE_GATES[phase];
-      const last2 = (scans || []).slice(-2);
-      return (
-        <div className="container col pad">
-          <div className="panel col">
-            <span className="label">Phase {phase} · {data.name}</span>
-            <div className="grid grid-3">
-              <div><div className="muted" style={{ fontSize: 11 }}>BF Range</div><div className="stat-num sm">{data.bf_range}</div></div>
-              <div><div className="muted" style={{ fontSize: 11 }}>Avg kcal</div><div className="stat-num sm">{data.avg_kcal}</div></div>
-              <div><div className="muted" style={{ fontSize: 11 }}>Rate</div><div className="stat-num sm">{data.rate}</div></div>
-            </div>
-            <div className="muted" style={{ fontSize: 12 }}>Diet break: {data.diet_break}</div>
-          </div>
-
-          <div className="panel">
-            <span className="label">Day-Type Macros</span>
-            <div className="scrollx" style={{ marginTop: 8 }}>
-              <table className="table">
-                <thead><tr><th>Type</th><th>Days</th><th>Cal</th><th>P</th><th>C</th><th>F</th></tr></thead>
-                <tbody>
-                  {data.days.map(d => {
-                    const isToday = d.days.includes(dowName(todayDow()));
-                    return (
-                      <tr key={d.type} className={isToday ? "today" : ""}>
-                        <td>{d.type}</td>
-                        <td>{d.days.join(", ")}</td>
-                        <td>{d.cal}</td>
-                        <td>{d.P}</td>
-                        <td>{d.C}</td>
-                        <td>{d.F}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div className="panel">
-            <span className="label">Phase Gate → {gate.next}</span>
-            <div style={{ marginTop: 6, fontSize: 14 }}>{gate.rule}</div>
-            {last2.length > 0 ? (
-              <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>
-                Last scans: {last2.map(s => `BF ${num(s.body_fat,1)}/LM ${num(s.lean_mass,1)}`).join(" · ")}
-              </div>
-            ) : (
-              <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>
-                No scans logged yet — gate evaluation requires ≥ {gate.weeks * 1} weekly scan(s).
-              </div>
-            )}
-          </div>
-
-          <div className="panel">
-            <span className="label">Training Split</span>
-            <div className="scrollx" style={{ marginTop: 8 }}>
-              <table className="table">
-                <thead><tr><th>Day</th><th>Focus</th><th>Detail</th></tr></thead>
-                <tbody>
-                  {Object.entries(TRAINING_SPLIT).map(([d, t]) => (
-                    <tr key={d} className={Number(d) === todayDow() ? "today" : ""}>
-                      <td>{t.name}</td>
-                      <td>{t.focus}</td>
-                      <td className="muted">{t.detail}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    function evaluateTriggers(health, scans) {
-      const out = {};
-      const h = health?.history || [];
-      const last7 = h.slice(-7);
-      const recent3 = (scans || []).slice(-3);
-
-      // lm_drop
-      if (recent3.length >= 3) {
-        const lms = recent3.map(s => s.lean_mass).filter(v => v != null);
-        if (lms.length >= 3) {
-          const delta = lms[lms.length - 1] - lms[0];
-          out.lm_drop = { active: delta <= -2, detail: `ΔLM ${delta.toFixed(1)} lb` };
-        }
-      }
-      out.lm_drop = out.lm_drop || { active: false, detail: "needs ≥3 scans" };
-
-      // sleep_low: count nights <6h in last 7
-      const lowNights = last7.filter(d => (d.sleep_total || 0) < 6).length;
-      out.sleep_low = { active: lowNights >= 3, detail: `${lowNights}/7 nights <6h` };
-
-      // hrv_drop: latest vs 7d avg
-      const hrvVals = last7.map(d => d.hrv).filter(v => v != null);
-      if (hrvVals.length >= 3) {
-        const avg = hrvVals.reduce((a, b) => a + b, 0) / hrvVals.length;
-        const cur = hrvVals[hrvVals.length - 1];
-        const drop = ((avg - cur) / avg) * 100;
-        out.hrv_drop = { active: drop >= 15, detail: `current ${cur} vs 7d avg ${avg.toFixed(1)} (Δ -${drop.toFixed(1)}%)` };
-      } else {
-        out.hrv_drop = { active: false, detail: "needs more HRV data" };
-      }
-
-      // deep_low: 14d avg deep < 0.5
-      const deepHist = h.slice(-14).map(d => d.sleep_deep).filter(v => v != null);
-      const avgDeep = deepHist.length ? deepHist.reduce((a, b) => a + b, 0) / deepHist.length : null;
-      out.deep_low = avgDeep != null
-        ? { active: avgDeep < 0.5, detail: `14d avg ${avgDeep.toFixed(2)}h` }
-        : { active: false, detail: "no deep sleep data" };
-
-      // weight_stall: weights from last 21 days, trend flat ≥3 wk
-      const weights = h.slice(-21).map(d => d.weight).filter(v => v != null);
-      if (weights.length >= 14) {
-        const first = weights[0], last = weights[weights.length - 1];
-        const delta = Math.abs(last - first);
-        out.weight_stall = { active: delta < 0.5, detail: `Δ ${delta.toFixed(2)} lb over ${weights.length}d` };
-      } else {
-        out.weight_stall = { active: false, detail: "needs ≥14d weights" };
-      }
-
-      // hct_high: not in health_data shape — manual flag
-      out.hct_high = { active: false, detail: "labs only — review next quarterly draw" };
-
-      return out;
-    }
-
-    function TriggersTab({ health, scans }) {
-      const status = useMemo(() => evaluateTriggers(health, scans), [health, scans]);
-      return (
-        <div className="container col pad">
-          <div className="panel">
-            <span className="label">Trigger Surveillance</span>
-            <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>
-              Live evaluation against the latest health snapshot + scan log. Active triggers should be acted on immediately.
-            </div>
-          </div>
-          {TRIGGERS.map(t => {
-            const s = status[t.id] || { active: false, detail: "—" };
-            return (
-              <div key={t.id} className="panel">
-                <div className="between">
-                  <div className="row">
-                    <span className={`dot ${s.active ? (t.level === "RED" ? "red" : "yellow") : "gray"}`} />
-                    <span style={{ fontWeight: 700 }}>{t.label}</span>
-                    <span className={`badge ${t.level === "RED" ? "mock" : "phase"}`} style={t.level === "RED" ? { background: "rgba(248,113,113,0.18)", color: "#f87171" } : {}}>{t.level}</span>
-                  </div>
-                  <span className="muted" style={{ fontSize: 12 }}>{s.active ? "ACTIVE" : "clear"}</span>
-                </div>
-                <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>{t.rule}</div>
-                <div style={{ fontSize: 13, marginTop: 4 }}>{s.detail}</div>
-              </div>
-            );
-          })}
-        </div>
-      );
-    }
-
-    function TrendTab({ health }) {
-      const h = (health?.history || []).slice(-30);
-      if (!LineChart || h.length < 2) {
-        return <div className="container col pad"><div className="panel">Not enough trend data yet.</div></div>;
-      }
-      return (
-        <div className="container col pad">
-          <div className="panel">
-            <span className="label">Weight · last 30d</span>
-            <div style={{ height: 220, marginTop: 8 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={h}>
-                  <CartesianGrid stroke="#232a3d" strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tick={{ fill: "#8089a0", fontSize: 10 }} tickFormatter={(d) => d.slice(5)} interval={Math.floor(h.length / 7)} />
-                  <YAxis domain={['auto', 'auto']} tick={{ fill: "#8089a0", fontSize: 11 }} width={40} />
-                  <Tooltip contentStyle={{ background: "#131826", border: "1px solid #232a3d", borderRadius: 8 }} />
-                  <Line type="monotone" dataKey="weight" stroke="#60a5fa" strokeWidth={2} dot={false} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          <div className="panel">
-            <span className="label">HRV · last 30d</span>
-            <div style={{ height: 220, marginTop: 8 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={h}>
-                  <CartesianGrid stroke="#232a3d" strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tick={{ fill: "#8089a0", fontSize: 10 }} tickFormatter={(d) => d.slice(5)} interval={Math.floor(h.length / 7)} />
-                  <YAxis domain={['auto', 'auto']} tick={{ fill: "#8089a0", fontSize: 11 }} width={40} />
-                  <Tooltip contentStyle={{ background: "#131826", border: "1px solid #232a3d", borderRadius: 8 }} />
-                  <Line type="monotone" dataKey="hrv" stroke="#a78bfa" strokeWidth={2} dot={false} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          <div className="panel">
-            <span className="label">Sleep Total · last 30d</span>
-            <div style={{ height: 200, marginTop: 8 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={h}>
-                  <CartesianGrid stroke="#232a3d" strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tick={{ fill: "#8089a0", fontSize: 10 }} tickFormatter={(d) => d.slice(5)} interval={Math.floor(h.length / 7)} />
-                  <YAxis domain={[4, 10]} tick={{ fill: "#8089a0", fontSize: 11 }} width={40} />
-                  <Tooltip contentStyle={{ background: "#131826", border: "1px solid #232a3d", borderRadius: 8 }} />
-                  <ReferenceLine y={6} stroke="#f87171" strokeDasharray="3 3" />
-                  <Line type="monotone" dataKey="sleep_total" stroke="#34d399" strokeWidth={2} dot={false} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    function App() {
-      const [phase, setPhase] = useState(() => localStorage.getItem("pcc_phase") || "A");
-      const [tab, setTab] = useState(() => localStorage.getItem("pcc_tab") || "overview");
-      const [health, setHealth] = useState(null);
-      const [scans, setScans] = useState([]);
-
-      useEffect(() => { localStorage.setItem("pcc_phase", phase); }, [phase]);
-      useEffect(() => { localStorage.setItem("pcc_tab", tab); }, [tab]);
-
-      const refreshScans = useCallback(async () => {
-        setScans(await fetchScans());
-      }, []);
-
-      const refreshHealth = useCallback(async () => {
-        const live = await fetchHealth();
-        setHealth(live || mockHealth());
-      }, []);
-
-      useEffect(() => {
-        refreshHealth(); refreshScans();
-        const t = setInterval(refreshHealth, 60_000);
-        return () => clearInterval(t);
-      }, [refreshHealth, refreshScans]);
-
-      const dayType = useMemo(() => dayTypeForToday(phase), [phase]);
-      const recoveryColor = health?.latest?.recovery?.color || "gray";
-      const source = health?.source || "mock";
-
-      // gate evaluation
-      const gateMet = useMemo(() => {
-        const gate = PHASE_GATES[phase];
-        if (!gate || !scans?.length) return false;
-        const need = gate.weeks;
-        if (scans.length < need) return false;
-        const slice = scans.slice(-need);
-        return slice.every(s =>
-          (s.body_fat != null && s.body_fat <= gate.bf_max) &&
-          (gate.lm_min === 0 || (s.lean_mass != null && s.lean_mass >= gate.lm_min))
-        );
-      }, [phase, scans]);
-
-      const onAdvance = () => {
-        const next = PHASE_GATES[phase].next;
-        if (next === "M") {
-          alert("Phase C complete — entering maintenance. Update protocol manually.");
-          return;
-        }
-        if (confirm(`Advance to Phase ${next}?`)) setPhase(next);
-      };
-
-      return (
-        <>
-          <Header
-            phase={phase} setPhase={setPhase}
-            dayType={dayType}
-            recoveryColor={recoveryColor}
-            source={source}
-            gateMet={gateMet}
-            onAdvance={onAdvance}
-          />
-          <Tabs tab={tab} setTab={setTab} />
-          {tab === "overview" && <OverviewTab health={health} phase={phase} dayType={dayType} />}
-          {tab === "wed"      && <ScanTab phase={phase} scans={scans} refreshScans={refreshScans} health={health} />}
-          {tab === "phase"    && <PhaseTab phase={phase} scans={scans} />}
-          {tab === "triggers" && <TriggersTab health={health} scans={scans} />}
-          {tab === "trend"    && <TrendTab health={health} />}
-        </>
-      );
-    }
-
-    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-  </script>
+load();
+setInterval(load, 5 * 60 * 1000);
+</script>
 </body>
 </html>

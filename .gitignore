@@ -4,3 +4,7 @@
 logs/
 data/
 !data/.gitkeep
+
+# Local backups (kept out of repo)
+*.bak
+*.bak.*

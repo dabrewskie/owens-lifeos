@@ -46,6 +46,8 @@ PCC_HTML = DASH_DIR / "protocol_command_center.html"
 PCC_DATA_FILE = DATA_DIR / "health_data.json"
 LIFEOS_DATA_FILE = HOME / "Documents" / "S6_COMMS_TECH" / "dashboard" / "health" / "health_data.json"
 SCANS_FILE = DATA_DIR / "scans.json"
+PHASE_STATE_FILE = DATA_DIR / "phase_state.json"
+PHASE_ORDER = ("A", "B", "C", "M")
 
 CLAUDE_CLI = shutil.which("claude") or str(HOME / ".local" / "bin" / "claude")
 
@@ -364,6 +366,206 @@ def load_scans():
         return []
 
 
+# --- protocol-shape (HTML v2.2) helpers ---
+def load_phase_state():
+    """Return {'phase': str, 'history': [...]}. Default to Phase A if missing."""
+    if not PHASE_STATE_FILE.exists():
+        return {"phase": "A", "history": []}
+    try:
+        data = json.loads(PHASE_STATE_FILE.read_text())
+        if not isinstance(data, dict) or "phase" not in data:
+            return {"phase": "A", "history": []}
+        data.setdefault("history", [])
+        return data
+    except Exception:
+        return {"phase": "A", "history": []}
+
+
+def save_phase_state(state):
+    PHASE_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    PHASE_STATE_FILE.write_text(json.dumps(state, indent=2))
+
+
+def load_canonical_health():
+    """Return raw lifeos canonical health_data.json with phase override merged.
+
+    The new HTML reads HEALTH.vital_signs.weight.value etc. directly, so we
+    serve the canonical shape unmodified (mirror-first, iCloud fallback).
+    Phase comes from phase_state.json (server-side override) — merged into
+    the served document at protocol.phase so the dashboard sees it.
+    """
+    src_file = None
+    for candidate in (PCC_DATA_FILE, LIFEOS_DATA_FILE):
+        try:
+            if candidate.exists():
+                src_file = candidate
+                break
+        except OSError:
+            continue
+    if src_file is None:
+        return {"meta": {"last_updated": datetime.now(timezone.utc).isoformat(),
+                         "source": "missing"},
+                "vital_signs": {}, "macros": {}, "workouts": [],
+                "protocol": {"phase": load_phase_state().get("phase", "A")}}
+    try:
+        raw = json.loads(src_file.read_text())
+    except Exception as e:
+        return {"meta": {"last_updated": datetime.now(timezone.utc).isoformat(),
+                         "source": f"parse-error: {e}"},
+                "vital_signs": {}, "macros": {}, "workouts": [],
+                "protocol": {"phase": load_phase_state().get("phase", "A")}}
+
+    # merge phase override
+    state = load_phase_state()
+    proto = raw.get("protocol")
+    if not isinstance(proto, dict):
+        proto = {}
+    proto["phase"] = state.get("phase", "A")
+    proto["phase_history"] = state.get("history", [])
+    raw["protocol"] = proto
+    return raw
+
+
+def save_protocol_scan(payload):
+    """Append/replace a JSON-shape scan record in scans.json.
+
+    The HTML v2.2 POSTs date/weight/bf_pct/fat_mass/lean_mass/skeletal_muscle/
+    body_water_pct/visceral_fat/hct/notes (no photos in this payload — those
+    arrive via /api/protocol/save_photo).
+    """
+    SCANS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    scan_date = (payload.get("date") or datetime.now().date().isoformat())[:10]
+
+    record = {
+        "date": scan_date,
+        "ts": datetime.now(timezone.utc).isoformat(),
+        "phase": load_phase_state().get("phase", "A"),
+        "weight": payload.get("weight"),
+        "bf_pct": payload.get("bf_pct"),
+        "fat_mass": payload.get("fat_mass"),
+        "lean_mass": payload.get("lean_mass"),
+        "skeletal_muscle": payload.get("skeletal_muscle"),
+        "body_water_pct": payload.get("body_water_pct"),
+        "visceral_fat": payload.get("visceral_fat"),
+        "hct": payload.get("hct"),
+        "notes": payload.get("notes") or "",
+    }
+
+    history = load_scans()
+    history = [s for s in history if s.get("date") != record["date"]]
+    history.append(record)
+    history.sort(key=lambda s: s.get("date", ""))
+    SCANS_FILE.write_text(json.dumps(history, indent=2))
+    return record, history
+
+
+def save_protocol_photo(view, scan_date, ext, body):
+    """Write a single photo to progress_photos/<date>/<view>.<ext>."""
+    if view not in ("front", "side", "back"):
+        raise ValueError(f"invalid view: {view}")
+    scan_date = scan_date or datetime.now().date().isoformat()
+    scan_date = scan_date[:10]
+    target_dir = PHOTO_DIR / scan_date
+    target_dir.mkdir(parents=True, exist_ok=True)
+    if not ext:
+        ext = "jpg"
+    ext = ext.lstrip(".").lower()
+    if ext not in ("jpg", "jpeg", "png", "heic", "heif", "webp"):
+        ext = "jpg"
+    out = target_dir / f"{view}.{ext}"
+    out.write_bytes(body)
+    return out
+
+
+def advance_phase():
+    """Bump phase A->B->C->M. Records history with timestamp."""
+    state = load_phase_state()
+    cur = state.get("phase", "A")
+    try:
+        nxt_idx = PHASE_ORDER.index(cur) + 1
+    except ValueError:
+        nxt_idx = 0
+    if nxt_idx >= len(PHASE_ORDER):
+        return state, False
+    new_phase = PHASE_ORDER[nxt_idx]
+    state["phase"] = new_phase
+    state.setdefault("history", []).append({
+        "phase": new_phase,
+        "previous": cur,
+        "ts": datetime.now(timezone.utc).isoformat(),
+    })
+    save_phase_state(state)
+    return state, True
+
+
+# --- minimal multipart/form-data parser (single-file uploads) ---
+def parse_multipart(content_type, body):
+    """Return {field_name: {'data': bytes, 'filename': str|None, 'ctype': str|None}}.
+
+    Stdlib-only. Handles RFC 7578 form data with text + binary fields.
+    Boundary extracted from the Content-Type header.
+    """
+    if not content_type or "multipart/form-data" not in content_type.lower():
+        return {}
+    marker = "boundary="
+    idx = content_type.lower().find(marker)
+    if idx < 0:
+        return {}
+    boundary = content_type[idx + len(marker):].strip()
+    if ";" in boundary:
+        boundary = boundary.split(";", 1)[0].strip()
+    if boundary.startswith('"') and boundary.endswith('"'):
+        boundary = boundary[1:-1]
+    delim = ("--" + boundary).encode()
+    parts = body.split(delim)
+    out = {}
+    for part in parts[1:-1]:
+        # strip the leading \r\n and trailing \r\n
+        if part.startswith(b"\r\n"):
+            part = part[2:]
+        if part.endswith(b"\r\n"):
+            part = part[:-2]
+        if not part:
+            continue
+        try:
+            headers_blob, content = part.split(b"\r\n\r\n", 1)
+        except ValueError:
+            continue
+        # remove trailing \r\n that precedes the next boundary
+        if content.endswith(b"\r\n"):
+            content = content[:-2]
+        name = None
+        filename = None
+        ctype = None
+        for line in headers_blob.decode("utf-8", errors="replace").split("\r\n"):
+            low = line.lower()
+            if low.startswith("content-disposition:"):
+                for tok in line.split(";"):
+                    tok = tok.strip()
+                    if tok.lower().startswith("name="):
+                        name = tok.split("=", 1)[1].strip().strip('"')
+                    elif tok.lower().startswith("filename="):
+                        filename = tok.split("=", 1)[1].strip().strip('"')
+            elif low.startswith("content-type:"):
+                ctype = line.split(":", 1)[1].strip()
+        if name:
+            out[name] = {"data": content, "filename": filename, "ctype": ctype}
+    return out
+
+
+def _ext_from_upload(field):
+    """Derive a file extension from filename or content-type."""
+    fn = (field or {}).get("filename") or ""
+    if "." in fn:
+        return fn.rsplit(".", 1)[1]
+    ct = ((field or {}).get("ctype") or "").lower()
+    if "jpeg" in ct or "jpg" in ct: return "jpg"
+    if "png" in ct: return "png"
+    if "heic" in ct or "heif" in ct: return "heic"
+    if "webp" in ct: return "webp"
+    return "jpg"
+
+
 # --- insight via Claude CLI ---
 INSIGHT_FALLBACK = (
     "OverwatchTDO insight unavailable (Claude CLI not reachable). "
@@ -457,8 +659,14 @@ class PCCHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = self.path.split("?", 1)[0]
-        if path in ("/", "/index.html", "/protocol_command_center.html"):
+        if path in ("/", "/index.html", "/pcc", "/protocol_command_center.html"):
             return self._send_file(PCC_HTML, "text/html; charset=utf-8")
+        # New HTML v2.2 reads canonical lifeos shape directly
+        if path == "/health/health_data.json":
+            return self._send_json(load_canonical_health())
+        if path == "/data/scans.json":
+            return self._send_json(load_scans())
+        # Legacy (kept for backward compat)
         if path == "/api/health_data":
             return self._send_json(load_health_data())
         if path == "/api/scans":
@@ -489,6 +697,42 @@ class PCCHandler(BaseHTTPRequestHandler):
         except ValueError:
             length = 0
         body_raw = self.rfile.read(length) if length else b""
+        ctype = self.headers.get("Content-Type", "")
+
+        # New protocol routes (HTML v2.2)
+        if self.path == "/api/protocol/save_scan":
+            try:
+                payload = json.loads(body_raw.decode("utf-8") or "{}")
+            except json.JSONDecodeError:
+                return self._send_json({"error": "invalid json"}, status=400)
+            try:
+                record, history = save_protocol_scan(payload)
+                return self._send_json({"ok": True, "record": record, "count": len(history)})
+            except Exception as e:  # noqa: BLE001
+                return self._send_json({"ok": False, "error": str(e)}, status=500)
+
+        if self.path == "/api/protocol/save_photo":
+            try:
+                fields = parse_multipart(ctype, body_raw)
+                if not fields or "photo" not in fields:
+                    return self._send_json({"ok": False, "error": "no photo field"}, status=400)
+                view = (fields.get("view") or {}).get("data", b"").decode("utf-8", errors="replace") or "front"
+                date = (fields.get("date") or {}).get("data", b"").decode("utf-8", errors="replace") or None
+                photo = fields["photo"]
+                ext = _ext_from_upload(photo)
+                out = save_protocol_photo(view, date, ext, photo["data"])
+                return self._send_json({"ok": True, "view": view, "date": date, "path": str(out)})
+            except Exception as e:  # noqa: BLE001
+                return self._send_json({"ok": False, "error": str(e)}, status=500)
+
+        if self.path == "/api/protocol/advance_phase":
+            try:
+                state, advanced = advance_phase()
+                return self._send_json({"ok": True, "advanced": advanced, "state": state})
+            except Exception as e:  # noqa: BLE001
+                return self._send_json({"ok": False, "error": str(e)}, status=500)
+
+        # Legacy routes (JSON body required)
         try:
             payload = json.loads(body_raw.decode("utf-8") or "{}")
         except json.JSONDecodeError:
