@@ -7,7 +7,7 @@
     "total_weeks": 8,
     "source_file": "iron_discipline_phase2.xlsx",
     "drive_file_id": "1uvxwHWQXCpDReDZEPnkLqAq7SE-ItDpm",
-    "last_synced": "2026-04-28T01:27:32Z"
+    "last_synced": "2026-04-29T00:30:12Z"
   },
   "weekly_structure": {
     "MON": {
@@ -575,42 +575,42 @@
     "weeks": [
       {
         "week": 1,
-        "scan_date": "2026-04-16",
+        "scan_date": "2026-04-15",
         "logged": false
       },
       {
         "week": 2,
-        "scan_date": "2026-04-23",
+        "scan_date": "2026-04-22",
         "logged": false
       },
       {
         "week": 3,
-        "scan_date": "2026-04-30",
+        "scan_date": "2026-04-29",
         "logged": false
       },
       {
         "week": 4,
-        "scan_date": "2026-05-07",
+        "scan_date": "2026-05-06",
         "logged": false
       },
       {
         "week": 5,
-        "scan_date": "2026-05-14",
+        "scan_date": "2026-05-13",
         "logged": false
       },
       {
         "week": 6,
-        "scan_date": "2026-05-21",
+        "scan_date": "2026-05-20",
         "logged": false
       },
       {
         "week": 7,
-        "scan_date": "2026-05-28",
+        "scan_date": "2026-05-27",
         "logged": false
       },
       {
         "week": 8,
-        "scan_date": "2026-06-04",
+        "scan_date": "2026-06-03",
         "logged": false
       }
     ]

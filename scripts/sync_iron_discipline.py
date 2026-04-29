@@ -30,6 +30,8 @@ REQUIRED_TOP_KEYS = {
     "rep_scheme", "progressive_overload_rule", "sessions", "weekly_progress",
 }
 REQUIRED_DAY_TYPES = {"TRAINING", "ACTIVE_RECOVERY", "FULL_REST"}
+SCAN_WEEKDAY = 2  # Wednesday — PCC banner hardcodes "Wednesday is scan day"
+WEEKDAY_NAME = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
 
 
 def validate(plan: dict) -> list[str]:
@@ -52,6 +54,21 @@ def validate(plan: dict) -> list[str]:
     for k in ("program", "start_date", "end_date", "total_weeks"):
         if k not in meta:
             errors.append(f"meta missing {k}")
+    weeks = (plan.get("weekly_progress") or {}).get("weeks") or []
+    for w in weeks:
+        sd = w.get("scan_date")
+        if not sd:
+            continue
+        try:
+            dt = datetime.strptime(sd, "%Y-%m-%d").date()
+        except ValueError:
+            errors.append(f"week {w.get('week')} scan_date not YYYY-MM-DD: {sd!r}")
+            continue
+        if dt.weekday() != SCAN_WEEKDAY:
+            errors.append(
+                f"week {w.get('week')} scan_date {sd} is {WEEKDAY_NAME[dt.weekday()]}, "
+                f"expected {WEEKDAY_NAME[SCAN_WEEKDAY]} — PCC banner hardcodes Wed scan day"
+            )
     return errors
 
 
