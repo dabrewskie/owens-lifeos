@@ -661,6 +661,68 @@ class PCCHandler(BaseHTTPRequestHandler):
         path = self.path.split("?", 1)[0]
         if path in ("/", "/index.html", "/pcc", "/protocol_command_center.html"):
             return self._send_file(PCC_HTML, "text/html; charset=utf-8")
+        # Photo comparison: inventory of all dated photo sets
+        if path == "/api/photos":
+            try:
+                inventory = []
+                if PHOTO_DIR.exists():
+                    for date_dir in sorted(PHOTO_DIR.iterdir()):
+                        if not date_dir.is_dir():
+                            continue
+                        date = date_dir.name
+                        photos = {}
+                        for f in date_dir.iterdir():
+                            stem = f.stem.lower()
+                            if stem in ("front", "side", "back") and f.is_file():
+                                photos[stem] = f"/photos/{date}/{f.name}"
+                        if photos:
+                            inventory.append({
+                                "date": date,
+                                "front": photos.get("front"),
+                                "side":  photos.get("side"),
+                                "back":  photos.get("back"),
+                                "complete": all(k in photos for k in ("front", "side", "back")),
+                            })
+                # Tag with iron-discipline week if scan_date matches
+                try:
+                    plan = json.loads((DATA_DIR / "iron_discipline.json").read_text())
+                    weeks = (plan.get("weekly_progress") or {}).get("weeks") or []
+                    week_by_date = {w["scan_date"]: w["week"] for w in weeks if w.get("scan_date")}
+                    for entry in inventory:
+                        entry["iron_week"] = week_by_date.get(entry["date"])
+                except Exception:
+                    pass
+                return self._send_json({"sets": inventory})
+            except Exception as e:  # noqa: BLE001
+                return self._send_json({"error": str(e)}, 500)
+        # Photo bytes — tailnet-only via existing :8444 boundary
+        if path.startswith("/photos/"):
+            try:
+                rel = path[len("/photos/"):]
+                target = (PHOTO_DIR / rel).resolve()
+                # Security: resolved path must stay inside PHOTO_DIR
+                target.relative_to(PHOTO_DIR.resolve())
+                if not target.exists() or not target.is_file():
+                    self.send_error(404)
+                    return
+                ext = target.suffix.lower()
+                mime_map = {
+                    ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+                    ".png": "image/png", ".heic": "image/heic",
+                    ".heif": "image/heic", ".webp": "image/webp",
+                }
+                ctype = mime_map.get(ext, "application/octet-stream")
+                body = target.read_bytes()
+                self.send_response(200)
+                self.send_header("Content-Type", ctype)
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "private, max-age=3600")
+                self.end_headers()
+                self.wfile.write(body)
+                return
+            except (ValueError, OSError):
+                self.send_error(403)
+                return
         # New HTML v2.2 reads canonical lifeos shape directly
         if path == "/health/health_data.json":
             return self._send_json(load_canonical_health())

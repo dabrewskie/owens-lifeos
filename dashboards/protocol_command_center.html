@@ -631,6 +631,61 @@
       .scan-banner { grid-template-columns: 4px 1fr; padding: 12px; }
       .sb-cta { grid-column: 1 / -1; }
     }
+    /* Photo comparison view */
+    .photo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 8px; }
+    .photo-cell { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .ph-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      color: var(--accent);
+      text-shadow: 0 0 8px var(--accent-glow);
+      text-transform: uppercase;
+    }
+    .ph-frame {
+      position: relative;
+      aspect-ratio: 3 / 4;
+      background: var(--panel-2);
+      border: 1px solid var(--line-strong);
+      overflow: hidden;
+      clip-path: polygon(0 6px, 6px 0, calc(100% - 6px) 0, 100% 6px,
+                         100% calc(100% - 6px), calc(100% - 6px) 100%,
+                         6px 100%, 0 calc(100% - 6px));
+    }
+    .ph-frame img {
+      width: 100%; height: 100%; object-fit: contain;
+      background: #000;
+    }
+    .ph-frame.empty::before {
+      content: 'NO IMAGE';
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--faint);
+      font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em;
+    }
+    .ph-frame.tap-zoom { cursor: zoom-in; }
+    @media (max-width: 540px) {
+      .photo-row { grid-template-columns: 1fr 1fr; gap: 6px; }
+      .photo-cell .ph-label { font-size: 9px; }
+    }
+    /* Lightbox overlay for tap-to-zoom */
+    .lightbox {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.92);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 200ms ease;
+    }
+    .lightbox.show { opacity: 1; pointer-events: auto; }
+    .lightbox img { max-width: 95vw; max-height: 95vh; object-fit: contain; }
+    .lightbox-close {
+      position: absolute; top: calc(env(safe-area-inset-top, 0) + 14px); right: 14px;
+      background: transparent; border: 1px solid var(--accent); color: var(--accent);
+      font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.16em;
+      padding: 6px 12px; cursor: pointer;
+      clip-path: polygon(0 4px, 4px 0, calc(100% - 4px) 0, 100% 4px,
+                         100% calc(100% - 4px), calc(100% - 4px) 100%,
+                         4px 100%, 0 calc(100% - 4px));
+    }
   </style>
 </head>
 <body class="cmd">
@@ -942,6 +997,46 @@
     <div class="footer-note">Ambient by default. Active by exception.</div>
   </section>
 
+  <section data-tab="photos" class="hidden">
+    <h2>BODY COMP PHOTOS &middot; WEEK OVER WEEK</h2>
+
+    <div class="card">
+      <div class="kv">
+        <div>
+          <div class="k">Compare</div>
+          <div class="v lg" id="photo-compare-label">— vs —</div>
+        </div>
+        <div class="actions">
+          <button class="btn" id="photo-prev">&#9666; PREV</button>
+          <button class="btn" id="photo-next">NEXT &#9656;</button>
+        </div>
+      </div>
+      <div class="small dim" id="photo-summary" style="margin-top:6px">Loading photo sets…</div>
+    </div>
+
+    <h2>FRONT</h2>
+    <div class="card photo-row" id="photo-row-front">
+      <div class="photo-cell"><div class="ph-label" id="ph-front-a-date">—</div><div class="ph-frame" id="ph-front-a"></div></div>
+      <div class="photo-cell"><div class="ph-label" id="ph-front-b-date">—</div><div class="ph-frame" id="ph-front-b"></div></div>
+    </div>
+
+    <h2>SIDE</h2>
+    <div class="card photo-row" id="photo-row-side">
+      <div class="photo-cell"><div class="ph-label" id="ph-side-a-date">—</div><div class="ph-frame" id="ph-side-a"></div></div>
+      <div class="photo-cell"><div class="ph-label" id="ph-side-b-date">—</div><div class="ph-frame" id="ph-side-b"></div></div>
+    </div>
+
+    <h2>BACK</h2>
+    <div class="card photo-row" id="photo-row-back">
+      <div class="photo-cell"><div class="ph-label" id="ph-back-a-date">—</div><div class="ph-frame" id="ph-back-a"></div></div>
+      <div class="photo-cell"><div class="ph-label" id="ph-back-b-date">—</div><div class="ph-frame" id="ph-back-b"></div></div>
+    </div>
+
+    <div class="small dim hidden" id="photo-empty-hint" style="margin-top:14px;text-align:center">
+      No comparison sets yet. Capture this week's scan + photos on the Wednesday tab.
+    </div>
+  </section>
+
   <div class="telemetry">
     <span class="tlm-cell">CONNECTED &middot; TAILSCALE</span>
     <span class="tlm-sep">&#9646;</span>
@@ -957,6 +1052,7 @@
     <button data-go="wednesday">Wed</button>
     <button data-go="trends">Trends</button>
     <button data-go="protocol">Protocol</button>
+    <button data-go="photos">Photos</button>
   </nav>
 
   <!-- Modal host (drill-down sheet) -->
@@ -1022,6 +1118,8 @@ function clear(node) { while (node.firstChild) node.removeChild(node.firstChild)
 
 let HEALTH = null;
 let SCANS  = [];
+let PHOTO_SETS = [];
+let PHOTO_COMPARE = { aIdx: null, bIdx: null }; // indices into PHOTO_SETS
 
 $$('nav button').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.go)));
 function switchTab(name) {
@@ -1034,7 +1132,142 @@ function switchTab(name) {
     $$('nav button').forEach(b => b.classList.toggle('active', b.dataset.go === name));
     window.scrollTo({ top: 0, behavior: 'smooth' });
     if (name === 'trends') renderTrends();
+    if (name === 'photos') renderPhotoCompare();
   }, 160);
+}
+
+/* ============================================================
+   PHOTO COMPARISON VIEW (WoW front/side/back)
+   ============================================================ */
+async function loadPhotos() {
+  try {
+    const res = await fetch('/api/photos', { cache: 'no-cache' });
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    PHOTO_SETS = (data.sets || []).filter(s => s.complete || s.front || s.side || s.back);
+    initPhotoCompare();
+    renderPhotoCompare();
+  } catch (e) {
+    PHOTO_SETS = [];
+    renderPhotoCompare();
+  }
+}
+
+function initPhotoCompare() {
+  if (!PHOTO_SETS.length) { PHOTO_COMPARE = { aIdx: null, bIdx: null }; return; }
+  // Default: previous on left (A), latest on right (B)
+  const latest = PHOTO_SETS.length - 1;
+  const prev = Math.max(0, latest - 1);
+  PHOTO_COMPARE = { aIdx: prev, bIdx: latest };
+}
+
+function renderPhotoCompare() {
+  const summary = document.getElementById('photo-summary');
+  const empty = document.getElementById('photo-empty-hint');
+  const compareLabel = document.getElementById('photo-compare-label');
+
+  if (!PHOTO_SETS.length) {
+    if (summary) summary.textContent = 'No photo sets yet. Log a scan + photos on Wednesday tab.';
+    if (compareLabel) compareLabel.textContent = '— vs —';
+    if (empty) empty.classList.remove('hidden');
+    ['front','side','back'].forEach(view => {
+      ['a','b'].forEach(which => {
+        const dateEl = document.getElementById(`ph-${view}-${which}-date`);
+        const frame  = document.getElementById(`ph-${view}-${which}`);
+        if (dateEl) dateEl.textContent = '—';
+        if (frame) {
+          clear(frame);
+          frame.classList.add('empty');
+          frame.classList.remove('tap-zoom');
+        }
+      });
+    });
+    return;
+  }
+  if (empty) empty.classList.add('hidden');
+  if (summary) summary.textContent = `${PHOTO_SETS.length} photo set${PHOTO_SETS.length===1?'':'s'} captured`;
+
+  const a = PHOTO_SETS[PHOTO_COMPARE.aIdx];
+  const b = PHOTO_SETS[PHOTO_COMPARE.bIdx];
+  const setLbl = (set) => set ? (set.iron_week != null ? `WK${set.iron_week} · ${set.date}` : set.date) : '—';
+  if (compareLabel) compareLabel.textContent = `${setLbl(a)} vs ${setLbl(b)}`;
+
+  ['front','side','back'].forEach(view => {
+    [['a', a], ['b', b]].forEach(([which, set]) => {
+      const dateEl = document.getElementById(`ph-${view}-${which}-date`);
+      const frame = document.getElementById(`ph-${view}-${which}`);
+      if (!dateEl || !frame) return;
+      if (!set) {
+        dateEl.textContent = '—';
+        clear(frame);
+        frame.classList.add('empty');
+        frame.classList.remove('tap-zoom');
+        return;
+      }
+      const url = set[view];
+      const lbl = (set.iron_week != null ? `WK${set.iron_week} · ` : '') + set.date;
+      dateEl.textContent = lbl;
+      clear(frame);
+      if (url) {
+        frame.classList.remove('empty');
+        frame.classList.add('tap-zoom');
+        const img = el('img', { src: url, alt: `${view} ${set.date}` });
+        img.addEventListener('click', () => openLightbox(url, lbl + ' · ' + view.toUpperCase()));
+        frame.appendChild(img);
+      } else {
+        frame.classList.add('empty');
+        frame.classList.remove('tap-zoom');
+      }
+    });
+  });
+}
+
+function openLightbox(url, caption) {
+  let lb = document.getElementById('photo-lightbox');
+  if (!lb) {
+    lb = el('div', { id: 'photo-lightbox', class: 'lightbox' });
+    const img = el('img', { id: 'photo-lightbox-img', alt: caption || '' });
+    const closeBtn = el('button', { class: 'lightbox-close' }, 'CLOSE');
+    closeBtn.addEventListener('click', () => lb.classList.remove('show'));
+    lb.addEventListener('click', (e) => { if (e.target === lb) lb.classList.remove('show'); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') lb.classList.remove('show'); });
+    lb.appendChild(closeBtn);
+    lb.appendChild(img);
+    document.body.appendChild(lb);
+  }
+  const imgEl = document.getElementById('photo-lightbox-img');
+  if (imgEl) {
+    imgEl.src = url;
+    if (caption) imgEl.alt = caption;
+  }
+  lb.classList.add('show');
+}
+
+function wirePhotoControls() {
+  const prev = document.getElementById('photo-prev');
+  const next = document.getElementById('photo-next');
+  if (prev && !prev.dataset.wired) {
+    prev.addEventListener('click', () => {
+      if (!PHOTO_SETS.length) return;
+      const lo = Math.min(PHOTO_COMPARE.aIdx, PHOTO_COMPARE.bIdx);
+      if (lo <= 0) return;
+      PHOTO_COMPARE.aIdx -= 1;
+      PHOTO_COMPARE.bIdx -= 1;
+      renderPhotoCompare();
+    });
+    prev.dataset.wired = '1';
+  }
+  if (next && !next.dataset.wired) {
+    next.addEventListener('click', () => {
+      if (!PHOTO_SETS.length) return;
+      const hi = Math.max(PHOTO_COMPARE.aIdx, PHOTO_COMPARE.bIdx);
+      if (hi >= PHOTO_SETS.length - 1) return;
+      PHOTO_COMPARE.aIdx += 1;
+      PHOTO_COMPARE.bIdx += 1;
+      renderPhotoCompare();
+    });
+    next.dataset.wired = '1';
+  }
 }
 
 async function load() {
@@ -1058,6 +1291,7 @@ async function load() {
     const r = await fetch(SCANS_URL, { cache: 'no-cache' });
     if (r.ok) SCANS = await r.json();
   } catch (e) { SCANS = []; }
+  try { await loadPhotos(); } catch (e) { /* photo inventory non-blocking */ }
   try {
     render();
     if (liveDot) liveDot.className = 'live-dot';
@@ -2390,6 +2624,7 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/pcc-sw.js').catch(()=>{});
 }
 
+wirePhotoControls();
 load();
 setInterval(load, 5 * 60 * 1000);
 </script>
