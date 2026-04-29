@@ -7,9 +7,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="PCC" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <link rel="manifest" href="/pcc-manifest.json" />
   <link rel="apple-touch-icon" href="/pcc-icon-192.png" />
   <title>PCC — Protocol Command Center</title>
+  <!-- BUILD: PCC v1.1 2026-04-29 10:00 EDT — back-nav to COP, no-cache headers -->
   <style>
     /* === Self-hosted tactical fonts (served at /fonts/*.woff2) === */
     @font-face { font-family: 'Black Ops One'; src: url('/fonts/blackopsone.woff2') format('woff2'); font-weight: 400; font-display: swap; }
@@ -633,6 +637,8 @@
 <div class="pad" id="root">
 
   <header class="cmd-hdr">
+    <a href="/lifeos-dashboard.html" style="display:flex; align-items:center; gap:6px; color:#82aaff; text-decoration:none; padding:8px 14px; margin-right:12px; background:rgba(130,170,255,0.15); border:2px solid #82aaff; border-radius:8px; font-size:13px; font-weight:700; min-width:80px; justify-content:center;" title="Back to Common Operating Picture">← COP</a>
+    <span style="position:absolute; top:4px; right:4px; font-size:9px; color:#666; padding:2px 6px; background:rgba(0,0,0,0.5); border-radius:4px;" title="Build version">PCC v1.1 10:00</span>
     <div class="hdr-left">
       <div class="dot x" id="status-dot" title="Composite status"></div>
       <div class="hdr-titles">
@@ -1225,13 +1231,23 @@ function render() {
 
   $('#status-dot').className = 'dot ' + computeCompositeStatus();
 
-  if (SCANS.length >= 2) {
-    const a = SCANS[SCANS.length-1], b = SCANS[SCANS.length-2];
+  // 2026-04-29: render scan data with 1 scan too (was 2+ only).
+  // SO #1 truth: if scan IS logged, show it — don't tell user "no scans yet".
+  if (SCANS.length >= 1) {
+    const a = SCANS[SCANS.length-1], b = SCANS.length >= 2 ? SCANS[SCANS.length-2] : null;
     $('#scan-delta-empty').classList.add('hidden');
     $('#scan-delta-body').classList.remove('hidden');
-    const dW = $('#d-weight'); clear(dW); dW.appendChild(deltaNode(a.weight, b.weight, 1, 'lbs'));
-    const dB = $('#d-bf');     clear(dB); dB.appendChild(deltaNode(a.bf_pct, b.bf_pct, 1, '%'));
-    const dL = $('#d-lm');     clear(dL); dL.appendChild(deltaNode(a.lean_mass, b.lean_mass, 1, 'lbs'));
+    const fmtLatestOrDelta = (cur, prev, decimals, unit) => {
+      if (prev != null) return deltaNode(cur, prev, decimals, unit);
+      const span = el('span', { class: 'latest-only' });
+      const valueText = cur != null ? cur.toFixed(decimals) + unit : '—';
+      span.appendChild(el('strong', null, valueText));
+      span.appendChild(el('span', { style: 'color:#888;font-size:0.85em;margin-left:4px;' }, ' (latest)'));
+      return span;
+    };
+    const dW = $('#d-weight'); clear(dW); dW.appendChild(fmtLatestOrDelta(a.weight, b ? b.weight : null, 1, 'lbs'));
+    const dB = $('#d-bf');     clear(dB); dB.appendChild(fmtLatestOrDelta(a.bf_pct, b ? b.bf_pct : null, 1, '%'));
+    const dL = $('#d-lm');     clear(dL); dL.appendChild(fmtLatestOrDelta(a.lean_mass, b ? b.lean_mass : null, 1, 'lbs'));
   }
 
   const trigs = evaluateTriggers();
