@@ -637,7 +637,20 @@
 <div class="pad" id="root">
 
   <header class="cmd-hdr">
-    <a href="/lifeos-dashboard.html" style="display:flex; align-items:center; gap:6px; color:#82aaff; text-decoration:none; padding:8px 14px; margin-right:12px; background:rgba(130,170,255,0.15); border:2px solid #82aaff; border-radius:8px; font-size:13px; font-weight:700; min-width:80px; justify-content:center;" title="Back to Common Operating Picture">← COP</a>
+    <a href="javascript:void(0)" id="back-to-cop-btn" style="display:flex; align-items:center; gap:6px; color:#82aaff; text-decoration:none; padding:8px 14px; margin-right:12px; background:rgba(130,170,255,0.15); border:2px solid #82aaff; border-radius:8px; font-size:13px; font-weight:700; min-width:80px; justify-content:center; cursor:pointer;" title="Back to Common Operating Picture">← COP</a>
+    <script>
+      // Port-aware redirect: PCC is on 8079 (localhost) or 8444 (Tailscale).
+      // Dashboard is on 8077 (localhost) or 8443 (Tailscale). Different ports
+      // means relative URLs don't work — must rewrite based on current host.
+      document.getElementById('back-to-cop-btn').addEventListener('click', function(e) {
+        e.preventDefault();
+        var host = window.location.hostname;
+        var isTailscale = host.indexOf('tail416e3a') !== -1 || host.indexOf('.ts.net') !== -1;
+        var protocol = isTailscale ? 'https:' : 'http:';
+        var port = isTailscale ? 8443 : 8077;
+        window.location.href = protocol + '//' + host + ':' + port + '/lifeos-dashboard.html?v=' + Date.now();
+      });
+    </script>
     <span style="position:absolute; top:4px; right:4px; font-size:9px; color:#666; padding:2px 6px; background:rgba(0,0,0,0.5); border-radius:4px;" title="Build version">PCC v1.1 10:00</span>
     <div class="hdr-left">
       <div class="dot x" id="status-dot" title="Composite status"></div>
