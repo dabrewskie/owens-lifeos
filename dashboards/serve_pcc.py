@@ -675,6 +675,86 @@ class PCCHandler(BaseHTTPRequestHandler):
             except Exception:
                 pass
             return self._send_json({"error": "iron_discipline.json missing"}, 404)
+        if path == "/api/protein_today":
+            try:
+                from datetime import datetime as _dt, timezone as _tz
+                today = _dt.now(_tz.utc).date().isoformat()
+                # Local timezone fallback — Indianapolis is UTC-5/-4. Use local date too,
+                # accept entries from either local-today or UTC-today.
+                local_today = _dt.now().date().isoformat()
+                log_path = DATA_DIR / "protein_log.json"
+                entries = []
+                if log_path.exists():
+                    try:
+                        entries = json.loads(log_path.read_text())
+                    except Exception:
+                        entries = []
+                total_g = 0.0
+                count = 0
+                for e in entries:
+                    ts = (e.get("ts") or "")[:10]
+                    if ts == today or ts == local_today:
+                        try:
+                            total_g += float(e.get("grams", 0))
+                            count += 1
+                        except (ValueError, TypeError):
+                            continue
+                return self._send_json({
+                    "date": local_today,
+                    "logged_grams": round(total_g, 1),
+                    "log_entries": count,
+                })
+            except Exception as exc:
+                return self._send_json({"error": str(exc)}, 500)
+        if path == "/api/streak":
+            try:
+                from datetime import datetime as _dt, timezone as _tz, timedelta as _td
+                log_path = DATA_DIR / "protein_log.json"
+                entries = []
+                if log_path.exists():
+                    try:
+                        entries = json.loads(log_path.read_text())
+                    except Exception:
+                        entries = []
+                # Group total grams by local date
+                by_day = {}
+                for e in entries:
+                    ts = (e.get("ts") or "")[:10]
+                    if not ts:
+                        continue
+                    try:
+                        by_day[ts] = by_day.get(ts, 0.0) + float(e.get("grams", 0))
+                    except (ValueError, TypeError):
+                        continue
+                # Walk back from today; streak = consecutive days with any logged grams
+                today = _dt.now().date()
+                streak = 0
+                d = today
+                while d.isoformat() in by_day and by_day[d.isoformat()] > 0:
+                    streak += 1
+                    d -= _td(days=1)
+                # Best-known streak = longest run in by_day
+                best = 0
+                run = 0
+                prev = None
+                for k in sorted(by_day.keys()):
+                    if not by_day[k] or by_day[k] <= 0:
+                        run = 0; prev = None; continue
+                    cur = _dt.fromisoformat(k).date()
+                    if prev is None or (cur - prev).days == 1:
+                        run += 1
+                    else:
+                        run = 1
+                    if run > best:
+                        best = run
+                    prev = cur
+                return self._send_json({
+                    "current_streak_days": streak,
+                    "best_streak_days": best,
+                    "logged_today_g": round(by_day.get(today.isoformat(), 0.0), 1),
+                })
+            except Exception as exc:
+                return self._send_json({"error": str(exc)}, 500)
         # Legacy (kept for backward compat)
         if path == "/api/health_data":
             return self._send_json(load_health_data())

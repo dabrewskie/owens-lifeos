@@ -341,6 +341,57 @@
     .hdr-titles { display: flex; flex-direction: column; gap: 2px; }
     .callsign { font-family: var(--font-mono); font-size: 10px; color: var(--accent);
       text-shadow: 0 0 8px var(--accent-glow); letter-spacing: 0.06em; }
+    .phase-bar { position: relative; height: 16px; min-width: 320px; max-width: 520px;
+      background: rgba(56,225,255,0.06);
+      border: 1px solid var(--line-strong);
+      clip-path: polygon(0 4px, 4px 0, calc(100% - 4px) 0, 100% 4px,
+                         100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px));
+      margin-top: 4px; overflow: hidden; }
+    .phase-bar-fill { position: absolute; inset: 0;
+      background: linear-gradient(90deg, rgba(56,225,255,0.35), var(--accent));
+      box-shadow: 0 0 12px var(--accent-glow);
+      transition: width 600ms cubic-bezier(.2,.9,.2,1); }
+    .phase-bar-text { position: absolute; inset: 0; display: flex; align-items: center;
+      justify-content: center; font-family: var(--font-mono); font-weight: 700; font-size: 10px;
+      color: var(--text); letter-spacing: 0.16em; mix-blend-mode: difference;
+      text-transform: uppercase; }
+    @media (max-width: 540px) { .phase-bar { min-width: 200px; } }
+    .streak-row { display: grid; grid-template-columns: auto 1fr auto; gap: 12px;
+      align-items: center; margin-top: 12px; padding: 10px 12px;
+      background: rgba(13,19,32,0.6); border: 1px solid var(--line);
+      clip-path: polygon(0 4px, 4px 0, calc(100% - 4px) 0, 100% 4px,
+                         100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px)); }
+    .streak-chip { display: flex; align-items: baseline; gap: 6px;
+      font-family: var(--font-display); font-size: 11px; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--muted); }
+    .streak-flame { color: var(--amber); text-shadow: 0 0 8px var(--amber-glow); font-size: 14px; }
+    .streak-num { font-family: var(--font-mono); font-weight: 700; font-size: 22px;
+      color: var(--accent); text-shadow: 0 0 10px var(--accent-glow); letter-spacing: 0; }
+    .streak-num.zero { color: var(--faint); text-shadow: none; }
+    .streak-suffix { color: var(--muted); }
+    .protein-progress { display: flex; flex-direction: column; gap: 4px; }
+    .pp-track { height: 10px; background: rgba(56,225,255,0.06);
+      border: 1px solid var(--line-strong); position: relative; overflow: hidden;
+      clip-path: polygon(0 3px, 3px 0, calc(100% - 3px) 0, 100% 3px,
+                         100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px)); }
+    .pp-fill { position: absolute; inset: 0;
+      background: linear-gradient(90deg, var(--green), rgba(62,224,139,0.6));
+      box-shadow: 0 0 10px var(--green-glow);
+      transition: width 600ms cubic-bezier(.2,.9,.2,1); }
+    .pp-fill.under { background: linear-gradient(90deg, var(--amber), rgba(255,186,43,0.6));
+      box-shadow: 0 0 10px var(--amber-glow); }
+    .pp-fill.way-under { background: linear-gradient(90deg, var(--red), rgba(255,59,92,0.6));
+      box-shadow: 0 0 10px var(--red-glow); }
+    .pp-text { font-family: var(--font-mono); font-size: 10px; color: var(--muted);
+      letter-spacing: 0.06em; }
+    .scan-countdown { display: flex; flex-direction: column; align-items: center;
+      font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--muted); }
+    .sc-num { font-family: var(--font-mono); font-weight: 700; font-size: 22px;
+      color: var(--magenta); text-shadow: 0 0 10px var(--magenta-glow); }
+    .sc-num.urgent { color: var(--red); text-shadow: 0 0 10px var(--red-glow); }
+    .sc-label { font-size: 10px; }
+    @media (max-width: 540px) { .streak-row { grid-template-columns: 1fr; gap: 8px; } }
     .hdr-right { display: flex; align-items: center; gap: 10px; }
     .hdr-clock { font-family: var(--font-mono); font-weight: 700; font-size: 14px;
       color: var(--accent); text-shadow: 0 0 10px var(--accent-glow);
@@ -508,6 +559,10 @@
       <div class="hdr-titles">
         <h1 id="hdr-title">PROTOCOL COMMAND CENTER</h1>
         <div class="callsign" id="hdr-callsign">&#9733; OWENS &middot; 1SG (RET) &middot; IRON DISCIPLINE PHASE 2</div>
+        <div class="phase-bar" id="phase-bar">
+          <div class="phase-bar-fill" id="phase-bar-fill" style="width:0%"></div>
+          <div class="phase-bar-text" id="phase-bar-text">&mdash; &middot; &mdash; &middot; &mdash;</div>
+        </div>
       </div>
     </div>
     <div class="hdr-right">
@@ -553,6 +608,22 @@
         <button class="ql-chip" data-protein="60">+60g P</button>
         <button class="ql-chip" id="ql-custom">Custom…</button>
         <span class="small" id="ql-status"></span>
+      </div>
+      <div class="streak-row">
+        <div class="streak-chip" id="streak-chip">
+          <span class="streak-flame">&#9650;</span>
+          <span class="streak-label">STREAK</span>
+          <span class="streak-num" id="streak-num">&mdash;</span>
+          <span class="streak-suffix">DAY</span>
+        </div>
+        <div class="protein-progress" id="protein-progress">
+          <div class="pp-track"><div class="pp-fill" id="pp-fill" style="width:0%"></div></div>
+          <div class="pp-text" id="pp-text">&mdash; / &mdash; g protein</div>
+        </div>
+        <div class="scan-countdown" id="scan-countdown">
+          <span class="sc-num" id="sc-num">&mdash;</span>
+          <span class="sc-label">DAYS TO SCAN</span>
+        </div>
       </div>
     </div>
 
@@ -986,6 +1057,20 @@ function render() {
     $('#phase-target').textContent = '\u2014';
   }
 
+  // Phase progress bar (header)
+  {
+    const wk = IRON_PLAN ? currentWeekNumber() : 0;
+    const total = IRON_PLAN ? IRON_PLAN.meta.total_weeks : 8;
+    const pct = total ? Math.min(100, Math.round((wk / total) * 100)) : 0;
+    const fill = document.getElementById('phase-bar-fill');
+    const text = document.getElementById('phase-bar-text');
+    if (fill) fill.style.width = pct + '%';
+    if (text && IRON_PLAN) {
+      const days = Math.max(0, Math.ceil((new Date(IRON_PLAN.meta.end_date + 'T23:59:59') - Date.now()) / 86400000));
+      text.textContent = 'WK ' + wk + '/' + total + ' \u00B7 ' + pct + '% \u00B7 ' + days + 'D LEFT';
+    }
+  }
+
   const m = todaysMacros();
   if (m) {
     if (!_firstRenderDone) { animateNumber($('#m-kcal'), m.kcal, 0); }
@@ -1081,7 +1166,72 @@ function render() {
   renderGate();
   renderRecommendations();
   wireMetricTiles();
+  renderMotivatingLayer();   // fire and forget
   setTimeout(() => { _firstRenderDone = true; }, 800);
+}
+
+/* ============================================================
+   MOTIVATING LAYER — streak, protein roll-up, scan countdown
+   ============================================================ */
+
+async function renderMotivatingLayer() {
+  // Streak
+  try {
+    const r = await fetch('/api/streak', { cache: 'no-cache' });
+    if (r.ok) {
+      const s = await r.json();
+      const num = document.getElementById('streak-num');
+      const sx = document.getElementById('streak-chip');
+      if (num && sx) {
+        num.textContent = s.current_streak_days || 0;
+        num.classList.toggle('zero', !s.current_streak_days);
+        sx.title = 'Current ' + (s.current_streak_days || 0) + ' \u00B7 Best ' + (s.best_streak_days || 0);
+      }
+    }
+  } catch (e) {}
+
+  // Protein eaten today (logged via quick-log + canonical macros)
+  let loggedG = 0;
+  try {
+    const r = await fetch('/api/protein_today', { cache: 'no-cache' });
+    if (r.ok) {
+      const p = await r.json();
+      loggedG = p.logged_grams || 0;
+    }
+  } catch (e) {}
+  const macroP = (HEALTH && HEALTH.macros && HEALTH.macros.protein) || {};
+  const baselineG = Number(macroP.current || 0);
+  const eatenG = Math.round(baselineG + loggedG);
+  const target = (todaysMacros() || {}).protein_g || 220;
+  const pct = Math.min(100, Math.round((eatenG / target) * 100));
+  const fill = document.getElementById('pp-fill');
+  const txt = document.getElementById('pp-text');
+  if (fill) {
+    fill.style.width = pct + '%';
+    fill.classList.toggle('under', pct >= 50 && pct < 80);
+    fill.classList.toggle('way-under', pct < 50);
+  }
+  if (txt) {
+    const remainG = Math.max(0, target - eatenG);
+    txt.textContent = eatenG + ' / ' + target + 'g \u00B7 ' + remainG + 'g remaining' +
+      (loggedG ? (' \u00B7 +' + loggedG + 'g logged') : '');
+  }
+  // Also reflect in the existing #m-eaten-p tile so the modal/drill-down sees it
+  const eaten = document.getElementById('m-eaten-p');
+  if (eaten) eaten.textContent = eatenG + ' g';
+
+  // Scan countdown
+  if (IRON_PLAN) {
+    const wk = currentWeekNumber();
+    const nextScanWeek = (IRON_PLAN.weekly_progress.weeks || []).find(w => w.week === wk);
+    const num = document.getElementById('sc-num');
+    if (nextScanWeek && num && nextScanWeek.scan_date) {
+      const sd = new Date(nextScanWeek.scan_date + 'T08:00:00');
+      const days = Math.ceil((sd - Date.now()) / 86400000);
+      num.textContent = days >= 0 ? days : 'PAST';
+      num.classList.toggle('urgent', days <= 1 || days < 0);
+    }
+  }
 }
 
 /* ============================================================
@@ -1387,6 +1537,29 @@ function drawLineChart(host, series, opts) {
     svg.appendChild(c);
   }
 
+  // Optional target line (dashed)
+  if (opts.targetLine != null && typeof opts.targetLine === 'number') {
+    const ty = pad.t + ySpan - ((opts.targetLine - min) / range) * ySpan;
+    if (ty >= pad.t && ty <= h - pad.b) {
+      const ln = document.createElementNS(SVG, 'line');
+      ln.setAttribute('x1', pad.l); ln.setAttribute('x2', w - pad.r);
+      ln.setAttribute('y1', ty); ln.setAttribute('y2', ty);
+      ln.setAttribute('stroke', 'var(--green)');
+      ln.setAttribute('stroke-width', '1.5');
+      ln.setAttribute('stroke-dasharray', '4 4');
+      ln.setAttribute('opacity', '0.65');
+      svg.appendChild(ln);
+      const lbl = document.createElementNS(SVG, 'text');
+      lbl.setAttribute('x', w - pad.r - 4); lbl.setAttribute('y', ty - 4);
+      lbl.setAttribute('fill', 'var(--green)');
+      lbl.setAttribute('font-size', '9');
+      lbl.setAttribute('text-anchor', 'end');
+      lbl.setAttribute('font-family', 'var(--font-mono)');
+      lbl.textContent = 'TGT ' + ((typeof opts.targetLine === 'number' && opts.targetLine > 100) ? Math.round(opts.targetLine) : Number(opts.targetLine).toFixed(1));
+      svg.appendChild(lbl);
+    }
+  }
+
   // Y-axis labels (top/bottom)
   const labels = [[0, max], [3, min]];
   for (const lab of labels) {
@@ -1629,7 +1802,7 @@ async function logProtein(grams) {
   } catch (e) {
     if (status) { status.textContent = 'log failed: ' + e.message; status.className = 'small stale'; }
   }
-  await load();
+  await Promise.all([load(), renderMotivatingLayer()]);
 }
 
 document.querySelectorAll('.ql-chip[data-protein]').forEach(b => {
@@ -1874,7 +2047,10 @@ function renderTrends() {
   const stHost = $('#chart-steps');
   if (wHost) {
     const ws = seriesFromTrends('weight');
-    if (ws.length >= 2) drawLineChart(wHost, ws, { unit: ' lbs' });
+    const startWt = (HEALTH && HEALTH.vital_signs && HEALTH.vital_signs.weight && HEALTH.vital_signs.weight.value) || 217;
+    const wkNow = IRON_PLAN ? currentWeekNumber() : 1;
+    const targetWt = startWt - (wkNow * 0.6);  // ~0.6 lb/wk cut (Phase A 0.5–0.7 range)
+    if (ws.length >= 2) drawLineChart(wHost, ws, { unit: ' lbs', targetLine: targetWt });
     else drawSparkFallback(wHost, ws.length ? ws : [v.weight && v.weight.value]);
     $('#weight-stats').textContent = 'latest ' + fmt(v.weight && v.weight.value, 1) + ' lbs · trend ' + ((v.weight && v.weight.trend) || '—');
   }
