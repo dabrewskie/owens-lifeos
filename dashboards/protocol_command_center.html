@@ -548,6 +548,85 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; }
     }
+    /* ============================================================
+       SCAN-DAY FORCING BANNER
+       ============================================================ */
+    .scan-banner {
+      position: relative;
+      display: grid;
+      grid-template-columns: 8px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      margin: 0 auto 12px;
+      max-width: 720px;
+      padding: 14px 16px;
+      background: linear-gradient(180deg, rgba(255,59,92,0.10), rgba(255,59,92,0.04));
+      border: 1px solid var(--red);
+      clip-path: polygon(0 6px, 6px 0, calc(100% - 6px) 0, 100% 6px,
+                         100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px));
+      box-shadow: 0 0 24px rgba(255,59,92,0.20);
+      animation: alarm-pulse 2.4s ease-in-out infinite;
+    }
+    .scan-banner.logged {
+      background: linear-gradient(180deg, rgba(62,224,139,0.10), rgba(62,224,139,0.04));
+      border-color: var(--green);
+      box-shadow: 0 0 18px rgba(62,224,139,0.18);
+      animation: none;
+    }
+    .scan-banner.hidden { display: none; }
+    .sb-pulse {
+      width: 8px;
+      align-self: stretch;
+      background: var(--red);
+      box-shadow: 0 0 12px var(--red-glow);
+    }
+    .scan-banner.logged .sb-pulse { background: var(--green); box-shadow: 0 0 12px var(--green-glow); }
+    .sb-content { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .sb-eyebrow {
+      font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.2em; color: var(--red); text-shadow: 0 0 8px var(--red-glow);
+      text-transform: uppercase;
+    }
+    .scan-banner.logged .sb-eyebrow { color: var(--green); text-shadow: 0 0 8px var(--green-glow); }
+    .sb-title {
+      font-family: var(--font-stencil); font-size: 17px; letter-spacing: 0.12em;
+      color: var(--text); text-transform: uppercase;
+    }
+    .sb-sub { font-family: var(--font-body); font-size: 12px; color: var(--muted); }
+    .sb-streak {
+      display: flex; gap: 4px; margin-top: 6px;
+      font-family: var(--font-mono); font-size: 10px;
+    }
+    .sb-streak .week-pip {
+      display: inline-flex; align-items: center; gap: 2px;
+      padding: 2px 6px; border: 1px solid var(--line); border-radius: 0;
+      color: var(--muted); letter-spacing: 0.06em;
+    }
+    .sb-streak .week-pip.done { color: var(--green); border-color: rgba(62,224,139,0.5); }
+    .sb-streak .week-pip.miss { color: var(--red); border-color: rgba(255,59,92,0.4); }
+    .sb-streak .week-pip.today { color: var(--accent); border-color: var(--accent); text-shadow: 0 0 8px var(--accent-glow); }
+    .sb-streak .week-pip.future { opacity: 0.4; }
+    .sb-cta {
+      font-family: var(--font-display); font-weight: 700; letter-spacing: 0.16em;
+      text-transform: uppercase; font-size: 12px;
+      padding: 10px 18px; cursor: pointer;
+      background: linear-gradient(180deg, var(--red), #c81f3a);
+      color: #fff; border: 1px solid rgba(255,255,255,0.1);
+      clip-path: polygon(0 4px, 4px 0, calc(100% - 4px) 0, 100% 4px,
+                         100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px));
+      box-shadow: 0 0 16px var(--red-glow);
+      transition: transform 100ms;
+    }
+    .sb-cta:hover { transform: scale(1.04); }
+    .sb-cta:active { transform: scale(0.97); }
+    .scan-banner.logged .sb-cta {
+      background: linear-gradient(180deg, var(--green), #1f8b56);
+      box-shadow: 0 0 14px var(--green-glow);
+    }
+    @media (max-width: 640px) {
+      .scan-banner { grid-template-columns: 4px 1fr; padding: 12px; }
+      .sb-cta { grid-column: 1 / -1; }
+    }
   </style>
 </head>
 <body class="cmd">
@@ -572,6 +651,17 @@
       <button class="hdr-btn" id="btn-refresh" title="Refresh">&#8635;</button>
     </div>
   </header>
+
+  <div id="scan-banner" class="scan-banner hidden" role="alert">
+    <div class="sb-pulse"></div>
+    <div class="sb-content">
+      <div class="sb-eyebrow" id="sb-eyebrow">SCAN DAY · WK 3</div>
+      <div class="sb-title" id="sb-title">HUME BODY SCAN DUE TODAY</div>
+      <div class="sb-sub" id="sb-sub">First scan of phase. Log weight, BF%, fat mass, lean mass + 3 photos.</div>
+      <div class="sb-streak" id="sb-streak"></div>
+    </div>
+    <button class="sb-cta" id="sb-cta">LOG SCAN NOW &rarr;</button>
+  </div>
 
   <div id="banners"></div>
 
@@ -1167,7 +1257,87 @@ function render() {
   renderRecommendations();
   wireMetricTiles();
   renderMotivatingLayer();   // fire and forget
+  renderScanBanner();
   setTimeout(() => { _firstRenderDone = true; }, 800);
+}
+
+/* ============================================================
+   SCAN-DAY FORCING BANNER — visible on every tab when today is
+   a scheduled scan day per IRON_PLAN.weekly_progress.weeks[*].
+   ============================================================ */
+function renderScanBanner() {
+  const banner = document.getElementById('scan-banner');
+  if (!banner) return;
+  if (!IRON_PLAN) { banner.classList.add('hidden'); return; }
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayStr = today.getFullYear() + '-' +
+                   String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                   String(today.getDate()).padStart(2, '0');
+
+  const weeks = (IRON_PLAN.weekly_progress && IRON_PLAN.weekly_progress.weeks) || [];
+  const todayWeek = weeks.find(w => w.scan_date === todayStr);
+
+  // Build streak pips for ALL weeks (always visible if banner is)
+  const scanDates = new Set((SCANS || []).map(s => (s.date || '').slice(0,10)));
+  const streak = document.getElementById('sb-streak');
+  if (streak) {
+    clear(streak);
+    weeks.forEach(w => {
+      const isToday = w.scan_date === todayStr;
+      const isPast = w.scan_date < todayStr;
+      const wasLogged = scanDates.has(w.scan_date);
+      let cls = 'week-pip';
+      if (wasLogged) cls += ' done';
+      else if (isToday) cls += ' today';
+      else if (isPast) cls += ' miss';
+      else cls += ' future';
+      streak.appendChild(el('span', { class: cls },
+        'W' + w.week + ' ' + (wasLogged ? '\u25CF' : (isPast || isToday ? '\u2717' : '\u25CB'))));
+    });
+  }
+
+  if (!todayWeek) { banner.classList.add('hidden'); return; }
+
+  banner.classList.remove('hidden');
+  const loggedToday = scanDates.has(todayStr);
+  banner.classList.toggle('logged', loggedToday);
+
+  const eyebrow = document.getElementById('sb-eyebrow');
+  const title = document.getElementById('sb-title');
+  const sub = document.getElementById('sb-sub');
+  const cta = document.getElementById('sb-cta');
+
+  if (loggedToday) {
+    if (eyebrow) eyebrow.textContent = 'SCAN LOGGED \u00B7 WK ' + todayWeek.week;
+    if (title) title.textContent = 'BODY SCAN COMPLETE FOR THE WEEK';
+    if (sub) sub.textContent = 'Delta surfaces in BODY COMP DELTA section. Next scan in 7 days.';
+    if (cta) { cta.textContent = 'VIEW DELTA \u2192'; }
+  } else {
+    if (eyebrow) eyebrow.textContent = 'SCAN DAY \u00B7 WK ' + todayWeek.week;
+    const totalLogged = scanDates.size;
+    const totalDue = weeks.filter(w => w.scan_date <= todayStr).length;
+    const missed = totalDue - totalLogged - 1;  // -1 for today itself
+    if (title) title.textContent = missed > 0
+      ? ('HUME SCAN DUE TODAY \u00B7 ' + missed + ' PRIOR ' + (missed === 1 ? 'SCAN' : 'SCANS') + ' MISSED')
+      : 'HUME SCAN DUE TODAY';
+    if (sub) sub.textContent = (totalLogged === 0)
+      ? 'First scan of phase. Log weight, BF%, fat mass, lean mass + 3 photos.'
+      : 'Capture weight, BF%, fat mass, lean mass + 3 photos.';
+    if (cta) cta.textContent = 'LOG SCAN NOW \u2192';
+  }
+
+  if (cta && !cta.dataset.wired) {
+    cta.addEventListener('click', () => {
+      switchTab('wednesday');
+      // Scroll into view + focus the first scan input
+      setTimeout(() => {
+        const first = document.getElementById('s-weight');
+        if (first) { first.scrollIntoView({ behavior: 'smooth', block: 'center' }); first.focus(); }
+      }, 220);
+    });
+    cta.dataset.wired = '1';
+  }
 }
 
 /* ============================================================
