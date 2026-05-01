@@ -358,6 +358,7 @@ def _check_task_failures(state, findings):
         name for name, t in tasks.items()
         if t.get("consecutive_failures", 0) >= 2
         and not t.get("archived")  # Skip archived/phantom tasks
+        and (t.get("status") or "").upper() not in ("RETIRED", "ARCHIVED")  # EE-Cycle11
     ]
     if failed:
         findings.append({
@@ -389,7 +390,8 @@ def _check_task_never_succeeds(state, findings):
     tasks = state.get("task_health", {}).get("tasks", {})
     broken = []
     for name, t in tasks.items():
-        if t.get("archived"):  # Skip archived/phantom tasks
+        status = (t.get("status") or "").upper()
+        if t.get("archived") or status in ("RETIRED", "ARCHIVED"):  # EE-Cycle11: skip retired
             continue
         runs = t.get("total_runs", 0)
         failures = t.get("total_failures", 0)
