@@ -195,6 +195,7 @@ def detect_patterns(state: dict) -> list:
     _check_alert_outbox(state, findings)
     _check_cop_staleness(state, findings)
     _check_evolve_timeout_risk(state, findings)
+    _check_overwatch_input_size(state, findings)             # NEW 2026-05-01 EE-Cycle11
     _check_claude_version_integrity(findings)
     _check_evolution_engine_dark(state, findings)       # NEW 2026-04-21
     _check_systemic_task_cliff(state, findings)         # NEW 2026-04-21
@@ -476,6 +477,49 @@ def _check_evolve_timeout_risk(state, findings):
         })
 
 
+def _check_overwatch_input_size(state, findings):
+    """Monitor overwatch_input.json size to prevent overwatch_morning TIMEOUT.
+
+    EE-Cycle11 2026-05-01: Observed 150KB file at ~3.3s/KB token rate → 495.5s empirical
+    duration, exceeding the 480s runner TIMEOUT (upgraded to 600s same cycle).
+    Cap reduction in state_synthesizer targets ~115KB → ~380s steady state.
+    This rule fires if file grows back toward the danger zone despite caps.
+
+    Thresholds (calibrated post-EE-Cycle11 cap reduction, target state = ~115KB):
+      MEDIUM → >130KB (cap drift detected, approaching danger zone — review synthesizer)
+      HIGH   → >145KB (TIMEOUT risk: at 3.3s/KB this maps to ~479s, near 600s runner limit)
+    """
+    import os
+    try:
+        dashboard = os.path.expanduser("~/Documents/S6_COMMS_TECH/dashboard")
+        input_path = os.path.join(dashboard, "overwatch_input.json")
+        if not os.path.exists(input_path):
+            return
+        size_kb = os.path.getsize(input_path) / 1024
+        if size_kb > 145:
+            findings.append({
+                "category": "SYSTEM",
+                "message": (
+                    f"overwatch_input.json is {size_kb:.0f}KB — HIGH TIMEOUT RISK. "
+                    f"At ~3.3s/KB, this maps to ~{size_kb*3.3:.0f}s inference time (runner limit 600s). "
+                    f"Review state_synthesizer.py ACTION_QUEUE_ACTIVE_CAP / ORCHESTRATOR_LOG_TAIL_LINES."
+                ),
+                "priority": "HIGH",
+            })
+        elif size_kb > 130:
+            findings.append({
+                "category": "SYSTEM",
+                "message": (
+                    f"overwatch_input.json is {size_kb:.0f}KB (growing toward 145KB TIMEOUT threshold). "
+                    f"Target is ~115KB. Check state_synthesizer.py cap constants — ACTION_QUEUE_ACTIVE_CAP={12}, "
+                    f"ORCHESTRATOR_LOG_TAIL_LINES={100}."
+                ),
+                "priority": "MEDIUM",
+            })
+    except Exception:
+        pass
+
+
 def _check_alert_outbox(state, findings):
     """Alert outbox check — queued unsent iMessages from daemon context.
 
@@ -517,7 +561,8 @@ def _check_high_failure_rate(state, findings):
     tasks = state.get("task_health", {}).get("tasks", {})
     degraded = []
     for name, t in tasks.items():
-        if t.get("archived"):  # Skip archived/retired tasks
+        status = (t.get("status") or "").upper()
+        if t.get("archived") or status in ("RETIRED", "ARCHIVED"):  # Skip retired/archived tasks
             continue
         runs = t.get("total_runs", 0)
         failures = t.get("total_failures", 0)
