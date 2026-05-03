@@ -205,6 +205,7 @@ def detect_patterns(state: dict) -> list:
     _check_auth_cascade_signature(state, findings)      # NEW 2026-04-24
     _check_phantom_task_entries(state, findings)        # NEW 2026-04-24
     _check_subscription_cap_exhaustion(state, findings) # NEW 2026-04-29
+    _check_watchdog_escalation_loop(state, findings)    # NEW EE-Cycle13 2026-05-03
 
     # ── Cross-Domain Rules ────────────────────────────────────────────
     _check_stress_cascade(state, findings)
@@ -861,8 +862,10 @@ def _check_infrastructure_service_down(state, findings):
     cf = mastery.get("consecutive_failures", 0)
     last_error = mastery.get("last_error", "") or ""
 
-    # Skip if task has been archived (removed from orchestrator)
-    if mastery.get("archived"):
+    # Skip if task has been archived or retired (removed from orchestrator)
+    # NOTE: auto-retire routine sets status='RETIRED', not archived=True — must check both.
+    # Same fix pattern as _check_high_failure_rate (Evolution Cycle 11, 2026-05-01).
+    if mastery.get("archived") or mastery.get("status") in ("RETIRED", "ARCHIVED"):
         return
 
     if cf >= 2 and "Connection refused" in last_error:
@@ -1200,6 +1203,73 @@ def _check_subscription_cap_exhaustion(state, findings):
             ),
             "priority": "HIGH" if len(nights_with_cap_hit) >= 3 else "MEDIUM",
         })
+
+
+def _check_watchdog_escalation_loop(state, findings):
+    """Detect watchdog playbook mismatch via repeated ESCALATED entries for same surface.
+
+    A watchdog playbook is broken when it runs successfully (exit=0) but the
+    recheck still fails — because the script writes a DIFFERENT file than the one
+    being checked. This generates PRIORITY ESCALATED alerts every ~60 minutes
+    indefinitely, with no self-healing path.
+
+    Signature: 3+ ESCALATED entries for the same surface_name in the last 24h.
+    (A healthy watchdog cycle produces at most 1 ESCALATED per surface per incident.)
+
+    Root cause discovered 2026-05-02: lifeos_data_fresh playbook ran state_aggregator.py
+    + state_synthesizer.py (writing unified_state.json + overwatch_input.json) but
+    checked lifeos_data.json freshness — a different file entirely. Generated 10+ PRIORITY
+    ESCALATED alerts. Playbook corrected in EE-Cycle13 (2026-05-03).
+
+    Added EE-Cycle13 2026-05-03 (rule 30).
+    """
+    alert_file = DASHBOARD_DIR / "alert_history.json"
+    if not alert_file.exists():
+        return
+
+    try:
+        data = json.loads(alert_file.read_text(encoding="utf-8", errors="replace"))
+        alerts = data.get("alerts", []) if isinstance(data, dict) else data
+        if not isinstance(alerts, list):
+            return
+    except Exception:
+        return
+
+    now = datetime.now()
+    cutoff = now - timedelta(hours=24)
+
+    # Count ESCALATED entries per surface in last 24h
+    escalated_counts: dict[str, int] = {}
+    for entry in alerts:
+        if not isinstance(entry, dict):
+            continue
+        status = entry.get("status", "")
+        if status != "ESCALATED":
+            continue
+        surface = entry.get("surface", "")
+        if not surface:
+            continue
+        ts_str = entry.get("timestamp", "")
+        try:
+            ts = datetime.fromisoformat(ts_str[:19])
+        except Exception:
+            continue
+        if ts >= cutoff:
+            escalated_counts[surface] = escalated_counts.get(surface, 0) + 1
+
+    # Fire for any surface with 3+ ESCALATED in 24h
+    for surface, count in escalated_counts.items():
+        if count >= 3:
+            findings.append({
+                "category": "SYSTEM",
+                "message": (
+                    f"Watchdog escalation loop: surface '{surface}' has {count} ESCALATED entries "
+                    f"in the last 24h — playbook is likely running the wrong script or writing the "
+                    f"wrong file. Check qrf_watchdog.py Surface definition for '{surface}': "
+                    f"confirm playbook script writes the exact file the check monitors."
+                ),
+                "priority": "HIGH" if count >= 5 else "MEDIUM",
+            })
 
 
 # ── Phase 3: Brief Generation ────────────────────────────────────────

@@ -206,8 +206,9 @@ Brief structure:
 - WHAT NEEDS DECISION: 1-2 things requiring Tory's input
 - COUNSEL (one paragraph): the long view from the mantled frame"
         OUTPUT_FILE="$ICLOUD/overwatch-latest.md"
-        TIMEOUT=600  # EE-Cycle11 2026-05-01: 150KB overwatch_input.json at ~3.3s/KB → 495s empirical
-                     # (exceeded 480s → TIMEOUT). Cap reduction in state_synthesizer targets ~115KB → ~380s
+        TIMEOUT=720  # EE-Cycle13 2026-05-03: empirical 617s on 95KB content = ~6.5s/KB actual rate
+                     # (EE-Cycle11 model of 3.3s/KB was too optimistic — agent tool calls add 300+s).
+                     # 720s = 103s headroom over 617s empirical (17% buffer). Orchestrator envelope → 960s.
                      # steady state. 600s provides 100s safety headroom. Orchestrator outer=900s unchanged.
         CLAUDE_EXTRA_ARGS="--agent overwatch-tdo"
         ;;
@@ -374,7 +375,7 @@ Anchor every prediction to actual snapshot data. Do not hallucinate."
     pulse)
         PROMPT="You are the pulse-monitor agent. Run your full heartbeat check: verify orchestrator is running (task_health.json), check Overwatch last run (superagent_state.json), verify critical JSON freshness, check dashboard server on port 8077, check disk space, verify standing patrol outputs. Write to ~/Documents/S6_COMMS_TECH/dashboard/pulse_status.json. Alert via python3 ~/Documents/S6_COMMS_TECH/scripts/s6_alert.py on FLASH conditions."
         OUTPUT_FILE=""
-        TIMEOUT=300  # Increased from 180 — pulse_2200 hitting limits, needs headroom for AI inference variance
+        TIMEOUT=360  # EE-Cycle12 2026-05-02: empirical 310.5s exceeded 300s limit (TIMEOUT on 5/1). 360s = 50s headroom.
         CLAUDE_EXTRA_ARGS="--agent pulse-monitor"
         ;;
     evolve-daily)
@@ -424,10 +425,136 @@ Anchor every prediction to actual snapshot data. Do not hallucinate."
         OUTPUT_FILE=""
         TIMEOUT=900  # 2 scouts × 300s each + overhead
         ;;
+    weekly-spend-pulse)
+        # ── Weekly Rocket Money 7-day spend pull ───────────────────────
+        # Fri 17:00 — autonomous end-to-end execution proven 2026-05-01.
+        # Architecture: Playwright MCP drives the logged-in Rocket Money
+        # session (cookies persist in mcp-chrome user-data-dir), Gmail MCP
+        # fetches the export-link email, Playwright follows the auth-aware
+        # download URL, then rocket_money_ingest.py (dedupe + merge-safe
+        # since 2026-05-01) loads it. Result iMessaged to Commander.
+        PROMPT="You are Tory Owens' Weekly Spend Pulse agent. Execute end-to-end, autonomously. NO confirmation prompts.
+
+PIPELINE:
+1) Open Playwright Chrome to https://app.rocketmoney.com/transactions. If redirected to login (auth.rocketaccount.com), STOP and run: python3 ~/Documents/S6_COMMS_TECH/scripts/s6_alert.py PRIORITY 'Spend Pulse blocked' 'Rocket Money session expired in Playwright Chrome — please log in once via the Playwright browser, then re-run battle_rhythm_runner.sh weekly-spend-pulse'. Then exit.
+2) Snapshot the page. Click the 'All dates' filter button. Snapshot again. Click the 'Last 7 days' menuitem.
+3) Click the 'Check all transactions' wrapper (NOT the inner checkbox — it's intercepted). Snapshot to confirm rows show [checked].
+4) Click 'Export selected transactions' button. Modal opens. Click the 'Export N transactions' confirm button (N varies — match by name pattern). Wait for the 'Export sent!' confirmation toast.
+5) Wait 180 seconds, then poll Gmail every 30s (max 5 min) for: from:hello@email.rocketmoney.com subject:'Transaction export complete' newer_than:1h. Get full thread content.
+6) Extract the 'Download file' URL from email body (it's a sendgrid 'ablink.email.rocketmoney.com/ls/click?...' link — NOT the 'Reconnect your account' link, NOT thumbs up/down, NOT footer links).
+7) Navigate Playwright to that URL. It auto-redirects through app.rocketmoney.com/download-transaction-export and triggers a download. Find the file with: find ~/.playwright-mcp -name '*-transactions.csv' -mtime -10m.
+8) Move CSV to ~/Downloads/ keeping the original filename.
+9) Run: python3 ~/Documents/S6_COMMS_TECH/scripts/rocket_money_ingest.py --file <full-path>. Capture stdout — confirm 'Deduped X/Y' line is present (dedupe is critical; if missing, the script wasn't updated post-2026-05-01).
+10) Compute 7-day discretionary spend from the deduped CSV (excluding categories 'Credit Card Payment', 'Internal Transfers', 'Loan Payment', 'Savings, Investment'; excluding rows where Name contains 'deposit' or category in 'Salary, Income'/'Investment Income'). Identify all txns >= \$50.
+11) Update ~/Documents/S6_COMMS_TECH/dashboard/owens_future_data.json: add or replace spending.fifty_thirty_twenty.spend_pulse_7d with: as_of (today YYYY-MM-DD), window (date-range from CSV), discretionary_spend_7d (float), weekly_run_rate_budget (2895.20), delta_pct (rounded 1dp), top_hits (top 6 txns >=\$50, sorted desc), source ('Rocket Money 7-day export, deduped'), verdict (EXCELLENT if delta_pct < -10, CAUTION if -10 to +10, BLOWN if > +10).
+12) Curl http://localhost:8077/owens-future.html — confirm HTTP 200 (dashboard server up).
+13) iMessage Commander via: python3 ~/Documents/S6_COMMS_TECH/scripts/s6_alert.py ROUTINE 'Weekly Spend Pulse' '\$<spend_7d> over/under \$2,895 weekly (<delta_pct>%) | Verdict: <verdict> | Top: <top 3 hit names with \$ amounts>'.
+14) Append a one-line summary to ~/Library/Mobile Documents/com~apple~CloudDocs/weekly-spend-pulse-latest.md (overwrite each week): '# WEEKLY SPEND PULSE — <date> | <verdict> | \$<spend> vs \$2,895 (<delta>%)' followed by the top hits list.
+
+ON FAILURE at any step: capture exact error, log to ~/Documents/S6_COMMS_TECH/scripts/cleanup_logs/weekly_spend_pulse.log, run s6_alert.py PRIORITY 'Spend Pulse failed at step <N>' with the error message. Exit non-zero so orchestrator marks task failed."
+        OUTPUT_FILE="$ICLOUD/weekly-spend-pulse-latest.md"
+        TIMEOUT=840
+        CLAUDE_EXTRA_ARGS=""
+        ;;
+    weekly-paypal-pulse)
+        # ── Weekly PayPal Savings / Emergency Fund balance pull ────────
+        # Fri 17:15 — runs 15 min after the spend pulse so Playwright
+        # Chrome is warm and any post-spend reflection is captured.
+        # Architecture: Playwright MCP scrapes PayPal Savings UI, no
+        # email step (faster than Rocket Money). Updates owens_future
+        # milestones.emergency_fund.current — sync_script propagates
+        # to cop_data.json. Catches the kind of 5-week stale-tracking
+        # discovered 2026-05-01 ($5K stale → $9,843 actual).
+        PROMPT="You are Tory Owens' Weekly PayPal Pulse agent. Execute end-to-end, autonomously.
+
+PIPELINE:
+1) Open Playwright Chrome to https://www.paypal.com/myaccount/savings/manage. If redirected to /signin, STOP and run: python3 ~/Documents/S6_COMMS_TECH/scripts/s6_alert.py PRIORITY 'PayPal Pulse blocked' 'PayPal session expired in Playwright Chrome — please log in once, then re-run battle_rhythm_runner.sh weekly-paypal-pulse'. Exit non-zero.
+2) Snapshot the page. Extract these values from the YAML snapshot:
+   - 'Total PayPal Savings' heading → next generic ref text is the total balance (e.g., '\$9,867.71')
+   - APY value (e.g., 'Current APY: 3.40%')
+   - 'Lifetime' label → next generic ref text is lifetime interest (e.g., '\$2,237.55')
+   - 'Pending' label → next generic ref text is pending balance
+   - Each goal button: 'Emergency Fund \$<balance>' or 'General Savings' label, with goal target visible in button name (e.g., 'Emergency Fund \$60,000.00') and current balance in the menu generic (e.g., \$9,842.70)
+3) Read ~/Documents/S6_COMMS_TECH/dashboard/owens_future_data.json. Get prior milestones.emergency_fund.current value for delta calculation.
+4) Update owens_future_data.json:
+   - milestones.emergency_fund.current = <new e-fund balance>
+   - milestones.emergency_fund.as_of = today YYYY-MM-DD
+   - milestones.emergency_fund.lifetime_interest_earned = <value>
+   - spending.paypal_pulse_latest = full block with all extracted values, weekly_delta = (new_current - prior_current), pct_complete = round(current/target*100, 1), months_to_goal = round((target - current) / 3064, 1)
+5) Run sync to propagate to cop_data.json: python3 ~/Documents/S6_COMMS_TECH/scripts/lifeos_data_sync.py
+6) Verify cop_data.financial_snapshot.emergency_fund matches new value
+7) iMessage Commander: python3 ~/Documents/S6_COMMS_TECH/scripts/s6_alert.py ROUTINE 'PayPal Pulse' 'E-fund \$<current> / \$<target> (<pct>%) | +\$<weekly_delta> this week | Lifetime interest \$<lifetime> | Months to goal: <months>'
+8) Write summary to ~/Library/Mobile Documents/com~apple~CloudDocs/paypal-pulse-latest.md: '# PAYPAL PULSE — <date> | E-fund \$<current> / \$<target> (<pct>%) | Δ +\$<weekly_delta>'
+
+ON FAILURE: log to ~/Documents/S6_COMMS_TECH/scripts/cleanup_logs/weekly_paypal_pulse.log, run s6_alert.py PRIORITY 'PayPal Pulse failed at step <N>' with error. Exit non-zero."
+        OUTPUT_FILE="$ICLOUD/paypal-pulse-latest.md"
+        TIMEOUT=300
+        CLAUDE_EXTRA_ARGS=""
+        ;;
+    monthly-forensics)
+        # ── Monthly Personal Income Statement & Forensics ──────────────
+        # Day-of-month guard: orchestrator polls daily 0700 but this case
+        # only EXECUTES on the 1st. All other days exit 0 cleanly so the
+        # orchestrator marks task GREEN without spawning claude -p.
+        DAY=$(date +%d)
+        if [ "$DAY" != "01" ]; then
+            log "$MODE skipped — day=$DAY (only runs on 01 of month)"
+            exit 0
+        fi
+
+        # On day 1: process the JUST-COMPLETED prior month (e.g., on June 1
+        # we analyze May). dispatch financial-reviewer agent.
+        TARGET_MONTH=$(date -v-1m +%Y-%m 2>/dev/null || date -d "$(date +%Y-%m-15) -1 month" +%Y-%m)
+        PROMPT="You are running CFP/CPA-grade budget forensics on the Owens family's ${TARGET_MONTH} spending.
+
+Use the Agent tool with subagent_type='financial-reviewer'. Pass it this exact prompt:
+
+---
+
+You are running a CFP/CPA-grade budget forensics on the Owens family's ${TARGET_MONTH} spending.
+
+CONTEXT
+- Today is $(date +%Y-%m-%d). ${TARGET_MONTH} is the most recent complete month.
+- Tory Owens, 100% P&T retired Guard, currently W-2 at Eli Lilly. Spouse Lindsey. Three kids (Rylan 14, Emory 7, Harlan 3 born 2023-01-04). RPED 2040.
+- Stated monthly budget: \$12,408 spending, take-home \$16,055/mo, FCF \$3,852/mo.
+- Active milestones: E-fund target \$47,286 (autopay \$3,064/mo to PayPal Savings 3.40% APY). CC debt \$0. Brightwheel ends Aug 2028 (Harlan pre-K). Backdoor Roth ON HOLD until E-fund funded.
+- Verified subscription burden \$334/mo (\$200-300 cuttable per 2026-05-01 audit) — replaced fake \$1,156 number.
+
+DATA SOURCES
+1. Latest deduped Rocket Money export: latest CSV in ~/Downloads/ matching '*transactions*.csv' or 'rocketmoney_*.csv'
+2. Existing financial state: ~/Documents/S6_COMMS_TECH/dashboard/owens_future_data.json
+3. Transaction detail: ~/Documents/S6_COMMS_TECH/dashboard/transaction_detail.json
+
+DELIVERABLE — Personal Income Statement for ${TARGET_MONTH}, ~600-800 words, sections:
+1. Income Statement Waterfall (Income → Fixed → Variable → Discretionary → Net to savings)
+2. Fixed vs Variable Classification with dollar amounts and % of post-tax income
+3. Subscription / Recurring Audit (verify \$334/mo holds; flag drift)
+4. Tax-Bucket Awareness (Schedule A items, HSA/FSA/401k evidence, charitable)
+5. One-Time vs Pattern (largest purchases — anomaly or trend?)
+6. Findings — top 3 actionable items with dollar impact
+7. Honest Assessment of \$12,408 budget vs reality
+8. Blind Spots — what data we don't see (Lindsey's separate accounts, cash, Venmo)
+
+OUTPUT
+Write full report to ~/Library/Mobile Documents/com~apple~CloudDocs/monthly-financial-forensics-${TARGET_MONTH}.md
+
+Then return 200-word executive summary.
+
+NO PERFORMATIVE WELLNESS. Truth over comfort. Per SO #1.
+
+---
+
+After the agent returns, run: python3 ~/Documents/S6_COMMS_TECH/scripts/s6_alert.py ROUTINE 'Monthly Forensics ${TARGET_MONTH}' with the agent's executive summary as the message body. Truncate body to 500 chars if needed.
+
+ON FAILURE: log to ~/Documents/S6_COMMS_TECH/scripts/cleanup_logs/monthly_forensics.log, alert PRIORITY."
+        OUTPUT_FILE=\"$ICLOUD/monthly-financial-forensics-${TARGET_MONTH}.md\"
+        TIMEOUT=1140
+        CLAUDE_EXTRA_ARGS=""
+        ;;
     help|*)
         echo "Usage: $0 {morning|eod|sync|data|overwatch|evolution|status|test|health}"
         echo "       $0 {horizon|relationship|opportunity|accountability|prophet|pulse}"
-        echo "       $0 {evolve-daily|evolve-weekly|network|shield|legacy|ecosystem-scan|scout-dispatch}"
+        echo "       $0 {evolve-daily|evolve-weekly|network|shield|legacy|ecosystem-scan|scout-dispatch|weekly-spend-pulse|weekly-paypal-pulse|monthly-forensics}"
         echo ""
         echo "Runs battle rhythm skills and standing patrol agents via headless Claude Code."
         echo "Output written to iCloud or dashboard JSON for cross-platform sync."
